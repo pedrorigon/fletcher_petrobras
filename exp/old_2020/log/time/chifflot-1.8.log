@@ -1,0 +1,83 @@
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (472,472,472) with spacing (12.50,12.50,12.50); simulated area (5887.50,5887.50,5887.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (504,504,504)
+Source at coordinates (256,256,256)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+Execution with OpenMP directives on 48 threads
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:511,0:511,0:511)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=8.404041e+02; vpz=1.945158e+03, v2pz=3.783638e+06
+v2sz=7.062791e+05; v2pz=3.783638e+06, v2px=5.599784e+06, v2pn=4.540366e+06
+Execution time (s) is 57.605814
+MSamples/s 222
+Memory High Water Mark is 12601464 kB
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (120,120,120) with spacing (12.50,12.50,12.50); simulated area (1487.50,1487.50,1487.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (152,152,152)
+Source at coordinates (80,80,80)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+Execution with OpenMP directives on 48 threads
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:159,0:159,0:159)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=4.637537e+02; vpz=1.073381e+03, v2pz=1.152148e+06
+v2sz=2.150675e+05; v2pz=1.152148e+06, v2px=1.705178e+06, v2pn=1.382577e+06
+Execution time (s) is 1.338089
+MSamples/s 262
+Memory High Water Mark is 344144 kB
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (248,248,248) with spacing (12.50,12.50,12.50); simulated area (3087.50,3087.50,3087.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (280,280,280)
+Source at coordinates (144,144,144)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:287,0:287,0:287)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=1.469934e+02; vpz=3.402236e+02, v2pz=1.157521e+05
+v2sz=2.160705e+04; v2pz=1.157521e+05, v2px=1.713131e+05, v2pn=1.389025e+05
+CUDA source using device(0) Tesla P100-PCIE-16GB with compute capability 6.0.
+GPU memory usage = 1913 MiB
+Execution time (s) is 1.581179
+MSamples/s 1388
+Memory High Water Mark is 2958768 kB
+CUDA_Finalize: SUCCESS
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (216,216,216) with spacing (12.50,12.50,12.50); simulated area (2687.50,2687.50,2687.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (248,248,248)
+Source at coordinates (128,128,128)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+Execution with OpenACC directives on device Tesla P100-PCIE-16GB
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:255,0:255,0:255)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=4.523026e+02; vpz=1.046877e+03, v2pz=1.095952e+06
+v2sz=2.045776e+05; v2pz=1.095952e+06, v2px=1.622008e+06, v2pn=1.315142e+06
+Execution time (s) is 5.694207
+MSamples/s 268
+Memory High Water Mark is 1503832 kB
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (88,88,88) with spacing (12.50,12.50,12.50); simulated area (1087.50,1087.50,1087.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (120,120,120)
+Source at coordinates (64,64,64)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+Execution with OpenACC directives on device Tesla P100-PCIE-16GB
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:127,0:127,0:127)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=2.245418e+02; vpz=5.197133e+02, v2pz=2.701019e+05
+v2sz=5.041902e+04; v2pz=2.701019e+05, v2px=3.997509e+05, v2pn=3.241223e+05
+Execution time (s) is 0.490924
+MSamples/s 352
+Memory High Water Mark is 356584 kB

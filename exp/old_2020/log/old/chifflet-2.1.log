@@ -1,0 +1,104 @@
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (216,216,216) with spacing (12.50,12.50,12.50); simulated area (2687.50,2687.50,2687.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (248,248,248)
+Source at coordinates (128,128,128)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:255,0:255,0:255)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=4.523026e+02; vpz=1.046877e+03, v2pz=1.095952e+06
+v2sz=2.045776e+05; v2pz=1.095952e+06, v2px=1.622008e+06, v2pn=1.315142e+06
+CUDA source using device(0) GeForce GTX 1080 Ti with compute capability 6.1.
+GPU memory usage = 1344 MiB
+Execution time (s) is 1.402827
+MSamples/s 1087
+Memory High Water Mark is 2109332 kB
+CUDA_Finalize: SUCCESS
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (120,120,120) with spacing (12.50,12.50,12.50); simulated area (1487.50,1487.50,1487.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (152,152,152)
+Source at coordinates (80,80,80)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:159,0:159,0:159)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=4.637538e+02; vpz=1.073381e+03, v2pz=1.152148e+06
+v2sz=2.150675e+05; v2pz=1.152148e+06, v2px=1.705178e+06, v2pn=1.382577e+06
+CUDA source using device(0) GeForce GTX 1080 Ti with compute capability 6.1.
+GPU memory usage = 328 MiB
+Execution time (s) is 0.340274
+MSamples/s 1032
+Memory High Water Mark is 621060 kB
+CUDA_Finalize: SUCCESS
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (312,312,312) with spacing (12.50,12.50,12.50); simulated area (3887.50,3887.50,3887.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (344,344,344)
+Source at coordinates (176,176,176)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+OpenMP directives disabled
+Execution with OpenACC directives on device Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:351,0:351,0:351)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=1.025355e+03; vpz=2.373235e+03, v2pz=5.632245e+06
+v2sz=1.051352e+06; v2pz=5.632245e+06, v2px=8.335722e+06, v2pn=6.758694e+06
+Execution time (s) is 21.144168
+MSamples/s 193
+Memory High Water Mark is 3440128 kB
+PID: 15713
+max=139 50000000 6.950000
+power: 401.064748 Watts
+energy (average):   2787.400042 Joules
+energy (integrate): 2766.900041 Joules
+401.06
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (88,88,88) with spacing (12.50,12.50,12.50); simulated area (1087.50,1087.50,1087.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (120,120,120)
+Source at coordinates (64,64,64)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+Execution with OpenMP directives on 56 threads
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:127,0:127,0:127)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=2.245418e+02; vpz=5.197133e+02, v2pz=2.701019e+05
+v2sz=5.041902e+04; v2pz=2.701019e+05, v2px=3.997509e+05, v2pn=3.241223e+05
+Execution time (s) is 8.604914
+MSamples/s 20
+Memory High Water Mark is 169332 kB
+PID: 17763
+max=40 50000000 2.000000
+power: 393.975000 Watts
+energy (average):   787.950012 Joules
+energy (integrate): 768.075011 Joules
+393.98
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (248,248,248) with spacing (12.50,12.50,12.50); simulated area (3087.50,3087.50,3087.50) 
+Grid is extended by 16 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (280,280,280)
+Source at coordinates (144,144,144)
+Will run 100 time steps of 0.001000 to reach time 0.100000
+Execution with OpenMP directives on 56 threads
+OpenACC directives disabled
+Recomended maximum time step is 0.000685; used time step is 0.001000
+File TTI.rsf contains time evolution of (0:287,0:287,0:287)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=1.469934e+02; vpz=3.402236e+02, v2pz=1.157521e+05
+v2sz=2.160705e+04; v2pz=1.157521e+05, v2px=1.713131e+05, v2pn=1.389025e+05
+Execution time (s) is 14.237775
+MSamples/s 154
+Memory High Water Mark is 2242592 kB
+PID: 18378
+max=95 50000000 4.750000
+power: 397.694737 Watts
+energy (average):   1889.050028 Joules
+energy (integrate): 1868.225028 Joules
+397.69

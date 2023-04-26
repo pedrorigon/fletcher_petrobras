@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo ipmitool dcmi power reading 2> /dev/null |grep -i "reading:" | tr -d " " | sed 's\Watts\\g' | awk -F: {'print $2'}
+

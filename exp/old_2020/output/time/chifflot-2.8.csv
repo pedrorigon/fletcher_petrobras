@@ -1,0 +1,14 @@
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-GPU,376,samples,1050,M
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-GPU,376,time,6.465305,s
+chifflot-2,skylake-avx512,der1der1,OpenMP,344,samples,234,M
+chifflot-2,skylake-avx512,der1der1,OpenMP,344,time,22.756943,s
+chifflot-2,skylake-avx512,der1der1hm,OpenACC-CPU,56,samples,47,M
+chifflot-2,skylake-avx512,der1der1hm,OpenACC-CPU,56,time,1.460962,s
+chifflot-2,skylake-avx512,original,OpenMP,344,samples,188,M
+chifflot-2,skylake-avx512,original,OpenMP,344,time,28.347525,s
+chifflot-2,skylake-avx512,original,OpenMP,120,samples,233,M
+chifflot-2,skylake-avx512,original,OpenMP,120,time,1.508216,s
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-CPU,88,samples,109,M
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-CPU,88,time,1.584391,s
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-CPU,216,samples,259,M
+chifflot-2,skylake-avx512,der1der1lm,OpenACC-CPU,216,time,5.885183,s
