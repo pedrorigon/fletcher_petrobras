@@ -7,7 +7,7 @@ cd ../
 
 for version in der1der1 der1der1_unified_memory original original_unified_memory der1der1hm der1der1hm_unified_memory der1der1lm der1der1lm_unified_memory; do
 	cd $version
-	for backend in OpenMP CUDA; do
+	for backend in CUDA; do
 		echo "-----------------------------------------------------"
 		echo "   $version - $backend"
 		echo "-----------------------------------------------------"
