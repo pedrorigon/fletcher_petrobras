@@ -13,15 +13,7 @@ for version in der1der1 original; do
 		echo "   $version - $backend"
 		echo "-----------------------------------------------------"
 		make clean
-        rm -f ModelagemFletcher.exe
-		make backend=$backend
-        if [[ $backend == *"OpenACC"* ]]; then
-            cp ModelagemFletcher.exe ../exp/bin/$version.$backend-CPU.`hostname`.x
-            mv ModelagemFletcher.exe ../exp/bin/$version.$backend-GPU.`hostname`.x
-		else
-            mv ModelagemFletcher.exe ../exp/bin/$version.$backend.`hostname`.x
-		fi
+                        rm -f ModelagemFletcher.exe
 	done
 	cd ..
 done
-
