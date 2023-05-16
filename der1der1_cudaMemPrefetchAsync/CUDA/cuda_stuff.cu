@@ -2,6 +2,7 @@
 #include "cuda_stuff.h"
 
 static size_t sxsy = 0;
+cudaStream_t stream, stream_1, stream_2;
 
 void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
                      float dx, float dy, float dz, float dt,
@@ -46,6 +47,10 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
    CUDA_CALL(cudaSetDevice(device));
 
+   cudaStreamCreate(&stream);
+   cudaStreamCreate(&stream_1);
+   cudaStreamCreate(&stream_2);
+
    // Check sx,sy values
    if (sx % BSIZE_X != 0)
    {
@@ -63,31 +68,55 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t msize_vol = sxsysz * sizeof(float);
    const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
    CUDA_CALL(cudaMallocManaged(&dev_vpz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_vpz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_vsv, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_vsv, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_epsilon, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_epsilon, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_delta, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_delta, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_phi, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_phi, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_theta, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_theta, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dxx, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dxx, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dyy, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dyy, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dzz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dzz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dxy, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dxy, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dyz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dyz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_ch1dxz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_ch1dxz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_v2px, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_v2px, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_v2pz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_v2pz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_v2sz, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_v2sz, msize_vol, device, stream));
    CUDA_CALL(cudaMallocManaged(&dev_v2pn, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_v2pn, msize_vol, device, stream));
 
    // Wave field arrays with an extra plan
    CUDA_CALL(cudaMallocManaged(&dev_pp, msize_vol_extra));
    CUDA_CALL(cudaMemset(dev_pp, 0, msize_vol_extra));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_pp, msize_vol_extra, device, stream_1));
+
    CUDA_CALL(cudaMallocManaged(&dev_pc, msize_vol_extra));
    CUDA_CALL(cudaMemset(dev_pc, 0, msize_vol_extra));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_pc, msize_vol_extra, device, stream_1));
+
    CUDA_CALL(cudaMallocManaged(&dev_qp, msize_vol_extra));
    CUDA_CALL(cudaMemset(dev_qp, 0, msize_vol_extra));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_qp, msize_vol_extra, device, stream_1));
+
    CUDA_CALL(cudaMallocManaged(&dev_qc, msize_vol_extra));
    CUDA_CALL(cudaMemset(dev_qc, 0, msize_vol_extra));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_qc, msize_vol_extra, device, stream_1));
+
    dev_pp += sxsy;
    dev_pc += sxsy;
    dev_qp += sxsy;
@@ -95,14 +124,24 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
 
    CUDA_CALL(cudaMallocManaged(&dev_pDx, msize_vol));
    CUDA_CALL(cudaMemset(dev_pDx, 0, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_pDx, msize_vol, device, stream_2));
+
    CUDA_CALL(cudaMallocManaged(&dev_pDy, msize_vol));
    CUDA_CALL(cudaMemset(dev_pDy, 0, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_pDy, msize_vol, device, stream_2));
+
    CUDA_CALL(cudaMallocManaged(&dev_qDx, msize_vol));
    CUDA_CALL(cudaMemset(dev_qDx, 0, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_qDx, msize_vol, device, stream_2));
+
    CUDA_CALL(cudaMallocManaged(&dev_qDy, msize_vol));
    CUDA_CALL(cudaMemset(dev_qDy, 0, msize_vol));
+   CUDA_CALL(cudaMemPrefetchAsync(dev_qDy, msize_vol, device, stream_2));
 
    CUDA_CALL(cudaGetLastError());
+   CUDA_CALL(cudaStreamSynchronize(stream));   /// teste
+   CUDA_CALL(cudaStreamSynchronize(stream_1)); /// teste
+   CUDA_CALL(cudaStreamSynchronize(stream_2)); /// teste
    CUDA_CALL(cudaDeviceSynchronize());
    printf("GPU memory usage = %ld MiB\n", 21 * msize_vol / 1024 / 1024);
 }
@@ -164,6 +203,9 @@ void CUDA_Finalize()
    CUDA_CALL(cudaFree(dev_qDx));
    CUDA_CALL(cudaFree(dev_pDy));
    CUDA_CALL(cudaFree(dev_qDy));
+   CUDA_CALL(cudaStreamDestroy(stream));
+   CUDA_CALL(cudaStreamDestroy(stream_1));
+   CUDA_CALL(cudaStreamDestroy(stream_2));
 
    printf("CUDA_Finalize: SUCCESS\n");
 }

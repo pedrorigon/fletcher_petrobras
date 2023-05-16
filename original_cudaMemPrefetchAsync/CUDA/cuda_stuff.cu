@@ -134,7 +134,6 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    CUDA_CALL(cudaMemPrefetchAsync(dev_qDy, msize_vol, device, NULL));
 
    CUDA_CALL(cudaGetLastError());
-
    CUDA_CALL(cudaDeviceSynchronize());
    printf("GPU memory usage = %ld MiB\n", 21 * msize_vol / 1024 / 1024);
 }
