@@ -62,10 +62,14 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
   extern float *dev_pDy;
   extern float *dev_qDx;
   extern float *dev_qDy;
+  
 
   dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
   dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
-
+  
+  
+  printf("numThreads: %d\n", BSIZE_X);
+  printf("numThreads: %d\n", BSIZE_Y);
   printf("numThreads: %d\n", BSIZE_X * BSIZE_Y);
   printf("numBlocks: %d\n", (sx / (threadsPerBlock.x) * (sy / threadsPerBlock.y)));
 

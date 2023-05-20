@@ -14,14 +14,14 @@ for app in *.`hostname`.x; do
 		echo "---------------------------------------------------"
 		unset -v ACC_NUM_CORES
 		export ACC_DEVICE_TYPE=nvidia
-  		./$app TTI 344 344 344 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
+  		./$app TTI 88 88 88 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
   		export ACC_DEVICE_TYPE=host
 		export ACC_NUM_CORES=`lscpu | grep "^CPU(s):" | awk {'print $2'}`
 		echo "---------------------------------------------------"
 		echo "CPU"
 		echo "---------------------------------------------------"
 	fi
-	./$app TTI 344 344 344 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
+	./$app TTI 88 88 88 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
 done
 
 cd ../
