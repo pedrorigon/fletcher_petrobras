@@ -9,8 +9,10 @@
 #include "driver.h"
 #include "fletcher.h"
 #include "model.h"
+#include "CUDA/cuda_defines.h"
 
 enum Form {ISO, VTI, TTI};
+int BSIZE_X, BSIZE_Y;
 
 int main(int argc, char** argv) {
 
@@ -37,6 +39,8 @@ int main(int argc, char** argv) {
   int i, it;             // for indices
 //PPL  char fNameAbs[128];    // prefix of absortion file
   char fNameSec[128];    // prefix of sections files
+  //int BSIZE_X, BSIZE_Y;
+  
 
   const float dtOutput=0.01;
 
@@ -58,6 +62,8 @@ int main(int argc, char** argv) {
   dz=atof(argv[8]);
   dt=atof(argv[9]);
   tmax=atof(argv[10]);
+  BSIZE_X=atof(argv[11]);
+  BSIZE_Y=atof(argv[12]);
 
   // verify problem formulation
 
