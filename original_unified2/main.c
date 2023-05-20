@@ -146,7 +146,8 @@ int main(int argc, char** argv) {
   // allocate input anisotropy arrays
   
   float *vpz=NULL;      // p wave speed normal to the simetry plane
-  vpz = (float *) malloc(sx*sy*sz*sizeof(float));
+  //vpz = (float *) malloc(sx*sy*sz*sizeof(float));
+  cudaMallocManaged(&vpz, sx*sy*sz*sizeof(float)); //alocacao para usar unified memory.
 
   float *vsv=NULL;      // sv wave speed normal to the simetry plane
   vsv = (float *) malloc(sx*sy*sz*sizeof(float));
