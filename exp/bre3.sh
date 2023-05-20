@@ -22,7 +22,7 @@ echo "Aplicativo, Bsize_X, Bsize_Y, Resultado Médio, Desvio Padrão, IC Inferio
 
 cd bin/
 
-bsize_values=("16 32" "32 16")
+bsize_values=("4 4" "4 8" "8 4" "4 16" "8 8" "16 4" "4 32" "8 16" "16 8" "32 4" "8 32" "16 16" "32 8" "16 32" "32 16" "32 32")
 
 for app in *.`hostname`.x; do
     echo "---------------------------------------------------"
