@@ -17,7 +17,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    extern float* dev_pDy;
    extern float* dev_qDx;
    extern float* dev_qDy;
-   extern float* dev_vpz;
+   //extern float* dev_vpz;
    extern float* dev_vsv;
    extern float* dev_epsilon;
    extern float* dev_delta;
@@ -64,8 +64,11 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t sxsysz=sxsy*sz;
    const size_t msize_vol=sxsysz*sizeof(float);
    const size_t msize_vol_extra=msize_vol+2*sxsy*sizeof(float); // 2 extra plans for wave fields
-   CUDA_CALL(cudaMalloc(&dev_vpz, msize_vol));
-   CUDA_CALL(cudaMemcpy(dev_vpz, vpz, msize_vol, cudaMemcpyHostToDevice));
+   
+   //CUDA_CALL(cudaMalloc(&dev_vpz, msize_vol));
+   //CUDA_CALL(cudaMemcpy(dev_vpz, vpz, msize_vol, cudaMemcpyHostToDevice));
+   cudaMemPrefetchAsync(vpz, msize_vol, device, NULL);
+   
    CUDA_CALL(cudaMalloc(&dev_vsv, msize_vol));
    CUDA_CALL(cudaMemcpy(dev_vsv, vsv, msize_vol, cudaMemcpyHostToDevice));
    CUDA_CALL(cudaMalloc(&dev_epsilon, msize_vol));
