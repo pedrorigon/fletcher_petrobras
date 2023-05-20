@@ -5,7 +5,7 @@
 mkdir -p bin/
 cd ../
 
-for version in original_cudaMemPrefetchAsync_test; do
+for version in original_bre; do
 	cd $version
 	for backend in CUDA; do
 		echo "-----------------------------------------------------"
