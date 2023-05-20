@@ -91,3 +91,4 @@ qp[i]=2.0f*qc[i] - qp[i] + rhsq*dt*dt;
 #ifdef SAMPLE_POST_LOOP
 #endif
 
+

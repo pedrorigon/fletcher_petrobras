@@ -59,7 +59,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 #include "precomp.h"
 #undef MODEL_INITIALIZE
 
-  // DRIVER_Initialize initialize target, allocate data etc
+ // DRIVER_Initialize initialize target, allocate data etc
   DRIVER_Initialize(sx,   sy,   sz,   bord,
 		      dx,  dy,  dz,  dt,
 		      vpz,    vsv,    epsilon,    delta,
