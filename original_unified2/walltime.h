@@ -1,8 +1,9 @@
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-double wtime();
+    double wtime();
 
 #ifdef __cplusplus
 }

@@ -9,7 +9,7 @@
 # icc 
 #source /home/intel/oneapi/compiler/latest/env/vars.sh
 
-export GCC=gcc
+export GCC=nvcc
 export OMP_FLAG=-fopenmp
 
 export OMP_NUM_THREADS=`lscpu | grep "^CPU(s):" | awk {'print $2'}`
@@ -38,7 +38,7 @@ export PGCC_GPU_SM=cc86 # NVIDIA RTX 3070
 #export PGCC_GPU_SM=cc75 # NVIDIA RTX 2080Ti
 
 # cuda
-export HOST_COMPILER=gcc
+export HOST_COMPILER=nvcc
 export PATH=$PATH:/usr/local/cuda/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
 

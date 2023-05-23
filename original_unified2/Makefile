@@ -30,8 +30,8 @@ all: 	$(OBJ)
 	cd $(arch) && make
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ) $(arch)/*.o $(LIBS)
 
-main.o:	main.c $(OBJ1)
-	$(CC) -c $(CFLAGS) main.c
+main.o:	main.cu $(OBJ1)
+	$(CC) -c $(CFLAGS) main.cu
 
 boundary.o:	boundary.c boundary.h  map.o
 	$(CC) -c $(CFLAGS) boundary.c

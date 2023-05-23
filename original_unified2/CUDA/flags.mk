@@ -1,4 +1,4 @@
-CC=$(GCC)
+CC=$(NVCC)
 CFLAGS=-O3
 GPUCC=$(NVCC)
 GPUCFLAGS=-Xptxas="-v" --maxrregcount 127 --gpu-architecture $(CUDA_GPU_SM)
