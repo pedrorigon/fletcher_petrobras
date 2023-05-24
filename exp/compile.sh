@@ -1,7 +1,7 @@
 mkdir -p bin/
 cd ../
 
-for version in original_unified2; do
+for version in original; do
 	cd $version
 	for backend in CUDA; do
 		echo "-----------------------------------------------------"
