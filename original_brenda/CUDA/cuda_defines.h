@@ -2,13 +2,11 @@
 #define __CUDA_DEFINES
 
 #define restrict __restrict__
-//#define BSIZE_X 32
-//#define BSIZE_Y 16
-extern int BSIZE_X;
-extern int BSIZE_Y;
+#define BSIZE_X 32
+#define BSIZE_Y 16
 #define NPOP 4
-//#define TOTAL_X (BSIZE_X+2*NPOP)
-//#define TOTAL_Y (BSIZE_Y+2*NPOP)
+#define TOTAL_X (BSIZE_X+2*NPOP)
+#define TOTAL_Y (BSIZE_Y+2*NPOP)
 
 
 #include <stdio.h>
