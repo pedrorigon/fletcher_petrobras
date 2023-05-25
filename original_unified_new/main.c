@@ -9,6 +9,7 @@
 #include "driver.h"
 #include "fletcher.h"
 #include "model.h"
+#include "CUDA/cuda_stuff.h"
 
 enum Form
 {
@@ -158,23 +159,20 @@ int main(int argc, char **argv)
 
   // allocate input anisotropy arrays
 
-  float *vpz = NULL; // p wave speed normal to the simetry plane
-  vpz = (float *)malloc(sx * sy * sz * sizeof(float));
-
-  float *vsv = NULL; // sv wave speed normal to the simetry plane
-  vsv = (float *)malloc(sx * sy * sz * sizeof(float));
-
+  float *vpz = NULL;     // p wave speed normal to the simetry plane
+  float *vsv = NULL;     // sv wave speed normal to the simetry plane
   float *epsilon = NULL; // Thomsen isotropic parameter
-  epsilon = (float *)malloc(sx * sy * sz * sizeof(float));
+  float *delta = NULL;   // Thomsen isotropic parameter
+  float *phi = NULL;     // isotropy simetry azimuth angle
+  float *theta = NULL;   // isotropy simetry deep angle
+  alloc_data(&vpz, &vsv, &epsilon, &delta, &phi, &theta, sx, sy, sz);
 
-  float *delta = NULL; // Thomsen isotropic parameter
-  delta = (float *)malloc(sx * sy * sz * sizeof(float));
-
-  float *phi = NULL; // isotropy simetry azimuth angle
-  phi = (float *)malloc(sx * sy * sz * sizeof(float));
-
-  float *theta = NULL; // isotropy simetry deep angle
-  theta = (float *)malloc(sx * sy * sz * sizeof(float));
+  /// vpz = (float *)malloc(sx * sy * sz * sizeof(float));
+  // vsv = (float *)malloc(sx * sy * sz * sizeof(float));
+  // epsilon = (float *)malloc(sx * sy * sz * sizeof(float));
+  // delta = (float *)malloc(sx * sy * sz * sizeof(float));
+  // phi = (float *)malloc(sx * sy * sz * sizeof(float));
+  // theta = (float *)malloc(sx * sy * sz * sizeof(float));
 
   // input anisotropy arrays for selected problem formulation
 
