@@ -165,7 +165,12 @@ int main(int argc, char **argv)
   float *delta = NULL;   // Thomsen isotropic parameter
   float *phi = NULL;     // isotropy simetry azimuth angle
   float *theta = NULL;   // isotropy simetry deep angle
-  alloc_data(&vpz, &vsv, &epsilon, &delta, &phi, &theta, sx, sy, sz);
+  float *pp = NULL;
+  float *pc = NULL;
+  float *qp = NULL;
+  float *qc = NULL;
+
+  alloc_data(&vpz, &vsv, &epsilon, &delta, &phi, &theta, &pp, &pc, &qp, &qc, sx, sy, sz);
 
   /// vpz = (float *)malloc(sx * sy * sz * sizeof(float));
   // vsv = (float *)malloc(sx * sy * sz * sizeof(float));
@@ -270,14 +275,14 @@ int main(int argc, char **argv)
                          vpz, vsv);
   // pressure fields at previous, current and future time steps
 
-  float *pp = NULL;
-  pp = (float *)malloc(sx * sy * sz * sizeof(float));
-  float *pc = NULL;
-  pc = (float *)malloc(sx * sy * sz * sizeof(float));
-  float *qp = NULL;
-  qp = (float *)malloc(sx * sy * sz * sizeof(float));
-  float *qc = NULL;
-  qc = (float *)malloc(sx * sy * sz * sizeof(float));
+  // float *pp = NULL;
+  // pp = (float *)malloc(sx * sy * sz * sizeof(float));
+  // float *pc = NULL;
+  // pc = (float *)malloc(sx * sy * sz * sizeof(float));
+  // float *qp = NULL;
+  // qp = (float *)malloc(sx * sy * sz * sizeof(float));
+  // float *qc = NULL;
+  // qc = (float *)malloc(sx * sy * sz * sizeof(float));
   for (i = 0; i < sx * sy * sz; i++)
   {
     pp[i] = 0.0f;

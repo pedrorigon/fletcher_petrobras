@@ -20,8 +20,8 @@ extern "C"
 
     void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc);
 
-    void alloc_data(float **vpz, float **vsv, float **epsilon, float **delta, float **phi,
-                    float **theta, int sx, int sy, int sz);
+    void alloc_data(float **vpz, float **vsv, float **epsilon, float **delta, float **phi, float **theta,
+                    float **pp, float **pc, float **qp, float **qc, int sx, int sy, int sz);
 
 #ifdef __cplusplus
 }

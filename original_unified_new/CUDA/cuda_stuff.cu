@@ -221,7 +221,8 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
 }
 
 // aloca memória usando cudaMallocManaged
-void alloc_data(float **vpz, float **vsv, float **epsilon, float **delta, float **phi, float **theta, int sx, int sy, int sz)
+void alloc_data(float **vpz, float **vsv, float **epsilon, float **delta, float **phi, float **theta,
+                float **pp, float **pc, float **qp, float **qc, int sx, int sy, int sz)
 {
    int size = sx * sy * sz * sizeof(float);
    cudaMallocManaged(vpz, size);
@@ -230,4 +231,8 @@ void alloc_data(float **vpz, float **vsv, float **epsilon, float **delta, float 
    cudaMallocManaged(delta, size);
    cudaMallocManaged(phi, size);
    cudaMallocManaged(theta, size);
+   cudaMallocManaged(pp, size);
+   cudaMallocManaged(pc, size);
+   cudaMallocManaged(qp, size);
+   cudaMallocManaged(qc, size);
 }
