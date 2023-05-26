@@ -62,34 +62,35 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t sxsysz = sxsy * sz;
    const size_t msize_vol = sxsysz * sizeof(float);
    const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
+
    // CUDA_CALL(cudaMalloc(&dev_vpz, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_vpz, vpz, msize_vol, cudaMemcpyHostToDevice));
-   CUDA_CALL(cudaMemPrefetchAsync(vpz, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(vpz, msize_vol, device));  //não usa no propagate
 
    // CUDA_CALL(cudaMalloc(&dev_vsv, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_vsv, vsv, msize_vol, cudaMemcpyHostToDevice));
 
-   CUDA_CALL(cudaMemPrefetchAsync(vsv, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(vsv, msize_vol, device));  //não usa no propagate
 
    // CUDA_CALL(cudaMalloc(&dev_epsilon, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_epsilon, epsilon, msize_vol, cudaMemcpyHostToDevice));
 
-   CUDA_CALL(cudaMemPrefetchAsync(epsilon, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(epsilon, msize_vol, device)); //não usa no propagate
 
    // CUDA_CALL(cudaMalloc(&dev_delta, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_delta, delta, msize_vol, cudaMemcpyHostToDevice));
 
-   CUDA_CALL(cudaMemPrefetchAsync(delta, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(delta, msize_vol, device)); //não usa no propagate
 
    // CUDA_CALL(cudaMalloc(&dev_phi, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_phi, phi, msize_vol, cudaMemcpyHostToDevice));
 
-   CUDA_CALL(cudaMemPrefetchAsync(phi, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(phi, msize_vol, device)); //não usa no propagate
 
    // CUDA_CALL(cudaMalloc(&dev_theta, msize_vol));
    // CUDA_CALL(cudaMemcpy(dev_theta, theta, msize_vol, cudaMemcpyHostToDevice));
 
-   CUDA_CALL(cudaMemPrefetchAsync(theta, msize_vol, device));
+   // CUDA_CALL(cudaMemPrefetchAsync(theta, msize_vol, device)); //não usa no propagate
 
    CUDA_CALL(cudaMalloc(&dev_ch1dxx, msize_vol));
    CUDA_CALL(cudaMemcpy(dev_ch1dxx, ch1dxx, msize_vol, cudaMemcpyHostToDevice));
@@ -137,10 +138,11 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
 
    CUDA_CALL(cudaGetLastError());
    CUDA_CALL(cudaDeviceSynchronize());
-   printf("GPU memory usage = %ld MiB\n", 21 * msize_vol / 1024 / 1024);
+   printf("GPU memory usage = %ld MiB\n", 15 * msize_vol / 1024 / 1024);
 }
 
-void CUDA_Finalize(float *restrict vpz, float *restrict vsv, float *restrict epsilon, float *restrict delta, float *restrict phi, float *restrict theta)
+void CUDA_Finalize(float *restrict vpz, float *restrict vsv, float *restrict epsilon,
+                   float *restrict delta, float *restrict phi, float *restrict theta)
 {
 
    // extern float *dev_vpz;
