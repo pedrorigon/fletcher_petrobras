@@ -1,3 +1,0 @@
-Aplicativo, Bsize_X, Bsize_Y, Resultado Médio, Desvio Padrão, IC Inferior, IC Superior
-original_cudaMemPrefetchAsync_test.CUDA.pedrorigon.x, 16, 32, 844.80, .40, 844.52, 845.08
-original_cudaMemPrefetchAsync_test.CUDA.pedrorigon.x, 32, 16, 932.00, .44, 931.69, 932.31

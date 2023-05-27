@@ -1,3 +1,23 @@
-Aplicativo, Bsize_X, Bsize_Y, Resultado Médio, Desvio Padrão, IC Inferior, IC Superior
-original_cudaMemPrefetchAsync_test.CUDA.pedrorigon.x, 4, 48, 304.00, 0, 304.00, 304.00
-original_cudaMemPrefetchAsync_test.CUDA.pedrorigon.x, 48, 4, 1162.70, 2.10, 1161.20, 1164.20
+Aplicativo,Tamanho,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior
+original.CUDA.pedrorigon.x,88,1725.00,4.04,1722.11,1727.89
+original.CUDA.pedrorigon.x,120,1387.40,.48,1387.06,1387.74
+original.CUDA.pedrorigon.x,152,2022.70,10.58,2015.13,2030.27
+original.CUDA.pedrorigon.x,184,1978.70,85.82,1917.27,2040.13
+original.CUDA.pedrorigon.x,216,2352.00,17.71,2339.33,2364.67
+original.CUDA.pedrorigon.x,248,2125.10,12.73,2115.99,2134.21
+original.CUDA.pedrorigon.x,280,1912.20,27.40,1892.59,1931.81
+original.CUDA.pedrorigon.x,312,1627.40,44.48,1595.56,1659.24
+original.CUDA.pedrorigon.x,344,1488.80,11.98,1480.23,1497.37
+original.CUDA.pedrorigon.x,376,1406.70,72.11,1355.08,1458.32
+original.CUDA.pedrorigon.x,408,0,0,0,0
+original_fatorado.CUDA.pedrorigon.x,88,1925.50,101.25,1853.02,1997.98
+original_fatorado.CUDA.pedrorigon.x,120,1386.50,.50,1386.15,1386.85
+original_fatorado.CUDA.pedrorigon.x,152,2021.50,10.19,2014.21,2028.79
+original_fatorado.CUDA.pedrorigon.x,184,1886.80,49.04,1851.70,1921.90
+original_fatorado.CUDA.pedrorigon.x,216,2356.60,2.05,2355.14,2358.06
+original_fatorado.CUDA.pedrorigon.x,248,2136.50,21.47,2121.14,2151.86
+original_fatorado.CUDA.pedrorigon.x,280,1912.30,15.10,1901.50,1923.10
+original_fatorado.CUDA.pedrorigon.x,312,1729.50,28.70,1708.96,1750.04
+original_fatorado.CUDA.pedrorigon.x,344,1547.90,59.55,1505.27,1590.53
+original_fatorado.CUDA.pedrorigon.x,376,1448.80,16.43,1437.04,1460.56
+original_fatorado.CUDA.pedrorigon.x,408,1350.30,14.07,1340.23,1360.37

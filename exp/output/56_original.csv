@@ -1,4 +1,0 @@
-Aplicativo,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior
-original_cudaMemPrefetchAsync.CUDA.pedrorigon.x,932.00,.63,931.55,932.45
-original.CUDA.pedrorigon.x,933.10,.30,932.89,933.31
-original_unified_memory.CUDA.pedrorigon.x,596.30,50.25,560.33,632.27
