@@ -55,6 +55,12 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    
    CUDA_CALL(cudaGetLastError());
    CUDA_CALL(cudaDeviceSynchronize());
+
+   pp+=sxsy;
+   pc+=sxsy;
+   qp+=sxsy;
+   qc+=sxsy;  
+
    printf("GPU memory usage = %ld MiB\n", 15*msize_vol/1024/1024);
 
    size_t freeMem, totalMem;
@@ -103,7 +109,6 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
 
    printf("CUDA_Finalize: SUCCESS\n");
 }
-
 
 
 void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
@@ -158,9 +163,9 @@ void CUDA_Allocate_main(float ** restrict vpz, float ** restrict vsv, float ** r
    memset(*pc, 0, msize_vol_extra);
    memset(*qp, 0, msize_vol_extra);
    memset(*qc, 0, msize_vol_extra);
-   pp+=sxsy;
-   pc+=sxsy;
-   qp+=sxsy;
-   qc+=sxsy;   
+   //pp+=sxsy;
+   //pc+=sxsy;
+   //qp+=sxsy;
+   //qc+=sxsy;   
 
 }
