@@ -110,9 +110,11 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
 {
 	//arthur: se usar memoria unificada, não precisa desta cópia.
    //extern float* dev_pc;
-   //const size_t sxsysz=((size_t)sx*sy)*sz;
-   //const size_t msize_vol=sxsysz*sizeof(float);
+   const size_t sxsysz=((size_t)sx*sy)*sz;
+   const size_t msize_vol=sxsysz*sizeof(float);
    //if (pc) CUDA_CALL(cudaMemcpy(pc, dev_pc, msize_vol, cudaMemcpyDeviceToHost));
+   CUDA_CALL(cudaMemPrefetchAsync(pc, msize_vol, cudaCpuDeviceId));
+
 }
 
 
