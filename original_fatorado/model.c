@@ -153,7 +153,8 @@ for (int it=1; it<=st; it++) {
   fflush(stdout);
 
   // DRIVER_Finalize deallocate data, clean-up things etc 
-  DRIVER_Finalize();
+  DRIVER_Finalize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
+              v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc);
 
 }
 
