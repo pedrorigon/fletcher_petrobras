@@ -10,7 +10,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 				 float * restrict ch1dxy, float * restrict ch1dyz, float * restrict ch1dxz, 
 				 float * restrict v2px, float * restrict v2pz, float * restrict v2sz, 
 				 float * restrict v2pn, float * restrict pp, float * restrict pc, 
-				 float * restrict qp, float * restrict qc){
+				 float * restrict qp, float * restrict qc, const int lower, const int upper){
   
   const int ix=blockIdx.x * blockDim.x + threadIdx.x;
   const int iy=blockIdx.y * blockDim.y + threadIdx.y;
@@ -29,7 +29,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
   // solve both equations in all internal grid points, 
   // including absortion zone
     
-  for (int iz=bord+1; iz<sz-bord-1; iz++) {
+  for (int iz = lower; iz < upper; iz++) {
       const int i=ind(ix,iy,iz);
       // p derivatives, H1(p) and H2(p)
       const float pxx= Der2(pc, i, strideX, dxxinv);
@@ -80,21 +80,48 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 // Propagate: using Fletcher's equations, propagate waves one dt,
 //            either forward or backward in time
 void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
-		    const float dx, const float dy, const float dz, const float dt, const int it, const float * const restrict ch1dxx, 
-         const float * const restrict ch1dyy, float * restrict ch1dzz, float * restrict ch1dxy, float * restrict ch1dyz, float * restrict ch1dxz, 
-         float * restrict v2px, float * restrict v2pz, float * restrict v2sz, float * restrict v2pn, float * pp, float * pc, 
-         float * qp, float * qc){
-  
-  dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
-  dim3 numBlocks(sx/threadsPerBlock.x, sy/threadsPerBlock.y);
-  
-  kernel_Propagate<<<numBlocks, threadsPerBlock>>> (sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, 
-                  ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc);
-  
-  CUDA_CALL(cudaGetLastError());
-  CUDA_SwapArrays(&pp, &pc, &qp, &qc);
-  CUDA_CALL(cudaDeviceSynchronize());
+                    const float dx, const float dy, const float dz, const float dt, const int it,
+                    const float * const restrict ch1dxx, const float * const restrict ch1dyy,
+                    float * restrict ch1dzz, float * restrict ch1dxy, float * restrict ch1dyz,
+                    float * restrict ch1dxz, float * restrict v2px, float * restrict v2pz,
+                    float * restrict v2sz, float * restrict v2pn, float * pp, float * pc,
+                    float * qp, float * qc) {
+
+    int num_gpus;
+    int lower, upper;
+    CUDA_CALL(cudaGetDeviceCount(&num_gpus)); // Obter o número de GPUs disponíveis
+
+    for (int gpu = 0; gpu < num_gpus; gpu++) {
+        cudaDeviceProp prop;
+        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu)); // Obter as propriedades da GPU
+
+        cudaSetDevice(gpu);
+
+        if (gpu == 0) {
+            lower = bord + 1;
+            upper = bord / 2 + 1;
+        } else {
+            lower = bord / 2 + 1;
+            upper = bord - 1;
+        }
+
+        const int width = upper - lower;
+
+            // Calcula o número de blocos e threads por bloco para a GPU atual
+        dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
+        dim3 numBlocks((width + threadsPerBlock.x - 1) / threadsPerBlock.x, (sy + threadsPerBlock.y - 1) / threadsPerBlock.y);
+
+
+        // Executar o kernel no dispositivo atual
+        kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy,
+                                                  ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz,
+                                                  v2pn, pp, pc, qp, qc, lower, upper);
+    }
+    CUDA_CALL(cudaGetLastError());
+    CUDA_SwapArrays(&pp, &pc, &qp, &qc);
+    CUDA_CALL(cudaDeviceSynchronize());
 }
+
 
 // swap array pointers on time forward array propagation
 void CUDA_SwapArrays(float **pp, float **pc, float **qp, float **qc) {

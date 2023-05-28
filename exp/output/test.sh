@@ -1,27 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-#set -o errexit -o nounset -o pipefail -o posix
+app="./$1"
+size=$2
 
-cd bin/
+# Inicializa o comando de monitoramento do nvidia-smi
+nvidia-smi dmon -i 0 -s mupcvt -d 1 -o TD > log.txt &
 
-for app in *.`hostname`.x; do
-	echo "---------------------------------------------------"
-	echo $app
-	echo "---------------------------------------------------"
-	
-	if [[ $app == *"OpenACC"* ]]; then
-		echo "GPU"
-		echo "---------------------------------------------------"
-		unset -v ACC_NUM_CORES
-		export ACC_DEVICE_TYPE=nvidia
-  		./$app TTI 88 88 88 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
-  		export ACC_DEVICE_TYPE=host
-		export ACC_NUM_CORES=`lscpu | grep "^CPU(s):" | awk {'print $2'}`
-		echo "---------------------------------------------------"
-		echo "CPU"
-		echo "---------------------------------------------------"
-	fi
-	./$app TTI 88 88 88 16 12.5 12.5 12.5 0.001 0.005 | grep Samples
-done
+# Executa o comando desejado
+$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32
 
-cd ../
+# Aguarda o comando finalizar
+wait
+
+# Encerra o monitoramento do nvidia-smi
+pkill -f "nvidia-smi dmon"
+
+echo "Script finalizado. Os logs foram salvos em log.txt."
+
