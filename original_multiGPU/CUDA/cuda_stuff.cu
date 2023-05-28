@@ -3,71 +3,72 @@
 
 
 void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
-	       float dx, float dy, float dz, float dt,
-	       float * restrict ch1dxx, float * restrict ch1dyy, float * restrict ch1dzz, 
-	       float * restrict ch1dxy, float * restrict ch1dyz, float * restrict ch1dxz, 
-	       float * restrict v2px, float * restrict v2pz, float * restrict v2sz, float * restrict v2pn,
-	       float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta,
-	       float * restrict phi, float * restrict theta, 
-	       float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc)
-{
+                     float dx, float dy, float dz, float dt,
+                     float * restrict ch1dxx, float * restrict ch1dyy, float * restrict ch1dzz,
+                     float * restrict ch1dxy, float * restrict ch1dyz, float * restrict ch1dxz,
+                     float * restrict v2px, float * restrict v2pz, float * restrict v2sz, float * restrict v2pn,
+                     float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta,
+                     float * restrict phi, float * restrict theta,
+                     float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc) {
 
-  int deviceCount;
-  CUDA_CALL(cudaGetDeviceCount(&deviceCount));
-  const int device=0;
-  cudaDeviceProp deviceProp;
-  CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
-  printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
-  CUDA_CALL(cudaSetDevice(device));
+    int deviceCount;
+    CUDA_CALL(cudaGetDeviceCount(&deviceCount));
 
-  // Check sx,sy values
-  if (sx%BSIZE_X != 0){
-     printf("sx(%d) must be multiple of BSIZE_X(%d)\n", sx, (int)BSIZE_X);
-     exit(1);
-  } 
-  if (sy%BSIZE_Y != 0){
-     printf("sy(%d) must be multiple of BSIZE_Y(%d)\n", sy, (int)BSIZE_Y);
-     exit(1);
-  } 
+    for (int device = 0; device < deviceCount; device++) {
+        cudaDeviceProp deviceProp;
+        CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
+        printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
+        CUDA_CALL(cudaSetDevice(device));
 
-   int sxsy=sx*sy; // one plan
-   const size_t sxsysz=sxsy*sz;
-   const size_t msize_vol=sxsysz*sizeof(float);
-   const size_t msize_vol_extra=msize_vol+2*sxsy*sizeof(float); // 2 extra plans for wave fields
-   
-   //arthur -- Se for realizar a cópia assíncrona com prefetch, é aqui o lugar.
+        // Check sx, sy values
+        if (sx % BSIZE_X != 0) {
+            printf("sx(%d) must be multiple of BSIZE_X(%d)\n", sx, (int) BSIZE_X);
+            exit(1);
+        }
+        if (sy % BSIZE_Y != 0) {
+            printf("sy(%d) must be multiple of BSIZE_Y(%d)\n", sy, (int) BSIZE_Y);
+            exit(1);
+        }
 
-   cudaMemPrefetchAsync(ch1dxx, msize_vol, device);
-   cudaMemPrefetchAsync(ch1dyy, msize_vol, device);
-   cudaMemPrefetchAsync(ch1dzz, msize_vol, device);
-   cudaMemPrefetchAsync(ch1dxy, msize_vol, device);
-   cudaMemPrefetchAsync(ch1dyz, msize_vol, device);
-   cudaMemPrefetchAsync(ch1dxz, msize_vol, device);
-   cudaMemPrefetchAsync(v2px, msize_vol, device);
-   cudaMemPrefetchAsync(v2pz, msize_vol, device);
-   cudaMemPrefetchAsync(v2sz, msize_vol, device);
-   cudaMemPrefetchAsync(v2pn, msize_vol, device);
+        int sxsy = sx * sy; // one plan
+        const size_t sxsysz = sxsy * sz;
+        const size_t msize_vol = sxsysz * sizeof(float);
+        const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
 
-   cudaMemPrefetchAsync(pp, msize_vol_extra, device);
-   cudaMemPrefetchAsync(pc, msize_vol_extra, device);
-   cudaMemPrefetchAsync(qp, msize_vol_extra, device);
-   cudaMemPrefetchAsync(qc, msize_vol_extra, device);
-   
-   CUDA_CALL(cudaGetLastError());
-   CUDA_CALL(cudaDeviceSynchronize());
+        // arthur -- Se for realizar a cópia assíncrona com prefetch, é aqui o lugar.
 
-   pp+=sxsy;
-   pc+=sxsy;
-   qp+=sxsy;
-   qc+=sxsy;  
+        cudaMemPrefetchAsync(ch1dxx, msize_vol, device);
+        cudaMemPrefetchAsync(ch1dyy, msize_vol, device);
+        cudaMemPrefetchAsync(ch1dzz, msize_vol, device);
+        cudaMemPrefetchAsync(ch1dxy, msize_vol, device);
+        cudaMemPrefetchAsync(ch1dyz, msize_vol, device);
+        cudaMemPrefetchAsync(ch1dxz, msize_vol, device);
+        cudaMemPrefetchAsync(v2px, msize_vol, device);
+        cudaMemPrefetchAsync(v2pz, msize_vol, device);
+        cudaMemPrefetchAsync(v2sz, msize_vol, device);
+        cudaMemPrefetchAsync(v2pn, msize_vol, device);
 
-   printf("GPU memory usage = %ld MiB\n", 15*msize_vol/1024/1024);
+        cudaMemPrefetchAsync(pp, msize_vol_extra, device);
+        cudaMemPrefetchAsync(pc, msize_vol_extra, device);
+        cudaMemPrefetchAsync(qp, msize_vol_extra, device);
+        cudaMemPrefetchAsync(qc, msize_vol_extra, device);
 
-   size_t freeMem, totalMem;
-   CUDA_CALL(cudaMemGetInfo(&freeMem, &totalMem));
-   printf("GPU memory usage: %lu MiB (used) / %lu MiB (total)\n", (totalMem - freeMem) / (1024 * 1024), totalMem / (1024 * 1024));
+        CUDA_CALL(cudaGetLastError());
+        CUDA_CALL(cudaDeviceSynchronize());
 
+        pp += sxsy;
+        pc += sxsy;
+        qp += sxsy;
+        qc += sxsy;
+
+        printf("GPU memory usage = %ld MiB\n", 15 * msize_vol / 1024 / 1024);
+
+        size_t freeMem, totalMem;
+        CUDA_CALL(cudaMemGetInfo(&freeMem, &totalMem));
+        printf("GPU memory usage: %lu MiB (used) / %lu MiB (total)\n", (totalMem - freeMem) / (1024 * 1024), totalMem / (1024 * 1024));
+    }
 }
+
 
 
 //ARTHUR - Ajustar função para receber os parametros do CUDA_Finalize.
