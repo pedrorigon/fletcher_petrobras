@@ -92,7 +92,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
     int num_gpus;
     int lower, upper;
-    CUDA_CALL(cudaGetDeviceCount(&num_gpus)); 
+    CUDA_CALL(cudaGetDeviceCount(&num_gpus));
 
     for (int gpu = 0; gpu < num_gpus; gpu++)
     {
@@ -104,12 +104,12 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         if (gpu == 0)
         {
             lower = bord + 1;
-            upper = bord / 2 + 1;
+            upper = sz / 2;
         }
         else
         {
-            lower = bord / 2 + 1;
-            upper = bord - 1;
+            lower = sz / 2;
+            upper = sz - bord - 1;
         }
 
         const int width = upper - lower;
