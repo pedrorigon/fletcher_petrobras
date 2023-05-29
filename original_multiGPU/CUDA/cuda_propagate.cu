@@ -92,12 +92,12 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
     int num_gpus;
     int lower, upper;
-    CUDA_CALL(cudaGetDeviceCount(&num_gpus)); // Obter o número de GPUs disponíveis
+    CUDA_CALL(cudaGetDeviceCount(&num_gpus)); 
 
     for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         cudaDeviceProp prop;
-        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu)); // Obter as propriedades da GPU
+        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
 
         cudaSetDevice(gpu);
 
@@ -118,7 +118,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
-        // Executar o kernel no dispositivo atual
+        // Executar o kernel no dispositivo da iteração
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy,
                                                          ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz,
                                                          v2pn, pp, pc, qp, qc, lower, upper);
