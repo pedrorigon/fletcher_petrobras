@@ -7,8 +7,10 @@ function get_t_critical() {
     t_critical=$(python3 -c "import scipy.stats; print(scipy.stats.t.ppf($confidence_level + (1 - $confidence_level)/2, $degrees_of_freedom))")
     echo $t_critical
 }
+param_values=("0.005" "0.01" "0.05" "0.1" "0.5") //ver se é . ou , 
 
-for size in `seq 24 32 504`; do
+for parametro in "${param_values[@]}"; do
+for size in `seq 24 32 504`; do //identaar tudo daqui em diante
 	mkdir -p output
 
 	output_file="resultados$size.csv"
@@ -46,7 +48,7 @@ for size in `seq 24 32 504`; do
                 		echo "---------------------------------------------------"
                 		unset -v ACC_NUM_CORES
                 		export ACC_DEVICE_TYPE=nvidia
-                		./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 $bsize_x $bsize_y | grep "MSamples/s"
+                		./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 $parametro $bsize_x $bsize_y | grep "MSamples/s"
                 		export ACC_DEVICE_TYPE=host
                 		export ACC_NUM_CORES=`lscpu | grep "^CPU(s):" | awk {'print $2'}`
                 		echo "---------------------------------------------------"
@@ -54,7 +56,7 @@ for size in `seq 24 32 504`; do
                 		echo "---------------------------------------------------"
             		fi
             
-            		result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 $bsize_x $bsize_y; } 2>&1 )
+            		result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 $parametro $bsize_x $bsize_y; } 2>&1 )
             		msamples=$(echo "$result" | grep "MSamples/s" || true)
             		echo "$msamples"
             		if [[ ! -z $msamples ]]; then
