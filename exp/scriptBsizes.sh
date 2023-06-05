@@ -44,18 +44,6 @@ for param in "${param_values[@]}"; do
 			msamples_values=()
 
 			for run in $(seq 1 $num_runs); do
-				if [[ $app == *"OpenACC"* ]]; then
-					echo "GPU"
-					echo "---------------------------------------------------"
-					unset -v ACC_NUM_CORES
-					export ACC_DEVICE_TYPE=nvidia
-					./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 $param $bsize_x $bsize_y | grep "MSamples/s"
-					export ACC_DEVICE_TYPE=host
-					export ACC_NUM_CORES=`lscpu | grep "^CPU(s):" | awk {'print $2'}`
-					echo "---------------------------------------------------"
-					echo "CPU"
-					echo "---------------------------------------------------"
-				fi
 
 				result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 $param $bsize_x $bsize_y; } 2>&1 )
 				msamples=$(echo "$result" | grep "MSamples/s" || true)
