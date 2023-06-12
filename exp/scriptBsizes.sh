@@ -44,7 +44,9 @@ for param in "${param_values[@]}"; do
 			msamples_values=()
 
 			for run in $(seq 1 $num_runs); do
-
+				
+				./extrai.sh >> $size.$bsize_x.$bsize_y.$param.txt &
+				id_extrai=$(pgrep -f nvidia-smi)
 				result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 $param $bsize_x $bsize_y; } 2>&1 )
 				msamples=$(echo "$result" | grep "MSamples/s" || true)
 				echo "$msamples"
@@ -53,6 +55,7 @@ for param in "${param_values[@]}"; do
 					total_msamples=$(echo "$total_msamples + $msamples_value" | bc)
 					msamples_values+=($msamples_value)
 				fi
+				kill $id_extrai
 			done
 
 			average_msamples=$(echo "scale=2; $total_msamples / $num_runs" | bc)
