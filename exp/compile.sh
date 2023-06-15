@@ -1,7 +1,7 @@
 mkdir -p bin/
 cd ../
 
-for version in original_fatorado original; do
+for version in original_multiGPU original; do
 	cd $version
 	for backend in CUDA; do
 		echo "-----------------------------------------------------"

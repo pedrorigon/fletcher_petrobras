@@ -1,5 +1,6 @@
 #include "cuda_defines.h"
 #include "cuda_stuff.h"
+#include "../map.h"
 
 void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
                      float dx, float dy, float dz, float dt,
@@ -31,6 +32,10 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t msize_vol = sxsysz * sizeof(float);
    const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
 
+   const int strideX = ind(1, 0, 0) - ind(0, 0, 0);
+   const int strideY = ind(0, 1, 0) - ind(0, 0, 0);
+   const int strideZ = ind(0, 0, 1) - ind(0, 0, 0);
+
    for (int device = 0; device < deviceCount; device++)
    {
       cudaDeviceProp deviceProp;
@@ -40,22 +45,38 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
 
       // arthur -- Se for realizar a cópia assíncrona com prefetch, é aqui o lugar.
 
-      cudaMemPrefetchAsync(ch1dxx, msize_vol, device);
-      cudaMemPrefetchAsync(ch1dyy, msize_vol, device);
-      cudaMemPrefetchAsync(ch1dzz, msize_vol, device);
-      cudaMemPrefetchAsync(ch1dxy, msize_vol, device);
-      cudaMemPrefetchAsync(ch1dyz, msize_vol, device);
-      cudaMemPrefetchAsync(ch1dxz, msize_vol, device);
-      cudaMemPrefetchAsync(v2px, msize_vol, device);
-      cudaMemPrefetchAsync(v2pz, msize_vol, device);
-      cudaMemPrefetchAsync(v2sz, msize_vol, device);
-      cudaMemPrefetchAsync(v2pn, msize_vol, device);
+      int gpuLower, gpuUpper, numElements;
+      if (device == 0)
+      {
+         gpuLower = 0;
+         gpuUpper = (sz / 2) + 5;  // +4 devido ao dercross que usar 4*stride (+ e -) 
+         numElements = (sx*sy*gpuUpper) - (sx*sy*gpuLower);
+      }
+      else
+      {
+         gpuLower = (sz / 2 ) - 5;  // -4 devido ao dercross que usar 4*stride (+ e -) 
+         gpuUpper = sz;
+         numElements = (sx*sy*gpuUpper) - (sx*sy*gpuLower);
+      }
 
-      cudaMemPrefetchAsync(pp, msize_vol_extra, device);
-      cudaMemPrefetchAsync(pc, msize_vol_extra, device);
-      cudaMemPrefetchAsync(qp, msize_vol_extra, device);
-      cudaMemPrefetchAsync(qc, msize_vol_extra, device);
+       // Prefetch necessary arrays for the GPU
 
+      cudaMemPrefetchAsync(&ch1dxx[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&ch1dyy[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&ch1dzz[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&ch1dxy[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&ch1dyz[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&ch1dxz[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&v2px[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&v2pz[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&v2sz[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&v2pn[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&pp[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&pc[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&qp[gpuLower], numElements * sizeof(float), device);
+      cudaMemPrefetchAsync(&qc[gpuLower], numElements * sizeof(float), device);
+
+//}
       CUDA_CALL(cudaDeviceSynchronize());
       CUDA_CALL(cudaGetLastError());
 
@@ -119,6 +140,38 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
    const size_t msize_vol = sxsysz * sizeof(float);
    // if (pc) CUDA_CALL(cudaMemcpy(pc, dev_pc, msize_vol, cudaMemcpyDeviceToHost));
    CUDA_CALL(cudaMemPrefetchAsync(pc, msize_vol, cudaCpuDeviceId));
+}
+
+void CUDA_prefetch_pc(const int sx, const int sy, const int sz, float *pc){
+
+   int deviceCount;
+   CUDA_CALL(cudaGetDeviceCount(&deviceCount));
+
+   for (int device = 0; device < deviceCount; device++)
+   {
+      cudaDeviceProp deviceProp;
+      CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
+      printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
+      CUDA_CALL(cudaSetDevice(device));
+
+      // arthur -- Se for realizar a cópia assíncrona com prefetch, é aqui o lugar.
+
+      int gpuLower, gpuUpper, numElements;
+      if (device == 0)
+      {
+         gpuLower = 0;
+         gpuUpper = (sz / 2) + 5;  // +4 devido ao dercross que usar 4*stride (+ e -) 
+         numElements = (sx*sy*gpuUpper) - (sx*sy*gpuLower);
+      }
+      else
+      {
+         gpuLower = (sz / 2 ) - 5;  // -4 devido ao dercross que usar 4*stride (+ e -) 
+         gpuUpper = sz;
+         numElements = (sx*sy*gpuUpper) - (sx*sy*gpuLower);
+      }
+
+      cudaMemPrefetchAsync(&pc[gpuLower], numElements * sizeof(float), device);
+   }
 }
 
 void CUDA_Allocate_Model_Variables(float **restrict ch1dxx, float **restrict ch1dyy, float **restrict ch1dzz, float **restrict ch1dxy,

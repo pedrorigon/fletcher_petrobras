@@ -4,8 +4,7 @@
 #include "fletcher.h"
 #include "walltime.h"
 #include "model.h"
-
-
+#include "CUDA/cuda_stuff.h"
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
 
@@ -103,9 +102,11 @@ for (int it=1; it<=st; it++) {
     if (tSim >= tOut) {
       DRIVER_Update_pointers(sx,sy,sz,pc);
       DumpSliceFile(sx,sy,sz,pc,sPtr);
+      CUDA_prefetch_pc(sx,sy,sz,pc);
+
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
-      DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
       //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
 #endif
     }
