@@ -123,8 +123,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy,
                                                          ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz,
                                                          v2pn, pp, pc, qp, qc, lower, upper);
+        CUDA_CALL(cudaGetLastError());
     }
-    CUDA_CALL(cudaGetLastError());
     CUDA_SwapArrays(&pp, &pc, &qp, &qc);
     CUDA_CALL(cudaDeviceSynchronize());
 }
