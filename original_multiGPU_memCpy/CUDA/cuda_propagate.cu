@@ -140,9 +140,9 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         // Executar o kernel no dispositivo da iteração
-        kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy,
-                                                         ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz,
-                                                         v2pn, pp, pc, qp, qc, lower, upper);
+        kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx, dev_ch1dyy,
+                                                         dev_ch1dzz, dev_ch1dxy, dev_ch1dyz, dev_ch1dxz, dev_v2px, dev_v2pz, dev_v2sz,
+                                                         dev_v2pn, dev_pp, dev_pc, dev_qp, dev_qc, lower, upper);
         
     }
     CUDA_CALL(cudaGetLastError());
