@@ -106,7 +106,7 @@ for (int it=1; it<=st; it++) {
 
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
-      //DRIVER_Update_pointers(sx,sy,sz,pc);
+      DRIVER_Update_pointers(sx,sy,sz,pc);
       //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
 #endif
     }
