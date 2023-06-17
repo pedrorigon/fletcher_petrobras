@@ -122,6 +122,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
         cudaSetDevice(gpu);
 
+        printf("Sou a GPU %d \n", gpu);
+
         if (gpu == 0)
         {
             lower = bord + 1;
