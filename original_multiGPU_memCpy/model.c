@@ -102,7 +102,7 @@ for (int it=1; it<=st; it++) {
     if (tSim >= tOut) {
       DRIVER_Update_pointers(sx,sy,sz,pc);
       DumpSliceFile(sx,sy,sz,pc,sPtr);
-      CUDA_prefetch_pc(sx,sy,sz,pc);
+    //  CUDA_prefetch_pc(sx,sy,sz,pc);
 
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
