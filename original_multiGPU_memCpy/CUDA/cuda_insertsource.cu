@@ -25,7 +25,7 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
   {
      dim3 threadsPerBlock(BSIZE_X, 1);
      dim3 numBlocks(1,1);
-     kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, pc, qc);
+     kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, dev_pc, dev_qc);
      CUDA_CALL(cudaGetLastError());
      CUDA_CALL(cudaDeviceSynchronize());
   }
