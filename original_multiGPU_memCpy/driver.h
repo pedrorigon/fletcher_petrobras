@@ -1,5 +1,6 @@
 #ifndef __driver_h__
 #define __driver_h__
+#define GPU_NUMBER 2
 
 #ifdef __cplusplus
 extern "C" {

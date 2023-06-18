@@ -6,21 +6,22 @@
 #include"cuda_stuff.h"
 #include"cuda_propagate.h"
 #include"cuda_insertsource.h"
+#define GPU_NUMBER 2
 
-float* dev_ch1dxx=NULL;
-float* dev_ch1dyy=NULL;
-float* dev_ch1dzz=NULL;
-float* dev_ch1dxy=NULL;
-float* dev_ch1dyz=NULL;
-float* dev_ch1dxz=NULL;
-float* dev_v2px=NULL;
-float* dev_v2pz=NULL;
-float* dev_v2sz=NULL;
-float* dev_v2pn=NULL;
-float* dev_pp=NULL;
-float* dev_pc=NULL;
-float* dev_qp=NULL;
-float* dev_qc=NULL;
+float* dev_ch1dxx[GPU_NUMBER];
+float* dev_ch1dyy[GPU_NUMBER];
+float* dev_ch1dzz[GPU_NUMBER];
+float* dev_ch1dxy[GPU_NUMBER];
+float* dev_ch1dyz[GPU_NUMBER];
+float* dev_ch1dxz[GPU_NUMBER];
+float* dev_v2px[GPU_NUMBER];
+float* dev_v2pz[GPU_NUMBER];
+float* dev_v2sz[GPU_NUMBER];
+float* dev_v2pn[GPU_NUMBER];
+float* dev_pp[GPU_NUMBER];
+float* dev_pc[GPU_NUMBER];
+float* dev_qp[GPU_NUMBER];
+float* dev_qc[GPU_NUMBER];
 
 
 void DRIVER_Initialize(const int sx, const int sy, const int sz, const int bord,

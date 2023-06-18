@@ -1,6 +1,7 @@
 #include "cuda_defines.h"
 #include "cuda_propagate.h"
 #include "../derivatives.h"
+#include "../driver.h"
 #include "../map.h"
 
 __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const int bord,
@@ -90,20 +91,20 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
                     float *qp, float *qc)
 {
 
-    extern float* dev_ch1dxx;
-    extern float* dev_ch1dyy;
-    extern float* dev_ch1dzz;
-    extern float* dev_ch1dxy;
-    extern float* dev_ch1dyz;
-    extern float* dev_ch1dxz;
-    extern float* dev_v2px;
-    extern float* dev_v2pz;
-    extern float* dev_v2sz;
-    extern float* dev_v2pn;
-    extern float* dev_pp;
-    extern float* dev_pc;
-    extern float* dev_qp;
-    extern float* dev_qc;
+    extern float* dev_ch1dxx[GPU_NUMBER];
+    extern float* dev_ch1dyy[GPU_NUMBER];
+    extern float* dev_ch1dzz[GPU_NUMBER];
+    extern float* dev_ch1dxy[GPU_NUMBER];
+    extern float* dev_ch1dyz[GPU_NUMBER];
+    extern float* dev_ch1dxz[GPU_NUMBER];
+    extern float* dev_v2px[GPU_NUMBER];
+    extern float* dev_v2pz[GPU_NUMBER];
+    extern float* dev_v2sz[GPU_NUMBER];
+    extern float* dev_v2pn[GPU_NUMBER];
+    extern float* dev_pp[GPU_NUMBER];
+    extern float* dev_pc[GPU_NUMBER];
+    extern float* dev_qp[GPU_NUMBER];
+    extern float* dev_qc[GPU_NUMBER];
 
     int num_gpus;
     int lower, upper;
@@ -133,14 +134,19 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         // Executar o kernel no dispositivo da iteração
-        kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx, dev_ch1dyy,
-                                                         dev_ch1dzz, dev_ch1dxy, dev_ch1dyz, dev_ch1dxz, dev_v2px, dev_v2pz, dev_v2sz,
-                                                         dev_v2pn, dev_pp, dev_pc, dev_qp, dev_qc, lower, upper);
+        kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
+                                                         dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
+                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
         
     }
+
     CUDA_CALL(cudaGetLastError());
-    CUDA_SwapArrays(&dev_pp, &dev_pc, &dev_qp, &dev_qc);
-    CUDA_CALL(cudaDeviceSynchronize());
+    for (int gpu = 0; gpu < num_gpus; gpu++)
+    {
+        CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
+    }
+    CUDA_CALL(cudaDeviceSynchronize()); 
+
 }
 
 // swap array pointers on time forward array propagation
