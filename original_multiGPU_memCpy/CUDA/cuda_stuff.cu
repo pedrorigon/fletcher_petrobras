@@ -258,7 +258,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
 void CUDA_prefetch_pc(const int sx, const int sy, const int sz, float *pc)
 {
 
-   extern float* dev_pc;
+   extern float* dev_pc[GPU_NUMBER];
    int sxsy = sx * sy; // one plan
    const size_t sxsysz = sxsy * sz;
    const size_t msize_vol = sxsysz * sizeof(float);
