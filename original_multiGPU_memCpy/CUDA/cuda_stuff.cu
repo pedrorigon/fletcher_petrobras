@@ -244,13 +244,15 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
         if (device == 0)
         {
             // Copiar a primeira metade do array dev_pc[0] --> primeira metade do array pc
-            CUDA_CALL(cudaMemcpyAsync(pc, dev_pc[0], msize_vol_half, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc, dev_pc[0], msize_vol_half, cudaMemcpyDeviceToHost));
+
         }
         else
         {
             // Copiar a segunda metade do array dev_pc[device] --> segunda metade do array pc
-            CUDA_CALL(cudaMemcpyAsync(pc + msize_vol_half, dev_pc[device] + msize_vol_half, msize_vol_half, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc + msize_vol_half, dev_pc[device] + msize_vol_half, msize_vol_half, cudaMemcpyDeviceToHost));
         }
+        CUDA_CALL(cudaDeviceSynchronize()); 
     }
 }
 
