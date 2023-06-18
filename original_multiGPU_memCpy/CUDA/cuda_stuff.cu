@@ -250,7 +250,8 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
         else
         {
             // Copiar a segunda metade do array dev_pc[device] --> segunda metade do array pc
-            CUDA_CALL(cudaMemcpy(pc + msize_vol_half, dev_pc[device] + msize_vol_half, msize_vol_half, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc + (msize_vol_half / sizeof(float)), dev_pc[device] + (msize_vol_half / sizeof(float)), msize_vol_half, cudaMemcpyDeviceToHost));
+
         }
         CUDA_CALL(cudaDeviceSynchronize()); 
     }
