@@ -33,6 +33,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    extern float* dev_qp[GPU_NUMBER];
    extern float* dev_qc[GPU_NUMBER];
 
+
    // Check sx, sy values
    if (sx % BSIZE_X != 0)
    {
@@ -138,6 +139,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       CUDA_CALL(cudaMalloc(&dev_qc[device], msize_vol_extra));
       CUDA_CALL(cudaMemset(dev_qc[device], 0, msize_vol_extra));
 
+
       dev_pp[device]+=sxsy;
       dev_pc[device]+=sxsy;
       dev_qp[device]+=sxsy;
@@ -180,6 +182,7 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
    extern float* dev_pc[GPU_NUMBER];
    extern float* dev_qp[GPU_NUMBER];
    extern float* dev_qc[GPU_NUMBER];
+   extern float* bordSwap[GPU_NUMBER];
 
    int deviceCount;
    CUDA_CALL(cudaGetDeviceCount(&deviceCount));

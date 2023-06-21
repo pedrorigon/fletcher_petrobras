@@ -22,6 +22,8 @@ float* dev_pp[GPU_NUMBER];
 float* dev_pc[GPU_NUMBER];
 float* dev_qp[GPU_NUMBER];
 float* dev_qc[GPU_NUMBER];
+float* bordSwap_pp[GPU_NUMBER];
+float* bordSwap_qp[GPU_NUMBER];
 
 
 void DRIVER_Initialize(const int sx, const int sy, const int sz, const int bord,
