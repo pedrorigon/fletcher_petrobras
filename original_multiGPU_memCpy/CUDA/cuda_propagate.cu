@@ -180,17 +180,23 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
     const size_t msize_vol_half = msize_vol_extra / 2;
-
+    const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
+    const int size_bord = ind(0, 0, (sz / 2));
+    const int size_lower = ind(0,0,0);
+    const int size_gpu0 = ind(0,0,(sz/2 - 4));
+    const int size_gpu1 = ind(0,0,(sz/2 + 4));
+    const int size_swap_gpu0 = size_bord - ind(0, 0, (sz/2 - 4));
+    const int size_swap_gpu1 = ind(0,0, (sz/2 +4)) - size_bord;
 
     for (int device = 0; device < deviceCount; device++)
     {
         CUDA_CALL(cudaSetDevice(device));
 
-        CUDA_CALL(cudaMemcpy(dev_pp[0] + ((msize_vol_half / sizeof(float))), dev_pp[1] + (msize_vol_half / sizeof(float)), (4*sx*sy*sizeof(float)), cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_pp[1] + ((msize_vol_half / sizeof(float)) - (4*sx*sy)), dev_pp[0] + ((msize_vol_half / sizeof(float)) - (4*sx*sy)), (4*sx*sy*sizeof(float)), cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[1] + size_gpu0, dev_pp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
 
-        CUDA_CALL(cudaMemcpy(dev_qp[0] + ((msize_vol_half / sizeof(float))), dev_qp[1] + (msize_vol_half / sizeof(float)), (4*sx*sy*sizeof(float)), cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_qp[1] + ((msize_vol_half / sizeof(float)) - (4*sx*sy)), dev_qp[0] + ((msize_vol_half / sizeof(float)) - (4*sx*sy)), (4*sx*sy*sizeof(float)), cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[1] + size_gpu0, dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
         CUDA_CALL(cudaDeviceSynchronize()); 
     }
 }
