@@ -188,6 +188,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const int size_bord = ind(0, 0, (sz / 2));
     const int size_lower = ind(0,0,0);
     const int size_gpu0 = ind(0,0,(sz/2 - 4));
+    const int size_trade = size_bord - size_gpu0;
     const int size_gpu1 = ind(0,0,(sz/2 + 4));
     const int size_swap_gpu0 = size_bord - ind(0, 0, (sz/2 - 4));
     const int size_swap_gpu1 = ind(0,0, (sz/2 +4)) - size_bord;
@@ -196,11 +197,11 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     {
         CUDA_CALL(cudaSetDevice(device));
 
-        CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_pp[1] + size_gpu0, dev_pp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_trade, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[1], dev_pp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
 
-        CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_qp[1] + size_gpu0, dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_trade, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[1], dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
         CUDA_CALL(cudaDeviceSynchronize()); 
     }
 }

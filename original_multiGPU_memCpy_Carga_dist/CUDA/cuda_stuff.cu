@@ -54,10 +54,6 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const int strideX = ind(1, 0, 0) - ind(0, 0, 0);
    const int strideY = ind(0, 1, 0) - ind(0, 0, 0);
    const int strideZ = ind(0, 0, 1) - ind(0, 0, 0);
-   const size_t sxsysz = ((size_t)sx * sy) * sz;
-   const size_t msize_vol = sxsysz * sizeof(float);
-   const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
-   const size_t msize_vol_half = msize_vol_extra / 2;
    const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
    const int size_bord = ind(0, 0, (sz / 2));
    const int size_lower = ind(0,0,0);
@@ -69,7 +65,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const int size_total_gpu1 = (ind(sz-1,sy-1,(sz-1)) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
    const int size_total_gpu0 = (size_gpu1 - ind(0,0,0)) * sizeof(float);
    printf("sizeof = %d e size_total - %d\n", size_offset, size_total_gpu1);
-   
+
    // Cópia dos dados para cada GPU
    for (int device = 0; device < 2; device++)
    {
