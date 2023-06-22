@@ -170,10 +170,10 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
       CUDA_CALL(cudaSetDevice(device));
 
 
-   dev_pp[device] -= sxsy;
-   dev_pc[device] -= sxsy;
-   dev_qp[device] -= sxsy;
-   dev_qc[device] -= sxsy;
+   //dev_pp[device] -= sxsy;
+   //dev_pc[device] -= sxsy;
+   //dev_qp[device] -= sxsy;
+   //dev_qc[device] -= sxsy;
 
    CUDA_CALL(cudaFree(dev_ch1dxx[device]));
    CUDA_CALL(cudaFree(dev_ch1dyy[device]));
