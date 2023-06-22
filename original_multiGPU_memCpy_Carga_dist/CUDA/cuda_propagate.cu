@@ -11,7 +11,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
                                  float *restrict ch1dxy, float *restrict ch1dyz, float *restrict ch1dxz,
                                  float *restrict v2px, float *restrict v2pz, float *restrict v2sz,
                                  float *restrict v2pn, float *restrict pp, float *restrict pc,
-                                 float *restrict qp, float *restrict qc, const int lower, const int upper)
+                                 float *restrict qp, float *restrict qc, const int lower, const int upper, int size_gpu)
 {
 
     const int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -33,7 +33,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 
     for (int iz = lower; iz < upper; iz++)
     {
-        const int i = ind(ix, iy, iz);
+        int i = ind(ix, iy, iz) - size_gpu;
         // p derivatives, H1(p) and H2(p)
         const float pxx = Der2(pc, i, strideX, dxxinv);
         const float pyy = Der2(pc, i, strideY, dyyinv);
@@ -116,16 +116,20 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
         CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
+        int size_gpu0 = 0;
+        int size = ind(0, 0, (sz/2)) - ind(0,0,(sz/2 - 4));
 
         if (gpu == 0)
         {
             lower = bord + 1;
             upper = sz / 2;
+            size_gpu0 = 0;
         }
         else
         {
             lower = sz / 2;
             upper = sz - bord - 1;
+            size_gpu0 = ind(0, 0, (sz/2)) - ind(0,0,0) + size;
         }
 
         const int width = upper - lower;
@@ -137,7 +141,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         // Executar o kernel no dispositivo da iteração
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
                                                          dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
-                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
+                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper, size_gpu0);
         
     }
 
