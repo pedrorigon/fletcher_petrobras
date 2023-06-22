@@ -1,0 +1,23 @@
+Aplicativo,Tamanho,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior
+original.CUDA.tupi1.x,88,692.70,37.39,665.94,719.46
+original.CUDA.tupi1.x,120,1081.90,1.86,1080.57,1083.23
+original.CUDA.tupi1.x,152,1030.30,1.55,1029.20,1031.40
+original.CUDA.tupi1.x,184,1015.20,25.49,996.96,1033.44
+original.CUDA.tupi1.x,216,947.80,6.63,943.06,952.54
+original.CUDA.tupi1.x,248,915.50,4.41,912.35,918.65
+original.CUDA.tupi1.x,280,842.20,1.53,841.11,843.29
+original.CUDA.tupi1.x,312,847.70,4.22,844.68,850.72
+original.CUDA.tupi1.x,344,813.40,1.62,812.25,814.55
+original.CUDA.tupi1.x,376,774.90,2.77,772.92,776.88
+original.CUDA.tupi1.x,408,710.50,2.06,709.03,711.97
+original_multiGPU_memCpy.CUDA.tupi1.x,88,663.60,1.42,662.59,664.61
+original_multiGPU_memCpy.CUDA.tupi1.x,120,1042.10,13.57,1032.39,1051.81
+original_multiGPU_memCpy.CUDA.tupi1.x,152,1248.90,28.12,1228.77,1269.03
+original_multiGPU_memCpy.CUDA.tupi1.x,184,1391.00,43.93,1359.56,1422.44
+original_multiGPU_memCpy.CUDA.tupi1.x,216,1437.80,19.59,1423.78,1451.82
+original_multiGPU_memCpy.CUDA.tupi1.x,248,1518.20,11.01,1510.32,1526.08
+original_multiGPU_memCpy.CUDA.tupi1.x,280,1500.30,13.47,1490.66,1509.94
+original_multiGPU_memCpy.CUDA.tupi1.x,312,1577.40,11.28,1569.33,1585.47
+original_multiGPU_memCpy.CUDA.tupi1.x,344,1583.00,4.75,1579.60,1586.40
+original_multiGPU_memCpy.CUDA.tupi1.x,376,1572.10,3.30,1569.74,1574.46
+original_multiGPU_memCpy.CUDA.tupi1.x,408,1543.70,2.41,1541.98,1545.42
