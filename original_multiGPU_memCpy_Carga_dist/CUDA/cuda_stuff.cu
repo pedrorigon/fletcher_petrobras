@@ -111,17 +111,6 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
 
       }else{
 
-         dev_ch1dxx[device]+=size_offset;
-         dev_ch1dyy[device]+=size_offset;
-         dev_ch1dzz[device]+=size_offset;
-         dev_ch1dxy[device]+=size_offset;
-         dev_ch1dyz[device]+=size_offset;
-         dev_ch1dxz[device]+=size_offset;
-         dev_v2px[device]+=size_offset;
-         dev_v2pz[device]+=size_offset;
-         dev_v2sz[device]+=size_offset;
-         dev_v2pn[device]+=size_offset;
-
          CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], size_total_gpu1));
          CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], size_total_gpu1));
          CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], size_total_gpu1));
@@ -132,8 +121,6 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
          CUDA_CALL(cudaMalloc(&dev_v2pz[device], size_total_gpu1));
          CUDA_CALL(cudaMalloc(&dev_v2sz[device], size_total_gpu1));
          CUDA_CALL(cudaMalloc(&dev_v2pn[device], size_total_gpu1));
-
-      
 
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[device], ch1dxx + size_offset, size_total_gpu1, cudaMemcpyHostToDevice));
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[device], ch1dyy + size_offset, size_total_gpu1, cudaMemcpyHostToDevice));
