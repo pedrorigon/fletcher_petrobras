@@ -111,7 +111,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     int lower, upper;
     CUDA_CALL(cudaGetDeviceCount(&num_gpus));
 
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 2; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
@@ -142,12 +142,12 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     }
 
     CUDA_CALL(cudaGetLastError());
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 2; gpu++)
     {
         CUDA_SwapBord(sx, sy, sz, dev_pp[gpu], dev_qp[gpu]);
     }
     CUDA_CALL(cudaDeviceSynchronize()); 
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 2; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
     }
@@ -179,7 +179,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
-    const size_t msize_vol_half = msize_vol_extra / 2;
+    const size_t msize_vol_half = msize_vol / 2;
     const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
     const int size_bord = ind(0, 0, (sz / 2));
     const int size_lower = ind(0,0,0);
@@ -188,7 +188,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const int size_swap_gpu0 = size_bord - ind(0, 0, (sz/2 - 4));
     const int size_swap_gpu1 = ind(0,0, (sz/2 +4)) - size_bord;
 
-    for (int device = 0; device < deviceCount; device++)
+    for (int device = 0; device < 2; device++)
     {
         CUDA_CALL(cudaSetDevice(device));
 
