@@ -43,7 +43,7 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
             fix_size = ind(0,0,(sz/2));
         }
 
-
+        printf("lower = [%d] - upper = [%d] - offset = %d - fix_size = %d - device = %d", offset, fix_size, gpu);
 
 
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
