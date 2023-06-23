@@ -35,7 +35,7 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
 
         if (gpu == 0)
         {
-            offset = ind(sx/2, sy/2, sz/2);
+            offset = 0;
             fix_size = 0;
         }
         else
