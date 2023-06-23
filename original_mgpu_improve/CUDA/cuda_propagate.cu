@@ -147,11 +147,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         
     }
 
-    CUDA_CALL(cudaGetLastError());
-    for (int gpu = 0; gpu < 2; gpu++)
-    {
-        CUDA_SwapBord(sx, sy, sz, dev_pp[gpu], dev_qp[gpu]);
-    }
+    CUDA_CALL(cudaGetLastError());  
+    CUDA_SwapBord(sx, sy, sz);
     CUDA_CALL(cudaDeviceSynchronize()); 
     for (int gpu = 0; gpu < 2; gpu++)
     {
@@ -175,26 +172,13 @@ void CUDA_SwapArrays(float **pp, float **pc, float **qp, float **qc)
     *qc = tmp;
 }
 
-void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* qp){
+void CUDA_SwapBord(const int sx, const int sy, const int sz){
 
     extern float* dev_pp[GPU_NUMBER];
     extern float* dev_qp[GPU_NUMBER];
 
     int deviceCount;
     CUDA_CALL(cudaGetDeviceCount(&deviceCount));
-    /*const size_t sxsysz = ((size_t)sx * sy) * sz;
-    const size_t msize_vol = sxsysz * sizeof(float);
-    const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
-    const size_t msize_vol_half = msize_vol / 2;
-    const size_t size_half = ind(0, 0, (sz/2 + 4)) - ind(0,0,(sz/2)) - 1;
-    const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
-    const int size_bord = ind(0, 0, (sz / 2));
-    const int size_lower = ind(0,0,0);
-    const int size_gpu0 = ind(0,0,(sz/2 - 4));
-    const int size_gpu1 = ind(0,0,(sz/2 + 4));
-    const int size_swap_gpu0 = size_bord - ind(0, 0, (sz/2 - 4));
-    const int size_swap_gpu1 = ind(0,0, (sz/2 +4)) - size_bord;
-    **/
 
     const size_t size_bord = ind(0, 0, (sz/2));
     const size_t size_offset_gpu1 = ind(0,0,(sz/2)) - ind(0, 0, (sz/2 - 4));
@@ -203,17 +187,9 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t size_offset_gpu0 = ind(0,0,(sz/2 - 4));
     const size_t size_transf_2 = (ind(0,0,(sz/2)) - ind(0,0,(sz/2 - 4)) - 1);
 
-
-
-    //for (int device = 0; device < 2; device++)
-   // {
-     //   CUDA_CALL(cudaSetDevice(device));
-
     CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_offset_gpu1, size_transf, cudaMemcpyDeviceToDevice));
     CUDA_CALL(cudaMemcpy(dev_pp[1], dev_pp[0] + size_offset_gpu0, size_transf_2 * sizeof(float), cudaMemcpyDeviceToDevice));
 
     CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_offset_gpu1, size_transf, cudaMemcpyDeviceToDevice));
     CUDA_CALL(cudaMemcpy(dev_qp[1], dev_qp[0] + size_offset_gpu0, size_transf_2 * sizeof(float), cudaMemcpyDeviceToDevice));
-    //}
-    CUDA_CALL(cudaDeviceSynchronize()); 
 }
