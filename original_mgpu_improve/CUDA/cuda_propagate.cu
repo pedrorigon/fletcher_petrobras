@@ -33,7 +33,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 
     for (int iz = lower; iz < upper; iz++)
     {
-        int i = ind(ix, iy, iz) - fix_size + offset;
+        const int i = ind(ix, iy, iz);
         // p derivatives, H1(p) and H2(p)
         const float pxx = Der2(pc, i, strideX, dxxinv);
         const float pyy = Der2(pc, i, strideY, dyyinv);
@@ -128,8 +128,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         }
         else
         {
-            lower = (sz/2);
-            upper = (sz)- bord - 1;
+            lower = 4;
+            upper = (sz/2)- bord - 1;
             offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
             fix_size = ind(0,0,(sz/2));
         }  
