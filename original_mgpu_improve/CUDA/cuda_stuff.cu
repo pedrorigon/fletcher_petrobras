@@ -255,7 +255,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
     CUDA_CALL(cudaGetDeviceCount(&deviceCount));
     const size_t offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4))) * sizeof(float);
     const size_t size_half = ind(0, 0, (sz/2)) * sizeof(float);
-    const size_t size_half_2 = (ind(sx-1, sy-1, sz-1) - ind(0, 0, (sz/2))) * sizeof(float);
+    const size_t size_half_2 = (sx*sy*sz - ind(0, 0, (sz/2))) * sizeof(float);
 
     for (int device = 0; device < 2; device++)
     {
@@ -273,8 +273,8 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
             CUDA_CALL(cudaMemcpy(pc + (size_half / sizeof(float)), dev_pc[device] + (offset / sizeof(float)), size_half_2, cudaMemcpyDeviceToHost));
 
         }
-        CUDA_CALL(cudaDeviceSynchronize()); 
     }
+    CUDA_CALL(cudaDeviceSynchronize()); 
 }
 
 
