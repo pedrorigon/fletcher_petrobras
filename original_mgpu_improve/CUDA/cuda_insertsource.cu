@@ -1,21 +1,20 @@
 #include "cuda_defines.h"
 #include "../driver.h"
-#include "../map.h"
 #include "cuda_insertsource.h"
 
 __global__ void kernel_InsertSource(const float val, const int iSource,
-	                            float * restrict qp, float * restrict qc, int offset, int fix_size)
+	                            float * restrict qp, float * restrict qc)
 {
   const int ix=blockIdx.x * blockDim.x + threadIdx.x;
   if (ix==0)
   {
-    qp[iSource - fix_size + offset]+=val;
-    qc[iSource - fix_size + offset]+=val;
+    qp[iSource]+=val;
+    qc[iSource]+=val;
   }
 }
 
 
-void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val, const int iSource, float * restrict pc, float * restrict qc,  float * restrict pp, float * restrict qp)
+void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, float * restrict qc,  float * restrict pp, float * restrict qp)
 {
 
   extern float* dev_pp[GPU_NUMBER];
@@ -24,36 +23,17 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
   extern float* dev_qc[GPU_NUMBER];
 
   int num_gpus;
-  int offset;
-  int fix_size;
   CUDA_CALL(cudaGetDeviceCount(&num_gpus));
-  printf("Teste se entrou aqui \n");
-  for (int gpu = 0; gpu < 2; gpu++)
+  for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
-
-        if (gpu == 0)
-        {
-            offset = 0;
-            fix_size = 0;
-        }
-        else
-        {
-            //offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
-            //offset = ind(sx/2, sy/2, sz/2) - ind(0, 0, sz/2) + (ind(0, 0, sz/2) - ind(0,0,(sz/2 - 4)));
-            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
-            fix_size = ind(0,0,(sz/2));
-        }
-
-        printf("offset = %d - fix_size = %d - device = %d \n", offset, fix_size, gpu);
-
-
+        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
         {
           dim3 threadsPerBlock(BSIZE_X, 1);
           dim3 numBlocks(1,1);
-          kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, dev_pc[gpu], dev_qc[gpu], offset, fix_size);
+          kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, dev_pc[gpu], dev_qc[gpu]);
           CUDA_CALL(cudaGetLastError());
           CUDA_CALL(cudaDeviceSynchronize());
         }

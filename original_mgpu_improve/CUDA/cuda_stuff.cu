@@ -17,59 +17,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    int deviceCount;
    CUDA_CALL(cudaGetDeviceCount(&deviceCount));
 
-   typedef struct {
-      size_t gpu_upper_x;
-      size_t gpu_upper_y;
-      size_t gpu_upper_z;
-      size_t gpu_lower_x;
-      size_t gpu_lower_y;
-      size_t gpu_lower_z;
-      size_t gpu_bord_size;
-      size_t gpu_offset_start;
-      size_t gpu_offset_end;
-      size_t gpu_total_size;
-      size_t cpu_lower;
-      size_t cpu_upper;
-      size_t cpu_bord_size_lower_inf;
-      size_t cpu_bord_size_upper_inf;
-
-   } Gpu;
-
-   Gpu gpu_map[deviceCount];
-
-   //Gpu 0 
-   gpu_map[0].gpu_upper_x = sx - 1;
-   gpu_map[0].gpu_upper_y = sy - 1;
-   gpu_map[0].gpu_upper_z = sz / 2 + 4;
-   gpu_map[0].gpu_lower_x = 0;
-   gpu_map[0].gpu_lower_y = 0;
-   gpu_map[0].gpu_lower_z = 0;
-   gpu_map[0].gpu_bord_size = ind((sx-1), (sy-1), (sz/2 + 4)) - ind(0,0,(sz/2));
-   gpu_map[0].gpu_offset_start = ind(0,0,(sz/2));
-   gpu_map[0].gpu_offset_end = ind((sx-1), (sy-1), (sz/2 + 4));
-   gpu_map[0].gpu_total_size = ind((sx-1), (sy-1), (sz/2 + 4)) - ind(0,0,0);
-   gpu_map[0].cpu_lower = ind(0,0,0);
-   gpu_map[0].cpu_upper = ind(0,0,(sz/2));
-   gpu_map[0].cpu_bord_size_lower_inf = ind(0,0,(sz/2));
-   gpu_map[0].cpu_bord_size_upper_inf = ind((sx-1),(sy-1),(sz/2 + 4));
-
-   //Gpu 1
-   gpu_map[0].gpu_upper_x = sx - 1;
-   gpu_map[0].gpu_upper_y = sy - 1;
-   gpu_map[0].gpu_upper_z = sz - 1;
-   gpu_map[0].gpu_lower_x = 0;
-   gpu_map[0].gpu_lower_y = 0;
-   gpu_map[0].gpu_lower_z = ((sz / 2) - 4);
-   gpu_map[0].gpu_bord_size = ind((0), (0), (sz/2)) - ind(0,0,((sz/2) - 4));
-   gpu_map[0].gpu_offset_start = ind(0,0,(sz/2));
-   gpu_map[0].gpu_offset_end = ind((sx-1), (sy-1), (sz - 1));
-   gpu_map[0].gpu_total_size = ind((sx-1), (sy-1), (sz - 1)) - ind(0,0,((sz/2) - 4));
-   gpu_map[0].cpu_lower = ind(0,0,(sz/2));
-   gpu_map[0].cpu_upper = ind(sx-1,sy-1,(sz-1));
-   gpu_map[0].cpu_bord_size_lower_inf = ind(0,0,(sz/2 - 4));
-   gpu_map[0].cpu_bord_size_upper_inf = ind(0, 0,(sz/2));
-
-
+   
    extern float* dev_ch1dxx[GPU_NUMBER];
    extern float* dev_ch1dyy[GPU_NUMBER];
    extern float* dev_ch1dzz[GPU_NUMBER];
@@ -101,85 +49,102 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    int sxsy = sx * sy; // one plan
    const size_t sxsysz = sxsy * sz;
    const size_t msize_vol = sxsysz * sizeof(float);
-   //const size_t size_half = ind(sx-1, sy-1, (sz/2 + 4)) * sizeof(float);
-   const size_t size_half = (sx*sy*(sz/2 + 4)) * sizeof(float);
-   const size_t size_half_2 = (sx*sy*(sz/2 + 4)) * sizeof(float);
-   const size_t lower_size = ind(0, 0, (sz/2 - 4));
-   const size_t size_2 = sx*sy*sz - lower_size;
+   const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
+
+   const int strideX = ind(1, 0, 0) - ind(0, 0, 0);
+   const int strideY = ind(0, 1, 0) - ind(0, 0, 0);
+   const int strideZ = ind(0, 0, 1) - ind(0, 0, 0);
+/*
+   CUDA_CALL(cudaMalloc(&dev_ch1dxx, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_ch1dyy, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_ch1dzz, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_ch1dxy, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_ch1dyz, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_ch1dxz, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_v2px, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_v2pz, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_v2sz, msize_vol));
+   CUDA_CALL(cudaMalloc(&dev_v2pn, msize_vol));
+
+   // Wave field arrays with an extra plan
+   CUDA_CALL(cudaMalloc(&dev_pp, msize_vol_extra));
+   CUDA_CALL(cudaMemset(dev_pp, 0, msize_vol_extra));
+   CUDA_CALL(cudaMalloc(&dev_pc, msize_vol_extra));
+   CUDA_CALL(cudaMemset(dev_pc, 0, msize_vol_extra));
+   CUDA_CALL(cudaMalloc(&dev_qp, msize_vol_extra));
+   CUDA_CALL(cudaMemset(dev_qp, 0, msize_vol_extra));
+   CUDA_CALL(cudaMalloc(&dev_qc, msize_vol_extra));
+   CUDA_CALL(cudaMemset(dev_qc, 0, msize_vol_extra));
+   dev_pp+=sxsy;
+   dev_pc+=sxsy;
+   dev_qp+=sxsy;
+   dev_qc+=sxsy;
+*/
+      // Cálculo do número de elementos para cada GPU
+   int numElementsPerGPU = (sx * sy * sz) / deviceCount;
+
+   // Cálculo do número de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+   int numExtraElementsPerGPU = msize_vol_extra / deviceCount;
 
    // Cópia dos dados para cada GPU
-   for (int device = 0; device < 2; device++)
+   for (int device = 0; device < deviceCount; device++)
    {
       cudaDeviceProp deviceProp;
       CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
       printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
       CUDA_CALL(cudaSetDevice(device));
-      if(device == 0){
-         CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxy[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyz[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxz[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_v2px[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_v2pz[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_v2sz[device], size_half));
-         CUDA_CALL(cudaMalloc(&dev_v2pn[device], size_half));
 
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[device], ch1dxx, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[device], ch1dyy, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[device], ch1dzz, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[device], ch1dxy, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[device], ch1dyz, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxz[device], ch1dxz, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2px[device], v2px, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pz[device], v2pz, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2sz[device], v2sz, size_half, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pn[device], v2pn, size_half, cudaMemcpyHostToDevice));
+      // Calcula o intervalo de elementos para a GPU atual
+      int gpuLower = device * numElementsPerGPU;
+      int gpuUpper = (device == deviceCount - 1) ? (sx * sy * sz) : ((device + 1) * numElementsPerGPU);
 
-         // Wave field arrays with an extra plan
-         CUDA_CALL(cudaMalloc(&dev_pp[device], size_half));
-         CUDA_CALL(cudaMemset(dev_pp[device], 0, size_half));
-         CUDA_CALL(cudaMalloc(&dev_pc[device], size_half));
-         CUDA_CALL(cudaMemset(dev_pc[device], 0, size_half));
-         CUDA_CALL(cudaMalloc(&dev_qp[device], size_half));
-         CUDA_CALL(cudaMemset(dev_qp[device], 0, size_half));
-         CUDA_CALL(cudaMalloc(&dev_qc[device], size_half));
-         CUDA_CALL(cudaMemset(dev_qc[device], 0, size_half));
-      }else
-      {
-         CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxy[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyz[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxz[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_v2px[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_v2pz[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_v2sz[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_v2pn[device], size_2 * sizeof(float)));
+      // Calcula o número de elementos para a GPU atual
+      int numElements = gpuUpper - gpuLower;
 
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[device], ch1dxx + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[device], ch1dyy + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[device], ch1dzz + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[device], ch1dxy + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[device], ch1dyz + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxz[device], ch1dxz + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2px[device], v2px + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pz[device], v2pz + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2sz[device], v2sz + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pn[device], v2pn + lower_size, size_2 * sizeof(float), cudaMemcpyHostToDevice));
+      // Calcula o intervalo de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+      int extraGpuLower = device * numExtraElementsPerGPU;
+      int extraGpuUpper = (device == deviceCount - 1) ? msize_vol_extra : ((device + 1) * numExtraElementsPerGPU);
 
-         // Wave field arrays with an extra plan
-         CUDA_CALL(cudaMalloc(&dev_pp[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMemset(dev_pp[device], 0, size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_pc[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMemset(dev_pc[device], 0, size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_qp[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMemset(dev_qp[device], 0, size_2 * sizeof(float)));
-         CUDA_CALL(cudaMalloc(&dev_qc[device], size_2 * sizeof(float)));
-         CUDA_CALL(cudaMemset(dev_qc[device], 0, size_2 * sizeof(float)));
-      }
+      // Calcula o número de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+      int numExtraElements = extraGpuUpper - extraGpuLower;
+
+      CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_ch1dxy[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_ch1dyz[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_ch1dxz[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_v2px[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_v2pz[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_v2sz[device], msize_vol));
+      CUDA_CALL(cudaMalloc(&dev_v2pn[device], msize_vol));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[device], ch1dxx, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[device], ch1dyy, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[device], ch1dzz, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[device], ch1dxy, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[device], ch1dyz, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_ch1dxz[device], ch1dxz, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_v2px[device], v2px, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_v2pz[device], v2pz, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_v2sz[device], v2sz, msize_vol, cudaMemcpyHostToDevice));
+      CUDA_CALL(cudaMemcpyAsync(dev_v2pn[device], v2pn, msize_vol, cudaMemcpyHostToDevice));
+
+      // Wave field arrays with an extra plan
+      CUDA_CALL(cudaMalloc(&dev_pp[device], msize_vol_extra));
+      CUDA_CALL(cudaMemset(dev_pp[device], 0, msize_vol_extra));
+      CUDA_CALL(cudaMalloc(&dev_pc[device], msize_vol_extra));
+      CUDA_CALL(cudaMemset(dev_pc[device], 0, msize_vol_extra));
+      CUDA_CALL(cudaMalloc(&dev_qp[device], msize_vol_extra));
+      CUDA_CALL(cudaMemset(dev_qp[device], 0, msize_vol_extra));
+      CUDA_CALL(cudaMalloc(&dev_qc[device], msize_vol_extra));
+      CUDA_CALL(cudaMemset(dev_qc[device], 0, msize_vol_extra));
+
+
+      dev_pp[device]+=sxsy;
+      dev_pc[device]+=sxsy;
+      dev_qp[device]+=sxsy;
+      dev_qc[device]+=sxsy;
+
 
       printf("GPU memory usage = %ld MiB\n", 15 * msize_vol / 1024 / 1024);
       size_t freeMem, totalMem;
@@ -221,62 +186,125 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
 
    int deviceCount;
    CUDA_CALL(cudaGetDeviceCount(&deviceCount));
-   for (int device = 0; device < 2; device++)
+   int sxsy = sx * sy; // one plan
+   for (int device = 0; device < deviceCount; device++)
    {
       cudaDeviceProp deviceProp;
       CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
-      printf("CUDA FINALIZE source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
+      printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
       CUDA_CALL(cudaSetDevice(device));
 
-      CUDA_CALL(cudaFree(dev_ch1dxx[device]));
-      CUDA_CALL(cudaFree(dev_ch1dyy[device]));
-      CUDA_CALL(cudaFree(dev_ch1dzz[device]));
-      CUDA_CALL(cudaFree(dev_ch1dxy[device]));
-      CUDA_CALL(cudaFree(dev_ch1dyz[device]));
-      CUDA_CALL(cudaFree(dev_ch1dxz[device]));
-      CUDA_CALL(cudaFree(dev_v2px[device]));
-      CUDA_CALL(cudaFree(dev_v2pz[device]));
-      CUDA_CALL(cudaFree(dev_v2sz[device]));
-      CUDA_CALL(cudaFree(dev_v2pn[device]));
-      CUDA_CALL(cudaFree(dev_pp[device]));
-      CUDA_CALL(cudaFree(dev_pc[device]));
-      CUDA_CALL(cudaFree(dev_qp[device]));
-      CUDA_CALL(cudaFree(dev_qc[device]));
+
+   dev_pp[device] -= sxsy;
+   dev_pc[device] -= sxsy;
+   dev_qp[device] -= sxsy;
+   dev_qc[device] -= sxsy;
+
+   CUDA_CALL(cudaFree(dev_ch1dxx[device]));
+   CUDA_CALL(cudaFree(dev_ch1dyy[device]));
+   CUDA_CALL(cudaFree(dev_ch1dzz[device]));
+   CUDA_CALL(cudaFree(dev_ch1dxy[device]));
+   CUDA_CALL(cudaFree(dev_ch1dyz[device]));
+   CUDA_CALL(cudaFree(dev_ch1dxz[device]));
+   CUDA_CALL(cudaFree(dev_v2px[device]));
+   CUDA_CALL(cudaFree(dev_v2pz[device]));
+   CUDA_CALL(cudaFree(dev_v2sz[device]));
+   CUDA_CALL(cudaFree(dev_v2pn[device]));
+   CUDA_CALL(cudaFree(dev_pp[device]));
+   CUDA_CALL(cudaFree(dev_pc[device]));
+   CUDA_CALL(cudaFree(dev_qp[device]));
+   CUDA_CALL(cudaFree(dev_qc[device]));
 
    }
 
    printf("CUDA_Finalize: SUCCESS\n");
 }
-
+/*
+void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
+{
+   // arthur: se usar memoria unificada, não precisa desta cópia.
+   extern float* dev_pc;
+   const size_t sxsysz = ((size_t)sx * sy) * sz;
+   const size_t msize_vol = sxsysz * sizeof(float);
+   if (pc){
+      CUDA_CALL(cudaMemcpyAsync(pc, dev_pc, msize_vol, cudaMemcpyDeviceToHost));
+   } 
+}
+*/
 void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
 {
     extern float* dev_pc[GPU_NUMBER];
     int deviceCount;
     CUDA_CALL(cudaGetDeviceCount(&deviceCount));
-    const size_t offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4))) * sizeof(float);
-    const size_t size_half = ind(0, 0, (sz/2)) * sizeof(float);
-    const size_t size_half_2 = (sx*sy*sz - ind(0, 0, (sz/2))) * sizeof(float);
+    const size_t sxsysz = ((size_t)sx * sy) * sz;
+    const size_t msize_vol = sxsysz * sizeof(float);
+    const size_t msize_vol_half = msize_vol / 2;
 
-    for (int device = 0; device < 2; device++)
+    for (int device = 0; device < deviceCount; device++)
     {
         CUDA_CALL(cudaSetDevice(device));
 
         if (device == 0)
         {
             // Copiar a primeira metade do array dev_pc[0] --> primeira metade do array pc
-            CUDA_CALL(cudaMemcpy(pc, dev_pc[0], size_half, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc, dev_pc[0], msize_vol_half, cudaMemcpyDeviceToHost));
 
         }
         else
         {
             // Copiar a segunda metade do array dev_pc[device] --> segunda metade do array pc
-            CUDA_CALL(cudaMemcpy(pc + (size_half / sizeof(float)), dev_pc[device] + (offset / sizeof(float)), size_half_2, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc + (msize_vol_half / sizeof(float)), dev_pc[device] + (msize_vol_half / sizeof(float)), msize_vol_half, cudaMemcpyDeviceToHost));
 
         }
+        CUDA_CALL(cudaDeviceSynchronize()); 
     }
-    CUDA_CALL(cudaDeviceSynchronize()); 
 }
 
+
+void CUDA_prefetch_pc(const int sx, const int sy, const int sz, float *pc)
+{
+
+   extern float* dev_pc[GPU_NUMBER];
+   int sxsy = sx * sy; // one plan
+   const size_t sxsysz = sxsy * sz;
+   const size_t msize_vol = sxsysz * sizeof(float);
+   const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
+   int deviceCount;
+   CUDA_CALL(cudaGetDeviceCount(&deviceCount));
+
+   // Cálculo do número de elementos para cada GPU
+   int numElementsPerGPU = (sx * sy * sz) / deviceCount;
+
+   // Cálculo do número de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+   int numExtraElementsPerGPU = msize_vol_extra / deviceCount;
+
+   // Cópia dos dados para cada GPU
+   for (int device = 0; device < deviceCount; device++)
+   {
+   
+      cudaDeviceProp deviceProp;
+      CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
+      printf("CUDA source using device(%d) %s with compute capability %d.%d.\n", device, deviceProp.name, deviceProp.major, deviceProp.minor);
+      CUDA_CALL(cudaSetDevice(device));
+
+      // Calcula o intervalo de elementos para a GPU atual
+      int gpuLower = device * numElementsPerGPU;
+      int gpuUpper = (device == deviceCount - 1) ? (sx * sy * sz) : ((device + 1) * numElementsPerGPU);
+
+      // Calcula o número de elementos para a GPU atual
+      int numElements = gpuUpper - gpuLower;
+
+      // Calcula o intervalo de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+      int extraGpuLower = device * numExtraElementsPerGPU;
+      int extraGpuUpper = (device == deviceCount - 1) ? msize_vol_extra : ((device + 1) * numExtraElementsPerGPU);
+
+      // Calcula o número de elementos para as variáveis dev_pp, dev_pc, dev_qp e dev_qc
+      int numExtraElements = extraGpuUpper - extraGpuLower;
+
+      // Copia os dados da CPU para a GPU atual
+      CUDA_CALL(cudaMemcpyAsync(pc, dev_pc, msize_vol, cudaMemcpyHostToDevice));
+   }
+}
 
 void CUDA_Allocate_Model_Variables(float **restrict ch1dxx, float **restrict ch1dyy, float **restrict ch1dzz, float **restrict ch1dxy,
                                    float **restrict ch1dyz, float **restrict ch1dxz, float **restrict v2px, float **restrict v2pz, float **restrict v2sz,
@@ -315,9 +343,13 @@ void CUDA_Allocate_main(float **restrict vpz, float **restrict vsv, float **rest
    CUDA_CALL(cudaMallocHost(pc, msize_vol_extra));
    CUDA_CALL(cudaMallocHost(qp, msize_vol_extra));
    CUDA_CALL(cudaMallocHost(qc, msize_vol_extra));
-
+   // ARTHUR - Ver se esta operação fica na CPU ou mover para a GPU.
    memset(*pp, 0, msize_vol_extra);
    memset(*pc, 0, msize_vol_extra);
    memset(*qp, 0, msize_vol_extra);
    memset(*qc, 0, msize_vol_extra);
+   // pp+=sxsy;
+   // pc+=sxsy;
+   // qp+=sxsy;
+   // qc+=sxsy;
 }

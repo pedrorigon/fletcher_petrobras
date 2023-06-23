@@ -76,8 +76,8 @@ CUDA_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1
 }
 
 
-void DRIVER_InsertSource(const int sx, const int sy, const int sz, const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp){
-	CUDA_InsertSource(sx, sy, sz, val, iSource, pc, qc, pp, qp);
+void DRIVER_InsertSource(const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp){
+	CUDA_InsertSource(val, iSource, pc, qc, pp, qp);
 }
 
 void DRIVER_Allocate_Model_Variables(float ** restrict ch1dxx, float ** restrict ch1dyy, float ** restrict ch1dzz, float ** restrict ch1dxy,

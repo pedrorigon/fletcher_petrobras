@@ -11,7 +11,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
                                  float *restrict ch1dxy, float *restrict ch1dyz, float *restrict ch1dxz,
                                  float *restrict v2px, float *restrict v2pz, float *restrict v2sz,
                                  float *restrict v2pn, float *restrict pp, float *restrict pc,
-                                 float *restrict qp, float *restrict qc, const int lower, const int upper, int offset, int fix_size)
+                                 float *restrict qp, float *restrict qc, const int lower, const int upper)
 {
 
     const int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -110,10 +110,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     int num_gpus;
     int lower, upper;
     CUDA_CALL(cudaGetDeviceCount(&num_gpus));
-    int offset = 0;
-    int fix_size = 0;
 
-    for (int gpu = 0; gpu < 2; gpu++)
+    for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
@@ -123,18 +121,14 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         {
             lower = bord + 1;
             upper = sz / 2;
-            offset = 0;
-            fix_size = 0;
         }
         else
         {
-            lower = 4;
-            upper = (sz/2)- bord - 1;
-            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
-            fix_size = ind(0,0,(sz/2));
-        }  
+            lower = sz / 2;
+            upper = sz - bord - 1;
+        }
 
-        printf("lower = [%d] - upper = [%d] - offset = %d - fix_size = %d - device = %d", lower, upper, offset, fix_size, gpu);
+        const int width = upper - lower;
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
         dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
@@ -143,15 +137,17 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         // Executar o kernel no dispositivo da iteração
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
                                                          dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
-                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper, offset, fix_size);
+                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
         
     }
 
     CUDA_CALL(cudaGetLastError());
+    for (int gpu = 0; gpu < num_gpus; gpu++)
+    {
+        CUDA_SwapBord(sx, sy, sz, dev_pp[gpu], dev_qp[gpu]);
+    }
     CUDA_CALL(cudaDeviceSynchronize()); 
-    CUDA_SwapBord(sx, sy, sz);
-    //CUDA_CALL(cudaDeviceSynchronize()); 
-    for (int gpu = 0; gpu < 2; gpu++)
+    for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
     }
@@ -173,7 +169,7 @@ void CUDA_SwapArrays(float **pp, float **pc, float **qp, float **qc)
     *qc = tmp;
 }
 
-void CUDA_SwapBord(const int sx, const int sy, const int sz){
+void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* qp){
 
     extern float* dev_pp[GPU_NUMBER];
     extern float* dev_qp[GPU_NUMBER];

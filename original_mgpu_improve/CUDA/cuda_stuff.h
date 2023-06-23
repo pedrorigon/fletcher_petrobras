@@ -33,6 +33,7 @@ void CUDA_Allocate_main(float ** restrict vpz, float ** restrict vsv, float ** r
     float ** restrict phi, float ** restrict theta, float ** restrict pp, float ** restrict pc, float ** restrict qp, 
     float ** restrict qc, int sx, int sy, int sz);
 
+void CUDA_prefetch_pc(const int sx, const int sy, const int sz, float *pc);
 
 #ifdef __cplusplus
 }

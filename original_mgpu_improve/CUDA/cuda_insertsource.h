@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp);
+void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp);
 
 #ifdef __cplusplus
 }
