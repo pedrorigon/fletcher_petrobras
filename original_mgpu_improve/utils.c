@@ -129,6 +129,14 @@ void DumpSliceFile(int sx, int sy, int sz, float *arrP, SlicePtr p) {
 //PPL  int ix, iy, iz;
   int iy, iz;
   
+ // for (iz=p->izStart; iz<=p->izEnd; iz++){
+ //   for (iy=p->iyStart; iy<=p->iyEnd; iy++){ 
+ //     for(int ix = p->ixStart; ix < p->ixEnd; ix++){
+ //       printf("[%d] [%d] [%d] = %.8f - %d\n", ix, iy, iz, arrP[ind(ix,iy,iz)], ind(ix,iy,iz));
+ //     }
+ //   }
+ // }
+
   // dump section to binary file
   
   for (iz=p->izStart; iz<=p->izEnd; iz++)
