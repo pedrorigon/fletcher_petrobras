@@ -9,8 +9,8 @@ __global__ void kernel_InsertSource(const float val, const int iSource,
   const int ix=blockIdx.x * blockDim.x + threadIdx.x;
   if (ix==0)
   {
-    qp[offset]+=val;
-    qc[offset]+=val;
+    qp[iSource - fix_size + offset]+=val;
+    qc[iSource - fix_size + offset]+=val;
   }
 }
 
@@ -42,7 +42,7 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
         {
             //offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
             //offset = ind(sx/2, sy/2, sz/2) - ind(0, 0, sz/2) + (ind(0, 0, sz/2) - ind(0,0,(sz/2 - 4)));
-            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4))) + ind(48,48,0);
+            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
             fix_size = ind(0,0,(sz/2));
         }
 
