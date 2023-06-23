@@ -204,6 +204,6 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
 
         CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_swap_gpu0, size_half * sizeof(float), cudaMemcpyDeviceToDevice));
         CUDA_CALL(cudaMemcpy(dev_qp[1], dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaDeviceSynchronize()); 
     }
+    CUDA_CALL(cudaDeviceSynchronize()); 
 }
