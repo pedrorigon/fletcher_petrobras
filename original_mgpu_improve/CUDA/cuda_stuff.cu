@@ -184,8 +184,8 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       CUDA_CALL(cudaMemGetInfo(&freeMem, &totalMem));
       printf("GPU memory usage: %lu MiB (used) / %lu MiB (total)\n", (totalMem - freeMem) / (1024 * 1024), totalMem / (1024 * 1024));
    }
-   //CUDA_CALL(cudaDeviceSynchronize());
-   //CUDA_CALL(cudaGetLastError());
+   CUDA_CALL(cudaDeviceSynchronize());
+   CUDA_CALL(cudaGetLastError());
 }
   
 

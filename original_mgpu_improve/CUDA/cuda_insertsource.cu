@@ -27,11 +27,12 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
   int offset;
   int fix_size;
   CUDA_CALL(cudaGetDeviceCount(&num_gpus));
+  printf("Teste se entrou aqui \n");
   for (int gpu = 0; gpu < 2; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
-        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
+
         if (gpu == 0)
         {
             offset = 0;
@@ -43,7 +44,7 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
             fix_size = ind(0,0,(sz/2));
         }
 
-        printf("lower = [%d] - upper = [%d] - offset = %d - fix_size = %d - device = %d", offset, fix_size, gpu);
+        printf("lower = [%d] - upper = [%d] - offset = %d - fix_size = %d - device = %d \n", offset, fix_size, gpu);
 
 
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
