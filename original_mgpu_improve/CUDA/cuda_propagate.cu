@@ -201,7 +201,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t size_transf = 4 * sx * sy * sizeof(float);
 
     const size_t size_offset_gpu0 = ind(0,0,(sz/2 - 4));
-    const size_t size_transf_2 = ind(0,0,(sz/2)) - ind(0,0,(sz/2 - 4));
+    const size_t size_transf_2 = (ind(0,0,(sz/2)) - ind(0,0,(sz/2 - 4)) - 1);
 
 
 
