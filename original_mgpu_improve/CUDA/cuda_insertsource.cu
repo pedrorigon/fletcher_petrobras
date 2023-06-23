@@ -41,7 +41,8 @@ void CUDA_InsertSource(const int sx, const int sy, const int sz, const float val
         else
         {
             //offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
-            offset = ind(sx/2, sy/2, sz/2) - ind(0, 0, sz/2) + (ind(0, 0, sz/2) - ind(0,0,(sz/2 - 4)));
+            //offset = ind(sx/2, sy/2, sz/2) - ind(0, 0, sz/2) + (ind(0, 0, sz/2) - ind(0,0,(sz/2 - 4)));
+            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4))) + ind(48,48,0);
             fix_size = ind(0,0,(sz/2));
         }
 

@@ -147,7 +147,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         
     }
 
-    CUDA_CALL(cudaGetLastError());  
+    CUDA_CALL(cudaGetLastError()); 
     CUDA_SwapBord(sx, sy, sz);
     CUDA_CALL(cudaDeviceSynchronize()); 
     for (int gpu = 0; gpu < 2; gpu++)
@@ -185,7 +185,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     const size_t size_transf = 4 * sx * sy * sizeof(float);
 
     const size_t size_offset_gpu0 = ind(0,0,(sz/2 - 4));
-    const size_t size_transf_2 = (ind(0,0,(sz/2)) - ind(0,0,(sz/2 - 4)) - 1);
+    const size_t size_transf_2 = (ind(0,0,(sz/2)) - ind(0,0,(sz/2 - 4)));
 
     CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_offset_gpu1, size_transf, cudaMemcpyDeviceToDevice));
     CUDA_CALL(cudaMemcpy(dev_pp[1], dev_pp[0] + size_offset_gpu0, size_transf_2 * sizeof(float), cudaMemcpyDeviceToDevice));
