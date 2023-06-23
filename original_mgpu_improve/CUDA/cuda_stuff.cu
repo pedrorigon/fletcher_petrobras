@@ -101,8 +101,9 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    int sxsy = sx * sy; // one plan
    const size_t sxsysz = sxsy * sz;
    const size_t msize_vol = sxsysz * sizeof(float);
-   const size_t size_half = ind(sx-1, sy-1, (sz/2 + 4)) * sizeof(float);
-   const size_t size_half_2 = (ind(sx-1, sy-1, sz-1) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
+   //const size_t size_half = ind(sx-1, sy-1, (sz/2 + 4)) * sizeof(float);
+   const size_t size_half = (sx*sy*(sz/2 + 4)) * sizeof(float);
+   const size_t size_half_2 = (sx*sy*(sz/2 + 4)) * sizeof(float);
    const size_t lower_size = ind(0, 0, (sz/2 - 4));
 
    // Cópia dos dados para cada GPU
