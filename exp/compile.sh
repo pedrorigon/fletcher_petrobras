@@ -1,7 +1,7 @@
 mkdir -p bin/
 cd ../
 
-for version in original_multiGPU original_multiGPU_memCpy; do
+for version in original_mgpu_improve original_multiGPU_memCpy; do
 	cd $version
 	for backend in CUDA; do
 		echo "-----------------------------------------------------"
