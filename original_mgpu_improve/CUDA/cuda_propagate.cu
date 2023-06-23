@@ -186,7 +186,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
     const size_t msize_vol_half = msize_vol / 2;
-    const size_t size_half = ind(sx-1, sy-1, (sz/2 + 4)) - ind(0,0,(sz/2));
+    const size_t size_half = ind(0, 0, (sz/2 + 4)) - ind(0,0,(sz/2));
     const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
     const int size_bord = ind(0, 0, (sz / 2));
     const int size_lower = ind(0,0,0);
