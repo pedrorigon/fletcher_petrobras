@@ -10,7 +10,7 @@ __global__ void kernel_InsertSource(const float val, const int iSource,
   if (ix==0)
   {
     qp[iSource - fix_size + offset]+=val;
-    qc[iSource]+=val;
+    qc[iSource - fix_size + offset]+=val;
   }
 }
 
