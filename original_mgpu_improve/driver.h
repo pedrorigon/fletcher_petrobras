@@ -34,7 +34,7 @@ void DRIVER_Finalize(const int sx, const int sy, const int sz, const int bord,
 
 void DRIVER_Update_pointers(const int sx, const int sy, const int sz, float *pc);
 
-void DRIVER_InsertSource(const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp);
+void DRIVER_InsertSource(const int sx, const int sy, const int sz, const float val, const int iSource, float * restrict pc, float * restrict qc, float * restrict pp, float * restrict qp);
 
 void DRIVER_Allocate_Model_Variables(float ** restrict ch1dxx, float ** restrict ch1dyy, float ** restrict ch1dzz, float ** restrict ch1dxy,
 		    float ** restrict ch1dyz, float ** restrict ch1dxz, float ** restrict v2px, float ** restrict v2pz, float ** restrict v2sz,

@@ -11,7 +11,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
                                  float *restrict ch1dxy, float *restrict ch1dyz, float *restrict ch1dxz,
                                  float *restrict v2px, float *restrict v2pz, float *restrict v2sz,
                                  float *restrict v2pn, float *restrict pp, float *restrict pc,
-                                 float *restrict qp, float *restrict qc, const int lower, const int upper)
+                                 float *restrict qp, float *restrict qc, const int lower, const int upper, int offset, int fix_size)
 {
 
     const int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -33,7 +33,7 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 
     for (int iz = lower; iz < upper; iz++)
     {
-        const int i = ind(ix, iy, iz);
+        int i = ind(ix, iy, iz) - fix_size + offset;
         // p derivatives, H1(p) and H2(p)
         const float pxx = Der2(pc, i, strideX, dxxinv);
         const float pyy = Der2(pc, i, strideY, dyyinv);
@@ -110,6 +110,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     int num_gpus;
     int lower, upper;
     CUDA_CALL(cudaGetDeviceCount(&num_gpus));
+    int offset = 0;
+    int fix_size = 0;
 
     for (int gpu = 0; gpu < 2; gpu++)
     {
@@ -121,14 +123,18 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         {
             lower = bord + 1;
             upper = sz / 2;
+            offset = 0;
+            fix_size = 0;
         }
         else
         {
             lower = sz / 2;
             upper = sz - bord - 1;
-        }
+            offset = (ind(0,0,(sz/2)) - ind(0,0,(sz/2-4)));
+            fix_size = ind(0,0,(sz/2));
+        }  
 
-        const int width = upper - lower;
+        printf("lower = [%d] - upper = [%d] - offset = %d - fix_size = %d - device = %d", lower, upper, offset, fix_size, gpu);
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
         dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
@@ -137,7 +143,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         // Executar o kernel no dispositivo da iteração
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
                                                          dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
-                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
+                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper, offset, fix_size);
         
     }
 
@@ -180,6 +186,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_extra = msize_vol + 2 * sx*sy * sizeof(float); // 2 extra plans for wave fields
     const size_t msize_vol_half = msize_vol / 2;
+    const size_t size_half = ind(sx-1, sy-1, (sz/2 + 4)) - ind(0,0,(sz/2));
     const int size_space = (ind(0, 0 , sz/2) - ind(0, 0, (sz/2 - 4))) * sizeof(float);
     const int size_bord = ind(0, 0, (sz / 2));
     const int size_lower = ind(0,0,0);
@@ -192,11 +199,11 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, float* pc, float* q
     {
         CUDA_CALL(cudaSetDevice(device));
 
-        CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_pp[1] + size_gpu0, dev_pp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[0] + size_bord, dev_pp[1] + size_swap_gpu0, size_half * sizeof(float), cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_pp[1], dev_pp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
 
-        CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_bord, size_space, cudaMemcpyDeviceToDevice));
-        CUDA_CALL(cudaMemcpy(dev_qp[1] + size_gpu0, dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[0] + size_bord, dev_qp[1] + size_swap_gpu0, size_half * sizeof(float), cudaMemcpyDeviceToDevice));
+        CUDA_CALL(cudaMemcpy(dev_qp[1], dev_qp[0] + size_gpu0, size_space, cudaMemcpyDeviceToDevice));
         CUDA_CALL(cudaDeviceSynchronize()); 
     }
 }

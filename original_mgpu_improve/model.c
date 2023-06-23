@@ -89,7 +89,7 @@ double walltime=0.0;
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
-    DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+    DRIVER_InsertSource(sx, sy, sz, src, iSource, pc, qc, pp, qp);
 
     const double t0=wtime();
     
@@ -102,7 +102,6 @@ for (int it=1; it<=st; it++) {
     if (tSim >= tOut) {
       DRIVER_Update_pointers(sx,sy,sz,pc);
       DumpSliceFile(sx,sy,sz,pc,sPtr);
-    //  CUDA_prefetch_pc(sx,sy,sz,pc);
 
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
