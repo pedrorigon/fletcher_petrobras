@@ -33,6 +33,10 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[0].cpu_end_pointer = ind(0,0,(sz/2));
    gpu_map[0].gpu_size_gpu = (sx*sy*(sz/2 + 4)) * sizeof(float);
    gpu_map[0].cpu_offset = 0;
+   gpu_map[0].cpu_z_start_compute = 0;
+   gpu_map[0].cpu_z_end_compute = sz/2;
+   gpu_map[0].cpu_z_start_read = 0;
+   gpu_map[0].cpu_z_end_read = sz/2 + 4;
 
    // GPU 1 - Important Variables
    gpu_map[1].gpu_upper_x = 0;
@@ -44,21 +48,25 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[1].gpu_size_bord = sx*sy*(4)*sizeof(float);
    gpu_map[1].gpu_payload = sx*sy*(sz/2)*sizeof(float);
    gpu_map[1].gpu_start_pointer = ind(0,0,4);
-   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/2+4));
+   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/2 + 4));
    gpu_map[1].cpu_start_pointer = ind(0,0,(sz/2));
    gpu_map[1].cpu_end_pointer = ind(0,0,(sz));
    gpu_map[1].gpu_size_gpu = (sx*sy*(sz/2 + 4)) * sizeof(float);
    gpu_map[1].cpu_offset = ind(0,0,(sz/2 - 4));
+   gpu_map[1].cpu_z_start_compute = sz/2;
+   gpu_map[1].cpu_z_end_compute = sz;
+   gpu_map[1].cpu_z_start_read = sz/2 - 4;
+   gpu_map[1].cpu_z_end_read = sz;
 
-   printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
-   , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].gpu_payload,
-   gpu_map[0].gpu_start_pointer, gpu_map[0].gpu_end_pointer);
+   printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
+   , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].cpu_z_start_compute, 
+   gpu_map[0].cpu_z_end_compute, gpu_map[0].cpu_z_start_read, gpu_map[0].cpu_z_end_read);
 
    printf("\n\n");
 
-   printf("GPU 1 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
-   , gpu_map[1].gpu_upper_x, gpu_map[1].gpu_upper_y, gpu_map[1].gpu_upper_z, gpu_map[1].gpu_lower_x, gpu_map[1].gpu_lower_y, gpu_map[1].gpu_lower_z, gpu_map[1].gpu_size_bord, gpu_map[1].gpu_payload,
-   gpu_map[1].gpu_start_pointer, gpu_map[1].gpu_end_pointer);
+   printf("GPU 1 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
+   , gpu_map[1].gpu_upper_x, gpu_map[1].gpu_upper_y, gpu_map[1].gpu_upper_z, gpu_map[1].gpu_lower_x, gpu_map[1].gpu_lower_y, gpu_map[1].gpu_lower_z, gpu_map[1].gpu_size_bord, gpu_map[1].cpu_z_start_compute, 
+   gpu_map[1].cpu_z_end_compute, gpu_map[1].cpu_z_start_read, gpu_map[1].cpu_z_end_read);
    
    extern float* dev_ch1dxx[GPU_NUMBER];
    extern float* dev_ch1dyy[GPU_NUMBER];
