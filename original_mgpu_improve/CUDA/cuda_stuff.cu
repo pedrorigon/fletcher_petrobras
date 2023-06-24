@@ -19,8 +19,8 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    extern Gpu gpu_map[GPU_NUMBER];
 
    // GPU 0 - Important Variables
-   gpu_map[0].gpu_upper_x = sx;
-   gpu_map[0].gpu_upper_y = sy;
+   gpu_map[0].gpu_upper_x = 0;
+   gpu_map[0].gpu_upper_y = 0;
    gpu_map[0].gpu_upper_z = sz/2;
    gpu_map[0].gpu_lower_x = 0;
    gpu_map[0].gpu_lower_y = 0;
@@ -49,6 +49,16 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[1].cpu_end_pointer = ind(0,0,(sz));
    gpu_map[1].gpu_size_gpu = (sx*sy*(sz/2 + 4)) * sizeof(float);
    gpu_map[1].cpu_offset = ind(0,0,(sz/2 - 4));
+
+   printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
+   , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].gpu_payload,
+   gpu_map[0].gpu_start_pointer, gpu_map[0].cpu_start_pointer);
+
+   printf("\n\n");
+
+   printf("GPU 1 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
+   , gpu_map[1].gpu_upper_x, gpu_map[1].gpu_upper_y, gpu_map[1].gpu_upper_z, gpu_map[1].gpu_lower_x, gpu_map[1].gpu_lower_y, gpu_map[1].gpu_lower_z, gpu_map[1].gpu_size_bord, gpu_map[1].gpu_payload,
+   gpu_map[1].gpu_start_pointer, gpu_map[1].cpu_start_pointer);
    
    extern float* dev_ch1dxx[GPU_NUMBER];
    extern float* dev_ch1dyy[GPU_NUMBER];
