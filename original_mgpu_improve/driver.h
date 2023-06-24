@@ -23,6 +23,11 @@ typedef struct {
       size_t cpu_end_pointer;
       size_t gpu_size_gpu;
       size_t cpu_offset;
+      size_t cpu_z_start_compute;
+      size_t cpu_z_end_compute;
+      size_t cpu_z_start_read;
+      size_t cpu_z_end_read;
+
 
    } Gpu;
 
