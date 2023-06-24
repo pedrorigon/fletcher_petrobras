@@ -52,13 +52,13 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
 
    printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
    , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].gpu_payload,
-   gpu_map[0].gpu_start_pointer, gpu_map[0].cpu_start_pointer);
+   gpu_map[0].gpu_start_pointer, gpu_map[0].cpu_end_pointer);
 
    printf("\n\n");
 
    printf("GPU 1 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite = [%d] \nPointerStart = [%d] \nPointerEnd = [%d]\n"
    , gpu_map[1].gpu_upper_x, gpu_map[1].gpu_upper_y, gpu_map[1].gpu_upper_z, gpu_map[1].gpu_lower_x, gpu_map[1].gpu_lower_y, gpu_map[1].gpu_lower_z, gpu_map[1].gpu_size_bord, gpu_map[1].gpu_payload,
-   gpu_map[1].gpu_start_pointer, gpu_map[1].cpu_start_pointer);
+   gpu_map[1].gpu_start_pointer, gpu_map[1].cpu_end_pointer);
    
    extern float* dev_ch1dxx[GPU_NUMBER];
    extern float* dev_ch1dyy[GPU_NUMBER];
