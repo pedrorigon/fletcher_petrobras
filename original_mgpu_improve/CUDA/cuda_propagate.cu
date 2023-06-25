@@ -115,7 +115,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
-        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
 
         if (gpu == 0)
         {
