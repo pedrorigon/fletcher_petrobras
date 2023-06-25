@@ -38,10 +38,8 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
             fix_position = gpu_map[0].cpu_end_pointer;
             offset = gpu_map[1].gpu_start_pointer;
             teste = iSource - fix_position + offset;
-            printf("Sou a GPU %d e tenho iSource = %d\n", gpu, teste);
           }else{
             teste = iSource - fix_position + offset;
-            printf("Sou a GPU %d e tenho iSource = %d\n", gpu, teste);
           }
           dim3 threadsPerBlock(BSIZE_X, 1);
           dim3 numBlocks(1,1);

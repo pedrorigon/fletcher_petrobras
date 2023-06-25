@@ -58,7 +58,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[1].cpu_z_start_read = sz/2 - 5;
    gpu_map[1].cpu_z_end_read = sz;
 
-   printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
+  /* printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
    , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].cpu_z_start_compute, 
    gpu_map[0].cpu_z_end_compute, gpu_map[0].cpu_z_start_read, gpu_map[0].cpu_z_end_read);
 
@@ -67,7 +67,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    printf("GPU 1 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
    , gpu_map[1].gpu_upper_x, gpu_map[1].gpu_upper_y, gpu_map[1].gpu_upper_z, gpu_map[1].gpu_lower_x, gpu_map[1].gpu_lower_y, gpu_map[1].gpu_lower_z, gpu_map[1].gpu_size_bord, gpu_map[1].cpu_z_start_compute, 
    gpu_map[1].cpu_z_end_compute, gpu_map[1].cpu_z_start_read, gpu_map[1].cpu_z_end_read);
-   
+  */ 
    extern float* dev_ch1dxx[GPU_NUMBER];
    extern float* dev_ch1dyy[GPU_NUMBER];
    extern float* dev_ch1dzz[GPU_NUMBER];
@@ -100,7 +100,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t msize_vol = sxsysz * sizeof(float);
    const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
 
-   printf("GPU 0 - Teste Ponteiros\n");
+   /*printf("GPU 0 - Teste Ponteiros\n");
    printf("dev_var[0](endereco inicial) = [%d] tamanho do Array = [%d]\n", &dev_ch1dxx[0], gpu_map[0].gpu_size_gpu / sizeof(float));
    printf("cpu_var(endereco inicial) = [%d] offset de onde comeca a ser enviado para a GPU 0 = [0]\n", &ch1dxx, gpu_map[1].cpu_offset);
 
@@ -109,7 +109,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    printf("GPU 1 - Teste Ponteiros\n");
    printf("dev_var[1](endereco inicial) = [%d] tamanho do Array = [%d]\n", &dev_ch1dxx[1], gpu_map[1].gpu_size_gpu / sizeof(float));
    printf("cpu_var(endereco inicial) = [%d] offset de onde comeca a ser enviado para a GPU 1 = [%d]\n", &ch1dxx, gpu_map[1].cpu_offset);
-
+*/
    // Cópia dos dados para cada GPU
    for (int device = 0; device < deviceCount; device++)
    {
