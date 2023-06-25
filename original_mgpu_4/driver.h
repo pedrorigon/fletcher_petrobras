@@ -27,6 +27,7 @@ typedef struct {
       size_t cpu_z_end_compute;
       size_t cpu_z_start_read;
       size_t cpu_z_end_read;
+      size_t center_position;
 
 
    } Gpu;

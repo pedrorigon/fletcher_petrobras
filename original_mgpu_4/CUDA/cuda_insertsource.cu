@@ -8,8 +8,8 @@ __global__ void kernel_InsertSource(const float val, const int iSource,
   const int ix=blockIdx.x * blockDim.x + threadIdx.x;
   if (ix==0)
   {
-    qp[iSource - fix_position + offset]+=val;
-    qc[iSource - fix_position + offset]+=val;
+    qp[offset]+=val;
+    qc[offset]+=val;
   }
 }
 
@@ -23,6 +23,7 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
   extern float* dev_qc[GPU_NUMBER];
 
   int num_gpus;
+  int gpu_mid;
   int teste;
   int offset = 0;
   int fix_position = 0;
@@ -31,19 +32,21 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
-        CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
         {
-          if(gpu != 0){
-            fix_position = gpu_map[0].cpu_end_pointer;
-            offset = gpu_map[1].gpu_start_pointer;
-            teste = iSource - fix_position + offset;
-          }else{
-            teste = iSource - fix_position + offset;
+          gpu_mid = num_gpus / 2;
+          if (gpu == gpu_mid){
+            offset = gpu_map[2].center_position;
+          } else if (gpu == (gpu_mid - 1)){
+            offset = gpu_map[1].center_position;
+          } else{
+            offset = -1;
           }
-          dim3 threadsPerBlock(BSIZE_X, 1);
-          dim3 numBlocks(1,1);
-          kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, dev_pc[gpu], dev_qc[gpu], fix_position, offset);
+          if(offset != -1){
+            dim3 threadsPerBlock(BSIZE_X, 1);
+            dim3 numBlocks(1,1);
+            kernel_InsertSource<<<numBlocks, threadsPerBlock>>> (val, iSource, dev_pc[gpu], dev_qc[gpu], fix_position, offset);
+          }
         }
     }
     CUDA_CALL(cudaGetLastError());

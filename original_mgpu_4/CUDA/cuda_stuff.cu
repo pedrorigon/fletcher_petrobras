@@ -57,6 +57,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[1].cpu_z_end_compute = sz/2;
    gpu_map[1].cpu_z_start_read = sz/4 - 5;
    gpu_map[1].cpu_z_end_read = sz/4 + 10;
+   gpu_map[2].center_position = ind(sx/2,sy/2,(sz/4 + 5));
 
    // GPU 2 - Important Variables
    gpu_map[2].gpu_upper_x = 0;
@@ -77,6 +78,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[2].cpu_z_end_compute = 3*sz/4;
    gpu_map[2].cpu_z_start_read = sz/2 - 5;
    gpu_map[2].cpu_z_end_read = (3*sz/4) + 5;
+   gpu_map[2].center_position = ind(sx/2,sy/2,5);
 
    // GPU 2 - Important Variables
    gpu_map[3].gpu_upper_x = 0;
