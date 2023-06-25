@@ -142,13 +142,13 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         kernel_Propagate<<<numBlocks, threadsPerBlock>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
                                                          dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
                                                          dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
-        
+        CUDA_CALL(cudaDeviceSynchronize()); 
     }
 
     CUDA_CALL(cudaGetLastError());
     CUDA_SwapBord(sx, sy, sz);
     CUDA_CALL(cudaDeviceSynchronize()); 
-    
+
     for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
