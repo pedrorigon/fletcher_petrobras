@@ -148,6 +148,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaGetLastError());
     CUDA_SwapBord(sx, sy, sz);
     CUDA_CALL(cudaDeviceSynchronize()); 
+    
     for (int gpu = 0; gpu < num_gpus; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
