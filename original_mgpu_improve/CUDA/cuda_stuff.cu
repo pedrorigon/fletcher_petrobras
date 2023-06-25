@@ -25,37 +25,37 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    gpu_map[0].gpu_lower_x = 0;
    gpu_map[0].gpu_lower_y = 0;
    gpu_map[0].gpu_lower_z = 0;
-   gpu_map[0].gpu_size_bord = sx*sy*(4)*sizeof(float);
+   gpu_map[0].gpu_size_bord = sx*sy*(5)*sizeof(float);
    gpu_map[0].gpu_payload = sx*sy*(sz/2)*sizeof(float);
    gpu_map[0].gpu_start_pointer = 0;
    gpu_map[0].gpu_end_pointer = ind(0,0,(sz/2));
    gpu_map[0].cpu_start_pointer = 0;
    gpu_map[0].cpu_end_pointer = ind(0,0,(sz/2));
-   gpu_map[0].gpu_size_gpu = (sx*sy*(sz/2 + 4)) * sizeof(float);
+   gpu_map[0].gpu_size_gpu = (sx*sy*(sz/2 + 5)) * sizeof(float);
    gpu_map[0].cpu_offset = 0;
    gpu_map[0].cpu_z_start_compute = 0;
    gpu_map[0].cpu_z_end_compute = sz/2;
    gpu_map[0].cpu_z_start_read = 0;
-   gpu_map[0].cpu_z_end_read = sz/2 + 4;
+   gpu_map[0].cpu_z_end_read = sz/2 + 5;
 
    // GPU 1 - Important Variables
    gpu_map[1].gpu_upper_x = 0;
    gpu_map[1].gpu_upper_y = 0;
-   gpu_map[1].gpu_upper_z = sz/2 + 4;
+   gpu_map[1].gpu_upper_z = sz/2 + 5;
    gpu_map[1].gpu_lower_x = 0;
    gpu_map[1].gpu_lower_y = 0;
-   gpu_map[1].gpu_lower_z = 4;
-   gpu_map[1].gpu_size_bord = sx*sy*(4)*sizeof(float);
+   gpu_map[1].gpu_lower_z = 5;
+   gpu_map[1].gpu_size_bord = sx*sy*(5)*sizeof(float);
    gpu_map[1].gpu_payload = sx*sy*(sz/2)*sizeof(float);
-   gpu_map[1].gpu_start_pointer = ind(0,0,4);
-   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/2 + 4));
+   gpu_map[1].gpu_start_pointer = ind(0,0,5);
+   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/2 + 5));
    gpu_map[1].cpu_start_pointer = ind(0,0,(sz/2));
    gpu_map[1].cpu_end_pointer = ind(0,0,(sz));
-   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/2 + 4)) * sizeof(float);
-   gpu_map[1].cpu_offset = ind(0,0,(sz/2 - 4));
+   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/2 + 5)) * sizeof(float);
+   gpu_map[1].cpu_offset = ind(0,0,(sz/2 - 5));
    gpu_map[1].cpu_z_start_compute = sz/2;
    gpu_map[1].cpu_z_end_compute = sz;
-   gpu_map[1].cpu_z_start_read = sz/2 - 4;
+   gpu_map[1].cpu_z_start_read = sz/2 - 5;
    gpu_map[1].cpu_z_end_read = sz;
 
    printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
@@ -259,6 +259,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_half = msize_vol / 2;
+
 
     for (int device = 0; device < deviceCount; device++)
     {
