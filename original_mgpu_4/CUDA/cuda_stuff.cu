@@ -21,42 +21,82 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    // GPU 0 - Important Variables
    gpu_map[0].gpu_upper_x = 0;
    gpu_map[0].gpu_upper_y = 0;
-   gpu_map[0].gpu_upper_z = sz/2;
+   gpu_map[0].gpu_upper_z = sz/4;
    gpu_map[0].gpu_lower_x = 0;
    gpu_map[0].gpu_lower_y = 0;
    gpu_map[0].gpu_lower_z = 0;
    gpu_map[0].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[0].gpu_payload = sx*sy*(sz/2)*sizeof(float);
+   gpu_map[0].gpu_payload = sx*sy*(sz/4)*sizeof(float);
    gpu_map[0].gpu_start_pointer = 0;
-   gpu_map[0].gpu_end_pointer = ind(0,0,(sz/2));
+   gpu_map[0].gpu_end_pointer = ind(0,0,(sz/4));
    gpu_map[0].cpu_start_pointer = 0;
-   gpu_map[0].cpu_end_pointer = ind(0,0,(sz/2));
-   gpu_map[0].gpu_size_gpu = (sx*sy*(sz/2 + 5)) * sizeof(float);
+   gpu_map[0].cpu_end_pointer = ind(0,0,(sz/4));
+   gpu_map[0].gpu_size_gpu = (sx*sy*(sz/4 + 5)) * sizeof(float);
    gpu_map[0].cpu_offset = 0;
    gpu_map[0].cpu_z_start_compute = 0;
-   gpu_map[0].cpu_z_end_compute = sz/2;
+   gpu_map[0].cpu_z_end_compute = sz/4;
    gpu_map[0].cpu_z_start_read = 0;
-   gpu_map[0].cpu_z_end_read = sz/2 + 5;
+   gpu_map[0].cpu_z_end_read = sz/4 + 5;
 
    // GPU 1 - Important Variables
    gpu_map[1].gpu_upper_x = 0;
    gpu_map[1].gpu_upper_y = 0;
-   gpu_map[1].gpu_upper_z = sz/2 + 5;
+   gpu_map[1].gpu_upper_z = sz/4 + 5;
    gpu_map[1].gpu_lower_x = 0;
    gpu_map[1].gpu_lower_y = 0;
    gpu_map[1].gpu_lower_z = 5;
    gpu_map[1].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[1].gpu_payload = sx*sy*(sz/2)*sizeof(float);
+   gpu_map[1].gpu_payload = sx*sy*(sz/4)*sizeof(float);
    gpu_map[1].gpu_start_pointer = ind(0,0,5);
-   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/2 + 5));
-   gpu_map[1].cpu_start_pointer = ind(0,0,(sz/2));
-   gpu_map[1].cpu_end_pointer = ind(0,0,(sz));
-   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/2 + 5)) * sizeof(float);
-   gpu_map[1].cpu_offset = ind(0,0,(sz/2 - 5));
-   gpu_map[1].cpu_z_start_compute = sz/2;
-   gpu_map[1].cpu_z_end_compute = sz;
-   gpu_map[1].cpu_z_start_read = sz/2 - 5;
-   gpu_map[1].cpu_z_end_read = sz;
+   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/4 + 5));
+   gpu_map[1].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[1].cpu_end_pointer = ind(0,0,(sz/2));
+   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/4 + 10)) * sizeof(float);
+   gpu_map[1].cpu_offset = ind(0,0,(sz/4 - 5));
+   gpu_map[1].cpu_z_start_compute = sz/4;
+   gpu_map[1].cpu_z_end_compute = sz/2;
+   gpu_map[1].cpu_z_start_read = sz/4 - 5;
+   gpu_map[1].cpu_z_end_read = sz/4 + 10;
+
+   // GPU 2 - Important Variables
+   gpu_map[2].gpu_upper_x = 0;
+   gpu_map[2].gpu_upper_y = 0;
+   gpu_map[2].gpu_upper_z = (sz/4) + 5;
+   gpu_map[2].gpu_lower_x = 0;
+   gpu_map[2].gpu_lower_y = 0;
+   gpu_map[2].gpu_lower_z = 5;
+   gpu_map[2].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[2].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[2].gpu_start_pointer = ind(0,0,5);
+   gpu_map[2].gpu_end_pointer = ind(0,0,(sz/4 + 5));
+   gpu_map[2].cpu_start_pointer = ind(0,0,(sz/2));
+   gpu_map[2].cpu_end_pointer = ind(0,0,(3*sz/4));
+   gpu_map[2].gpu_size_gpu = (sx*sy*(sz/4 + 10)) * sizeof(float);
+   gpu_map[2].cpu_offset = ind(0,0,(sz/2 - 5));
+   gpu_map[2].cpu_z_start_compute = sz/2;
+   gpu_map[2].cpu_z_end_compute = 3*sz/4;
+   gpu_map[2].cpu_z_start_read = sz/2 - 5;
+   gpu_map[2].cpu_z_end_read = (3*sz/4) + 5;
+
+   // GPU 2 - Important Variables
+   gpu_map[3].gpu_upper_x = 0;
+   gpu_map[3].gpu_upper_y = 0;
+   gpu_map[3].gpu_upper_z = sz/4 + 5;
+   gpu_map[3].gpu_lower_x = 0;
+   gpu_map[3].gpu_lower_y = 0;
+   gpu_map[3].gpu_lower_z = 5;
+   gpu_map[3].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[3].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[3].gpu_start_pointer = ind(0,0,5);
+   gpu_map[3].gpu_end_pointer = ind(0,0,(sz/4 + 5));
+   gpu_map[3].cpu_start_pointer = ind(0,0,(3*sz/4));
+   gpu_map[3].cpu_end_pointer = ind(0,0,(sz));
+   gpu_map[3].gpu_size_gpu = (sx*sy*(sz/4 + 5)) * sizeof(float);
+   gpu_map[3].cpu_offset = ind(0,0,(3*sz/4 - 5));
+   gpu_map[3].cpu_z_start_compute = sz/4;
+   gpu_map[3].cpu_z_end_compute = sz/2;
+   gpu_map[3].cpu_z_start_read = sz/2 - 5;
+   gpu_map[3].cpu_z_end_read = (3*sz/4) + 5;
 
   /* printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
    , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].cpu_z_start_compute, 
@@ -149,37 +189,37 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
          CUDA_CALL(cudaMemset(dev_qp[0], 0, gpu_map[0].gpu_size_gpu));
          CUDA_CALL(cudaMalloc(&dev_qc[0], gpu_map[0].gpu_size_gpu));
          CUDA_CALL(cudaMemset(dev_qc[0], 0, gpu_map[0].gpu_size_gpu));
-      }else{
-         CUDA_CALL(cudaMalloc(&dev_ch1dxx[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyy[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_ch1dzz[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxy[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_ch1dyz[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_ch1dxz[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_v2px[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_v2pz[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_v2sz[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_v2pn[1], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[1], ch1dxx + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[1], ch1dyy + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[1], ch1dzz + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[1], ch1dxy + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[1], ch1dyz + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxz[1], ch1dxz + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2px[1], v2px + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pz[1], v2pz + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2sz[1], v2sz + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_v2pn[1], v2pn + gpu_map[1].cpu_offset, gpu_map[1].gpu_size_gpu, cudaMemcpyHostToDevice));
+      }else{ 
+         CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_ch1dxy[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_ch1dyz[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_ch1dxz[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_v2px[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_v2pz[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_v2sz[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_v2pn[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[device], ch1dxx + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[device], ch1dyy + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[device], ch1dzz + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[device], ch1dxy + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[device], ch1dyz + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dxz[device], ch1dxz + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_v2px[device], v2px + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_v2pz[device], v2pz + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_v2sz[device], v2sz + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_v2pn[device], v2pn + gpu_map[device].cpu_offset, gpu_map[device].gpu_size_gpu, cudaMemcpyHostToDevice));
 
          // Wave field arrays with an extra plan
-         CUDA_CALL(cudaMalloc(&dev_pp[device], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMemset(dev_pp[device], 0, gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_pc[device], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMemset(dev_pc[device], 0, gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_qp[device], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMemset(dev_qp[device], 0, gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMalloc(&dev_qc[device], gpu_map[1].gpu_size_gpu));
-         CUDA_CALL(cudaMemset(dev_qc[device], 0, gpu_map[1].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_pp[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMemset(dev_pp[device], 0, gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_pc[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMemset(dev_pc[device], 0, gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_qp[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMemset(dev_qp[device], 0, gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMalloc(&dev_qc[device], gpu_map[device].gpu_size_gpu));
+         CUDA_CALL(cudaMemset(dev_qc[device], 0, gpu_map[device].gpu_size_gpu));
       }
 
       printf("GPU memory usage = %ld MiB\n", 15 * msize_vol / 1024 / 1024);
@@ -258,7 +298,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
     CUDA_CALL(cudaGetDeviceCount(&deviceCount));
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
-    const size_t msize_vol_half = msize_vol / 2;
+    const size_t msize_vol_half = msize_vol / 4;
 
 
     for (int device = 0; device < deviceCount; device++)
@@ -274,7 +314,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
         else
         {
             // Copiar a segunda metade do array dev_pc[device] --> segunda metade do array pc
-            CUDA_CALL(cudaMemcpy(pc + (msize_vol_half / sizeof(float)), dev_pc[device] + (gpu_map[1].gpu_start_pointer), msize_vol_half, cudaMemcpyDeviceToHost));
+            CUDA_CALL(cudaMemcpy(pc + ((device * msize_vol_half) / sizeof(float)), dev_pc[device] + (gpu_map[device].gpu_start_pointer), msize_vol_half, cudaMemcpyDeviceToHost));
 
         }
         CUDA_CALL(cudaDeviceSynchronize()); 
