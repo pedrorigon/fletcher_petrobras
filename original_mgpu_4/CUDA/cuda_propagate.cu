@@ -121,15 +121,19 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
            // lower = bord + 1;
            // upper = sz / 2;
             lower = bord + 1;
-            upper = gpu_map[0].gpu_upper_z;
+            //upper = gpu_map[0].gpu_upper_z;
+            upper = sz / 4;
         }
-        else
+        else if(gpu == (num_gpus - 1))
         {
            // lower = sz / 2;
           //  upper = sz - bord - 1;
           //lower = gpu_map[1].gpu_lower_z;
           lower = bord + 1;
-          upper = sz/2 - 1;
+          upper = sz/4 - 1;
+        } else{
+          lower = bord + 1;
+          upper = sz/4 + 5;
         }
 
         const int width = upper - lower;
