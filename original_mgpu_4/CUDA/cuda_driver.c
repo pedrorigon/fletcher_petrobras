@@ -8,6 +8,8 @@
 #include"cuda_insertsource.h"
 #define GPU_NUMBER 2
 
+
+Gpu gpu_map[GPU_NUMBER];
 float* dev_ch1dxx[GPU_NUMBER];
 float* dev_ch1dyy[GPU_NUMBER];
 float* dev_ch1dzz[GPU_NUMBER];
