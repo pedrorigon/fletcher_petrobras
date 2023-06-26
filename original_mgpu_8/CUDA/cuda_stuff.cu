@@ -388,7 +388,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
     CUDA_CALL(cudaGetDeviceCount(&deviceCount));
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
-    const size_t msize_vol_half = msize_vol / 4;
+    const size_t msize_vol_half = msize_vol / 8;
 
 
     for (int device = 0; device < deviceCount; device++)
