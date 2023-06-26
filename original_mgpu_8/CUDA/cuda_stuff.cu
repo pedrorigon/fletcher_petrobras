@@ -21,84 +21,170 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    // GPU 0 - Important Variables
    gpu_map[0].gpu_upper_x = 0;
    gpu_map[0].gpu_upper_y = 0;
-   gpu_map[0].gpu_upper_z = sz/4;
+   gpu_map[0].gpu_upper_z = sz/8;
    gpu_map[0].gpu_lower_x = 0;
    gpu_map[0].gpu_lower_y = 0;
    gpu_map[0].gpu_lower_z = 0;
    gpu_map[0].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[0].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[0].gpu_payload = sx*sy*(sz/8)*sizeof(float);
    gpu_map[0].gpu_start_pointer = 0;
-   gpu_map[0].gpu_end_pointer = ind(0,0,(sz/4));
+   gpu_map[0].gpu_end_pointer = ind(0,0,(sz/8));
    gpu_map[0].cpu_start_pointer = 0;
    gpu_map[0].cpu_end_pointer = ind(0,0,(sz/4));
    gpu_map[0].gpu_size_gpu = (sx*sy*(sz/4 + 5)) * sizeof(float);
    gpu_map[0].cpu_offset = 0;
    gpu_map[0].cpu_z_start_compute = 0;
-   gpu_map[0].cpu_z_end_compute = sz/4;
+   gpu_map[0].cpu_z_end_compute = sz/8;
    gpu_map[0].cpu_z_start_read = 0;
-   gpu_map[0].cpu_z_end_read = sz/4 + 5;
+   gpu_map[0].cpu_z_end_read = sz/8 + 5;
 
    // GPU 1 - Important Variables
    gpu_map[1].gpu_upper_x = 0;
    gpu_map[1].gpu_upper_y = 0;
-   gpu_map[1].gpu_upper_z = sz/4 + 5;
+   gpu_map[1].gpu_upper_z = sz/8 + 5;
    gpu_map[1].gpu_lower_x = 0;
    gpu_map[1].gpu_lower_y = 0;
    gpu_map[1].gpu_lower_z = 5;
    gpu_map[1].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[1].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[1].gpu_payload = sx*sy*(sz/8)*sizeof(float);
    gpu_map[1].gpu_start_pointer = ind(0,0,5);
-   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/4 + 5));
-   gpu_map[1].cpu_start_pointer = ind(0,0,(sz/4));
-   gpu_map[1].cpu_end_pointer = ind(0,0,(sz/2));
-   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/4 + 10)) * sizeof(float);
-   gpu_map[1].cpu_offset = ind(0,0,(sz/4 - 5));
-   gpu_map[1].cpu_z_start_compute = sz/4;
-   gpu_map[1].cpu_z_end_compute = sz/2;
-   gpu_map[1].cpu_z_start_read = sz/4 - 5;
-   gpu_map[1].cpu_z_end_read = sz/4 + 10;
+   gpu_map[1].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[1].cpu_start_pointer = ind(0,0,(sz/8));
+   gpu_map[1].cpu_end_pointer = ind(0,0,(sz/8));
+   gpu_map[1].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[1].cpu_offset = ind(0,0,(sz/8 - 5));
+   gpu_map[1].cpu_z_start_compute = sz/8;
+   gpu_map[1].cpu_z_end_compute = sz/4;
+   gpu_map[1].cpu_z_start_read = sz/8 - 5;
+   gpu_map[1].cpu_z_end_read = sz/8 + 10;
    gpu_map[1].center_position = ind(sx/2,sy/2,(sz/4 + 5));
 
    // GPU 2 - Important Variables
    gpu_map[2].gpu_upper_x = 0;
    gpu_map[2].gpu_upper_y = 0;
-   gpu_map[2].gpu_upper_z = (sz/4) + 5;
+   gpu_map[2].gpu_upper_z = (sz/8) + 5;
    gpu_map[2].gpu_lower_x = 0;
    gpu_map[2].gpu_lower_y = 0;
    gpu_map[2].gpu_lower_z = 5;
    gpu_map[2].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[2].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[2].gpu_payload = sx*sy*(sz/8)*sizeof(float);
    gpu_map[2].gpu_start_pointer = ind(0,0,5);
-   gpu_map[2].gpu_end_pointer = ind(0,0,(sz/4 + 5));
-   gpu_map[2].cpu_start_pointer = ind(0,0,(sz/2));
-   gpu_map[2].cpu_end_pointer = ind(0,0,(3*sz/4));
-   gpu_map[2].gpu_size_gpu = (sx*sy*(sz/4 + 10)) * sizeof(float);
-   gpu_map[2].cpu_offset = ind(0,0,(sz/2 - 5));
-   gpu_map[2].cpu_z_start_compute = sz/2;
-   gpu_map[2].cpu_z_end_compute = 3*sz/4;
-   gpu_map[2].cpu_z_start_read = sz/2 - 5;
-   gpu_map[2].cpu_z_end_read = (3*sz/4) + 5;
+   gpu_map[2].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[2].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[2].cpu_end_pointer = ind(0,0,(3*sz/8));
+   gpu_map[2].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[2].cpu_offset = ind(0,0,(sz/4 - 5));
+   gpu_map[2].cpu_z_start_compute = sz/4;
+   gpu_map[2].cpu_z_end_compute = 3*sz/8;
+   gpu_map[2].cpu_z_start_read = sz/4 - 5;
+   gpu_map[2].cpu_z_end_read = (3*sz/8) + 5;
    gpu_map[2].center_position = ind(sx/2,sy/2,5);
 
-   // GPU 2 - Important Variables
+   // GPU 3 - Important Variables
    gpu_map[3].gpu_upper_x = 0;
    gpu_map[3].gpu_upper_y = 0;
-   gpu_map[3].gpu_upper_z = sz/4 + 5;
+   gpu_map[3].gpu_upper_z = (sz/8) + 5;
    gpu_map[3].gpu_lower_x = 0;
    gpu_map[3].gpu_lower_y = 0;
    gpu_map[3].gpu_lower_z = 5;
    gpu_map[3].gpu_size_bord = sx*sy*(5)*sizeof(float);
-   gpu_map[3].gpu_payload = sx*sy*(sz/4)*sizeof(float);
+   gpu_map[3].gpu_payload = sx*sy*(sz/8)*sizeof(float);
    gpu_map[3].gpu_start_pointer = ind(0,0,5);
-   gpu_map[3].gpu_end_pointer = ind(0,0,(sz/4 + 5));
-   gpu_map[3].cpu_start_pointer = ind(0,0,(3*sz/4));
-   gpu_map[3].cpu_end_pointer = ind(0,0,(sz));
-   gpu_map[3].gpu_size_gpu = (sx*sy*(sz/4 + 5)) * sizeof(float);
-   gpu_map[3].cpu_offset = ind(0,0,(3*sz/4 - 5));
-   gpu_map[3].cpu_z_start_compute = sz/4;
-   gpu_map[3].cpu_z_end_compute = sz/2;
-   gpu_map[3].cpu_z_start_read = sz/2 - 5;
-   gpu_map[3].cpu_z_end_read = (3*sz/4) + 5;
+   gpu_map[3].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[3].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[3].cpu_end_pointer = ind(0,0,(4*sz/8));
+   gpu_map[3].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[3].cpu_offset = ind(0,0,((3*(sz/8)) - 5));
+   gpu_map[3].cpu_z_start_compute = sz/2;
+   gpu_map[3].cpu_z_end_compute = 4*sz/8;
+   gpu_map[3].cpu_z_start_read = sz/4 - 5;
+   gpu_map[3].cpu_z_end_read = (3*sz/8) + 5;
+   gpu_map[3].center_position = ind(sx/2,sy/2,(sz/8 + 5));
+
+// GPU 4 - Important Variables
+   gpu_map[4].gpu_upper_x = 0;
+   gpu_map[4].gpu_upper_y = 0;
+   gpu_map[4].gpu_upper_z = (sz/8) + 5;
+   gpu_map[4].gpu_lower_x = 0;
+   gpu_map[4].gpu_lower_y = 0;
+   gpu_map[4].gpu_lower_z = 5;
+   gpu_map[4].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[4].gpu_payload = sx*sy*(sz/8)*sizeof(float);
+   gpu_map[4].gpu_start_pointer = ind(0,0,5);
+   gpu_map[4].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[4].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[4].cpu_end_pointer = ind(0,0,(4*sz/8));
+   gpu_map[4].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[4].cpu_offset = ind(0,0,((4*(sz/8)) - 5));
+   gpu_map[4].cpu_z_start_compute = sz/2;
+   gpu_map[4].cpu_z_end_compute = 4*sz/8;
+   gpu_map[4].cpu_z_start_read = sz/4 - 5;
+   gpu_map[4].cpu_z_end_read = (3*sz/8) + 5;
+   gpu_map[4].center_position = ind(sx/2,sy/2,5);
+
+   // GPU 5 - Important Variables
+   gpu_map[5].gpu_upper_x = 0;
+   gpu_map[5].gpu_upper_y = 0;
+   gpu_map[5].gpu_upper_z = (sz/8) + 5;
+   gpu_map[5].gpu_lower_x = 0;
+   gpu_map[5].gpu_lower_y = 0;
+   gpu_map[5].gpu_lower_z = 5;
+   gpu_map[5].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[5].gpu_payload = sx*sy*(sz/8)*sizeof(float);
+   gpu_map[5].gpu_start_pointer = ind(0,0,5);
+   gpu_map[5].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[5].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[5].cpu_end_pointer = ind(0,0,(4*sz/8));
+   gpu_map[5].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[5].cpu_offset = ind(0,0,((5*(sz/8)) - 5));
+   gpu_map[5].cpu_z_start_compute = sz/2;
+   gpu_map[5].cpu_z_end_compute = 4*sz/8;
+   gpu_map[5].cpu_z_start_read = sz/4 - 5;
+   gpu_map[5].cpu_z_end_read = (3*sz/8) + 5;
+   gpu_map[5].center_position = ind(sx/2,sy/2,5);
+
+// GPU 6 - Important Variables
+   gpu_map[6].gpu_upper_x = 0;
+   gpu_map[6].gpu_upper_y = 0;
+   gpu_map[6].gpu_upper_z = (sz/8) + 5;
+   gpu_map[6].gpu_lower_x = 0;
+   gpu_map[6].gpu_lower_y = 0;
+   gpu_map[6].gpu_lower_z = 5;
+   gpu_map[6].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[6].gpu_payload = sx*sy*(sz/8)*sizeof(float);
+   gpu_map[6].gpu_start_pointer = ind(0,0,5);
+   gpu_map[6].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[6].cpu_start_pointer = ind(0,0,(sz/4));
+   gpu_map[6].cpu_end_pointer = ind(0,0,(4*sz/8));
+   gpu_map[6].gpu_size_gpu = (sx*sy*(sz/8 + 10)) * sizeof(float);
+   gpu_map[6].cpu_offset = ind(0,0,((6*(sz/8)) - 5));
+   gpu_map[6].cpu_z_start_compute = sz/2;
+   gpu_map[6].cpu_z_end_compute = 4*sz/8;
+   gpu_map[6].cpu_z_start_read = sz/4 - 5;
+   gpu_map[6].cpu_z_end_read = (3*sz/8) + 5;
+   gpu_map[6].center_position = ind(sx/2,sy/2,5);
+
+
+// GPU 7 - Important Variables
+   gpu_map[7].gpu_upper_x = 0;
+   gpu_map[7].gpu_upper_y = 0;
+   gpu_map[7].gpu_upper_z = sz/8 + 5;
+   gpu_map[7].gpu_lower_x = 0;
+   gpu_map[7].gpu_lower_y = 0;
+   gpu_map[7].gpu_lower_z = 5;
+   gpu_map[7].gpu_size_bord = sx*sy*(5)*sizeof(float);
+   gpu_map[7].gpu_payload = sx*sy*(sz/8)*sizeof(float);
+   gpu_map[7].gpu_start_pointer = ind(0,0,5);
+   gpu_map[7].gpu_end_pointer = ind(0,0,(sz/8 + 5));
+   gpu_map[7].cpu_start_pointer = ind(0,0,(3*sz/4));
+   gpu_map[7].cpu_end_pointer = ind(0,0,(sz));
+   gpu_map[7].gpu_size_gpu = (sx*sy*(sz/4 + 5)) * sizeof(float);
+   gpu_map[7].cpu_offset = ind(0,0,(7*sz/4 - 5));
+   gpu_map[7].cpu_z_start_compute = sz/4;
+   gpu_map[7].cpu_z_end_compute = sz/2;
+   gpu_map[7].cpu_z_start_read = sz/2 - 5;
+   gpu_map[7].cpu_z_end_read = (3*sz/4) + 5;
+
 
   /* printf("GPU 0 -> Upper (%d, %d, %d) \nLower (%d, %d, %d) \nSizeBord = [%d] \nSizeWrite_Start = (0, 0, %d) \nSizeWrite_End = (0, 0, %d) \nPointerStart_all = (0, 0, %d) \nPointerEnd_all = (0, 0, %d)\n"
    , gpu_map[0].gpu_upper_x, gpu_map[0].gpu_upper_y, gpu_map[0].gpu_upper_z, gpu_map[0].gpu_lower_x, gpu_map[0].gpu_lower_y, gpu_map[0].gpu_lower_z, gpu_map[0].gpu_size_bord, gpu_map[0].cpu_z_start_compute, 
@@ -191,7 +277,9 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
          CUDA_CALL(cudaMemset(dev_qp[0], 0, gpu_map[0].gpu_size_gpu));
          CUDA_CALL(cudaMalloc(&dev_qc[0], gpu_map[0].gpu_size_gpu));
          CUDA_CALL(cudaMemset(dev_qc[0], 0, gpu_map[0].gpu_size_gpu));
-      }else{  
+
+      }else
+      {  
          CUDA_CALL(cudaMalloc(&dev_ch1dxx[device], gpu_map[device].gpu_size_gpu));
          CUDA_CALL(cudaMalloc(&dev_ch1dyy[device], gpu_map[device].gpu_size_gpu));
          CUDA_CALL(cudaMalloc(&dev_ch1dzz[device], gpu_map[device].gpu_size_gpu));
