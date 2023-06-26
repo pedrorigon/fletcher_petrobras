@@ -122,7 +122,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
            // upper = sz / 2;
             lower = bord + 1;
             //upper = gpu_map[0].gpu_upper_z;
-            upper = sz / 4;
+            upper = sz / 8;
         }
         else if(gpu == (num_gpus - 1))
         {
@@ -130,10 +130,10 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
           //  upper = sz - bord - 1;
           //lower = gpu_map[1].gpu_lower_z;
           lower = bord + 1;
-          upper = sz/4 - 1;
+          upper = sz/8 - 1;
         } else{
           lower = bord + 1;
-          upper = sz/4 + 5;
+          upper = sz/8 + 5;
         }
 
         const int width = upper - lower;
@@ -180,9 +180,9 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     extern float* dev_pp[GPU_NUMBER];
     extern float* dev_qp[GPU_NUMBER];
     extern Gpu gpu_map[GPU_NUMBER];
-    const int size_gpu0 = ind(0,0,(sz/4 - 5));
+    const int size_gpu0 = ind(0,0,(sz/8 - 5));
     const int size_gpu1 = ind(0,0,(sz/4 + 5));
-    const int size_med = ind(0,0,(sz/4));
+    const int size_med = ind(0,0,(sz/8));
 
     CUDA_CALL(cudaMemcpy(dev_pp[0] + gpu_map[0].gpu_end_pointer, dev_pp[1] + gpu_map[1].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
     CUDA_CALL(cudaMemcpy(dev_pp[1], dev_pp[0] + size_gpu0, gpu_map[1].gpu_size_bord, cudaMemcpyDeviceToDevice));
@@ -201,4 +201,28 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
 
     CUDA_CALL(cudaMemcpy(dev_pp[3], dev_pp[2] + size_med, gpu_map[2].gpu_size_bord, cudaMemcpyDeviceToDevice));
     CUDA_CALL(cudaMemcpy(dev_qp[3], dev_qp[2] + size_med, gpu_map[2].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[3] + gpu_map[3].gpu_end_pointer, dev_pp[4] + gpu_map[4].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[3] + gpu_map[3].gpu_end_pointer, dev_qp[4] + gpu_map[4].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[4] + gpu_map[4].gpu_end_pointer, dev_pp[5] + gpu_map[5].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[4] + gpu_map[4].gpu_end_pointer, dev_qp[5] + gpu_map[5].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[4], dev_pp[3] + size_med, gpu_map[3].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[4], dev_qp[3] + size_med, gpu_map[3].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[5] + gpu_map[5].gpu_end_pointer, dev_pp[6] + gpu_map[6].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[5] + gpu_map[5].gpu_end_pointer, dev_qp[6] + gpu_map[6].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[5], dev_pp[4] + size_med, gpu_map[4].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[5], dev_qp[4] + size_med, gpu_map[4].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[6] + gpu_map[6].gpu_end_pointer, dev_pp[7] + gpu_map[7].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[6] + gpu_map[6].gpu_end_pointer, dev_qp[7] + gpu_map[7].gpu_start_pointer, gpu_map[0].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[6], dev_pp[5] + size_med, gpu_map[5].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[6], dev_qp[5] + size_med, gpu_map[5].gpu_size_bord, cudaMemcpyDeviceToDevice));
+
+    CUDA_CALL(cudaMemcpy(dev_pp[7], dev_pp[6] + size_med, gpu_map[6].gpu_size_bord, cudaMemcpyDeviceToDevice));
+    CUDA_CALL(cudaMemcpy(dev_qp[7], dev_qp[6] + size_med, gpu_map[6].gpu_size_bord, cudaMemcpyDeviceToDevice));
 }
