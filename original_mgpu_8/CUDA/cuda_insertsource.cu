@@ -36,9 +36,9 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
         {
           gpu_mid = num_gpus / 2;
           if (gpu == gpu_mid){
-            offset = gpu_map[2].center_position;
+            offset = gpu_map[4].center_position;
           } else if (gpu == (gpu_mid - 1)){
-            offset = gpu_map[1].center_position;
+            offset = gpu_map[3].center_position;
           } else{
             offset = -1;
           }
