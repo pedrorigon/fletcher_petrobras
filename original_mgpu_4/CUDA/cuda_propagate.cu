@@ -107,11 +107,11 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     extern float* dev_qc[GPU_NUMBER];
 
 
-    int num_gpus;
+    int num_gpus = 4;
     int lower, upper;
-    CUDA_CALL(cudaGetDeviceCount(&num_gpus));
+    //CUDA_CALL(cudaGetDeviceCount(&num_gpus));
 
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 4; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
@@ -153,7 +153,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_SwapBord(sx, sy, sz);
     CUDA_CALL(cudaDeviceSynchronize()); 
 
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 4; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
     }

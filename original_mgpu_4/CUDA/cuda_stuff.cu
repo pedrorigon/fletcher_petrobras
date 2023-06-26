@@ -153,7 +153,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    printf("cpu_var(endereco inicial) = [%d] offset de onde comeca a ser enviado para a GPU 1 = [%d]\n", &ch1dxx, gpu_map[1].cpu_offset);
 */
    // Cópia dos dados para cada GPU
-   for (int device = 0; device < deviceCount; device++)
+   for (int device = 0; device < 4; device++)
    {
       cudaDeviceProp deviceProp;
       CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
@@ -265,7 +265,7 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
    int deviceCount;
    CUDA_CALL(cudaGetDeviceCount(&deviceCount));
    int sxsy = sx * sy; // one plan
-   for (int device = 0; device < deviceCount; device++)
+   for (int device = 0; device < 4; device++)
    {
       cudaDeviceProp deviceProp;
       CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
@@ -303,7 +303,7 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
     const size_t msize_vol_half = msize_vol / 4;
 
 
-    for (int device = 0; device < deviceCount; device++)
+    for (int device = 0; device < 4; device++)
     {
         CUDA_CALL(cudaSetDevice(device));
 
