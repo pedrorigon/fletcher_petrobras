@@ -41,6 +41,8 @@ export PGCC_GPU_SM=cc60 # NVIDIA P100
 export HOST_COMPILER=nvcc
 export PATH=$PATH:/usr/local/cuda/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+#export PATH=$PATH:opt/nvidia/hpc_sdk/Linux_x86_64/23.1/compilers/bin/  #para AWS
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/nvidia/hpc_sdk/Linux_x86_64/23.1/cuda/lib64  #Para AWS
 
 #export CUDA_GPU_SM=sm_35 # NVIDIA K20m
 #export CUDA_GPU_SM=sm_37 # NVIDIA K80

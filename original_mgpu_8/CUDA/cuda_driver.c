@@ -6,7 +6,7 @@
 #include"cuda_stuff.h"
 #include"cuda_propagate.h"
 #include"cuda_insertsource.h"
-#define GPU_NUMBER 4
+#define GPU_NUMBER 8
 
 
 Gpu gpu_map[GPU_NUMBER];

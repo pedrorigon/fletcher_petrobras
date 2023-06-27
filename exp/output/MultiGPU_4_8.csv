@@ -1,0 +1,23 @@
+Aplicativo,Tamanho,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior
+original_mgpu_4.CUDA.ip-10-20-2-60.x,88,1304.00,0,1304.00,1304.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,120,1967.00,0,1967.00,1967.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,152,2636.00,0,2636.00,2636.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,184,2853.00,0,2853.00,2853.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,216,3633.00,0,3633.00,3633.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,248,3931.00,0,3931.00,3931.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,280,4709.00,0,4709.00,4709.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,312,4964.00,0,4964.00,4964.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,344,5677.00,0,5677.00,5677.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,376,6032.00,0,6032.00,6032.00
+original_mgpu_4.CUDA.ip-10-20-2-60.x,408,6645.00,0,6645.00,6645.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,88,692.00,0,692.00,692.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,120,1011.00,0,1011.00,1011.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,152,1336.00,0,1336.00,1336.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,184,1603.00,0,1603.00,1603.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,216,2038.00,0,2038.00,2038.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,248,2413.00,0,2413.00,2413.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,280,2856.00,0,2856.00,2856.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,312,3193.00,0,3193.00,3193.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,344,3651.00,0,3651.00,3651.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,376,3978.00,0,3978.00,3978.00
+original_mgpu_8.CUDA.ip-10-20-2-60.x,408,4438.00,0,4438.00,4438.00
