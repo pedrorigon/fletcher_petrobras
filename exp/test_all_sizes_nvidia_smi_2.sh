@@ -40,8 +40,12 @@ for app in *.`hostname`.x; do
         total_msamples=0
         num_runs=10
         msamples_values=()
-        power_sum=0
-        energy_sum=0
+        total_gpu_usage=0
+ 	total_gpu_usage=0
+        total_time=0
+        start_time=0
+        end_time=0
+        
 
         for run in $(seq 1 $num_runs); do   
             if [[ $app == *"OpenACC"* ]]; then
@@ -75,7 +79,7 @@ for app in *.`hostname`.x; do
                 msamples_values+=($msamples_value)
             fi
 
-           gpu_usage=$(nvidia-smi ----query-gpu=power.draw --format=csv,noheader,nounits)
+           gpu_usage=$(nvidia-smi --query-gpu=power.draw --format=csv,noheader,nounits)
            total_gpu_usage=$(echo "$total_gpu_usage + $gpu_usage" | bc)
            total_time=$(echo "$total_time + $execution_time" | bc)
            
