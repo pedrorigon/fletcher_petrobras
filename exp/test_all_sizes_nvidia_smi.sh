@@ -54,11 +54,11 @@ for app in *.`hostname`.x; do
                 echo "CPU"
                 echo "---------------------------------------------------"
             fi
-	    # Início da contagem de tempo
+            # Início da contagem de tempo
             start_time=$(date +%s.%N)
-	    nvidia-smi dmon -i -s up -d 1 -o T > ../output/
-	    nvidia_smi_pid=$!
-	    
+            nvidia-smi dmon -s up -d 1 -o T > "../output/${app}_$size.txt" &
+            nvidia_smi_pid=$!
+            
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
             result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32; } 2>&1 )
             kill $nvidia_smi_pid
@@ -72,12 +72,7 @@ for app in *.`hostname`.x; do
                 total_msamples=$(echo "$total_msamples + $msamples_value" | bc)
                 msamples_values+=($msamples_value)
             fi
-            gpu_usage=$(nvidia-smi --id=0 --query-gpu=power.draw --format=csv,noheader,nounits)
-                		total_gpu_usage=$(echo "$total_gpu_usage + $gpu_usage" | bc)
-                		total_time=$(echo "$total_time + $execution_time" | bc)
         done
-	pot_gpu_media=$(echo "scale=2; $total_gpu_usage / $num_runs" | bc)
-        energy_gpu_consumed=$(echo "$total_time * $pot_gpu_media" | bc)
         # Calcula a média dos resultados
         average_msamples=$(echo "scale=2; $total_msamples / $num_runs" | bc)
 
@@ -102,7 +97,7 @@ for app in *.`hostname`.x; do
         upper_bound=$(echo "scale=2; $average_msamples + $margin_of_error" | bc)
 
         # Salva a média, o desvio padrão e o intervalo de confiança no arquivo CSV
-        echo "$app,$size,$average_msamples,$stddev,$lower_bound,$upper_bound,$pot_gpu_media, $total_time, $energy_gpu_consumed" >> "../$output_file"
+        echo "$app,$size,$average_msamples,$stddev,$lower_bound,$upper_bound" >> "../$output_file"
     done
 done
 
