@@ -94,7 +94,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     int lower, upper;
     CUDA_CALL(cudaGetDeviceCount(&num_gpus));
 
-    for (int gpu = 0; gpu < num_gpus; gpu++)
+    for (int gpu = 0; gpu < 2; gpu++)
     {
         cudaDeviceProp prop;
         CUDA_CALL(cudaGetDeviceProperties(&prop, gpu));
