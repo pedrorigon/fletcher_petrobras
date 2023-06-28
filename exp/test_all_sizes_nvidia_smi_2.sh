@@ -75,14 +75,13 @@ for app in *.`hostname`.x; do
                 msamples_values+=($msamples_value)
             fi
 
-            # Processa o arquivo de saída do nvidia-smi para obter a potência média e a energia
-            nvidia_smi_output="../output/${app}_$size.txt"
-            power=$(awk '{sum += $2} END {print sum/NR}' $nvidia_smi_output)
-            energy=$(echo "$power * $execution_time" | bc)
-
-            power_sum=$(echo "$power_sum + $power" | bc)
-            energy_sum=$(echo "$energy_sum + $energy" | bc)
+           gpu_usage=$(nvidia-smi ----query-gpu=power.draw --format=csv,noheader,nounits)
+           total_gpu_usage=$(echo "$total_gpu_usage + $gpu_usage" | bc)
+           total_time=$(echo "$total_time + $execution_time" | bc)
+           
         done
+        pot_gpu_media=$(echo "scale=2; $total_gpu_usage / $num_runs" | bc)
+        energy_gpu_consumed=$(echo "$total_time * $pot_gpu_media" | bc)
         # Calcula a média dos resultados
         average_msamples=$(echo "scale=2; $total_msamples / $num_runs" | bc)
 
@@ -107,7 +106,7 @@ for app in *.`hostname`.x; do
         upper_bound=$(echo "scale=2; $average_msamples + $margin_of_error" | bc)
 
         # Salva a média, o desvio padrão, o intervalo de confiança, potência média e energia no arquivo CSV
-        echo "$app,$size,$average_msamples,$stddev,$lower_bound,$upper_bound,$power_sum,$energy_sum" >> "../$output_file"
+        echo "$app,$size,$average_msamples,$stddev,$lower_bound,$upper_bound,$pot_gpu_media, $total_time, $energy_gpu_consumed" >> "../$output_file"
     done
 done
 
