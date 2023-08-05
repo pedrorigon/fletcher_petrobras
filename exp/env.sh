@@ -37,6 +37,11 @@ export PGCC_GPU_SM=cc60 # NVIDIA P100
 #export PGCC_GPU_SM=cc61 # NVIDIA GTX 1080Ti
 #export PGCC_GPU_SM=cc75 # NVIDIA RTX 2080Ti
 
+# cuda 12.2
+#export PATH=$PATH:/usr/local/cuda-12.2/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-12.2/lib64
+
+
 # cuda
 export HOST_COMPILER=nvcc
 export PATH=$PATH:/usr/local/cuda/bin
