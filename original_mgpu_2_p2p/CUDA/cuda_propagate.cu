@@ -186,10 +186,17 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     CUDA_CALL(cudaDeviceCanAccessPeer(&can_access_peer_1_0, 1, 0));
     
     if (can_access_peer_0_1 && can_access_peer_1_0) {
-        CUDA_CALL(cudaSetDevice(0));
-        CUDA_CALL(cudaDeviceEnablePeerAccess(1, 0)); // Habilitar acesso da GPU 0 para a GPU 1
-        CUDA_CALL(cudaSetDevice(1));
-        CUDA_CALL(cudaDeviceEnablePeerAccess(0, 0)); // Habilitar acesso da GPU 1 para a GPU 0
+        int already_enabled;
+        CUDA_CALL(cudaDeviceCanAccessPeer(&already_enabled, 0, 1));
+        if (!already_enabled) {
+            CUDA_CALL(cudaSetDevice(0));
+            CUDA_CALL(cudaDeviceEnablePeerAccess(1, 0)); // Habilitar acesso da GPU 0 para a GPU 1
+        }
+        CUDA_CALL(cudaDeviceCanAccessPeer(&already_enabled, 1, 0));
+        if (!already_enabled) {
+            CUDA_CALL(cudaSetDevice(1));
+            CUDA_CALL(cudaDeviceEnablePeerAccess(0, 0)); // Habilitar acesso da GPU 1 para a GPU 0
+        }
     }
 
     // Transferências P2P
@@ -199,6 +206,7 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     CUDA_CALL(cudaMemcpyPeer(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord));
     CUDA_CALL(cudaMemcpyPeer(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord));
 }
+
 
 
 
