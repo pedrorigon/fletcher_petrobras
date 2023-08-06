@@ -104,35 +104,67 @@ int** criar_espaco_estados(int num_estados) {
     return estados;
 }
 
-void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao) {
-    int estado_atual = 0;
-    for (int iteracao = 0; iteracao < num_combinacoes_validas; iteracao++) {
-        // Definir a configuração inicial como 16x16 na primeira iteração.
-        if (iteracao == 0) {
-            estado_atual = num_combinacoes_validas - 1; // Última configuração (16x16).
-        } else {
-            // Escolher um estado atual (configuração atual) aleatoriamente.
+int obter_max_Q(double** Q, int** estados, int num_combinacoes_validas) {
+    int indice_max = 0;
+    double valor_max = Q[0][0];
+    for (int i = 0; i < num_combinacoes_validas; i++) {
+        for (int j = 0; j < num_combinacoes_validas; j++) {
+            if (Q[i][j] > valor_max) {
+                valor_max = Q[i][j];
+                indice_max = i;
+            }
+        }
+    }
+    return indice_max;
+}
+
+double obter_max_valor_Q(double** Q, int** estados, int num_combinacoes_validas, int estado_atual) {
+    double valor_max = Q[estado_atual][0];
+    for (int j = 1; j < num_combinacoes_validas; j++) {
+        if (Q[estado_atual][j] > valor_max) {
+            valor_max = Q[estado_atual][j];
+        }
+    }
+    return valor_max;
+}
+
+
+void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao, int* bsize_x, int* bsize_y) {
+    static int primeira_chamada = 1;
+    int estado_atual, proximo_estado;
+    double recompensa, Q_max, Q_atual, delta_Q;
+
+    if (primeira_chamada) {
+        primeira_chamada = 0;
+        *bsize_x = 16;
+        *bsize_y = 16;
+    } else {
+        if (((double) rand() / (RAND_MAX)) < epsilon) {
             estado_atual = rand() % num_combinacoes_validas;
+        } else {
+            estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
         }
 
-        // Escolher uma ação (configuração) com base na política ε-greedy.
-        int acao_escolhida = escolher_acao(Q, estado_atual, epsilon);
+        // Supondo que estados é uma matriz 2D onde cada linha é um par (bsize_x, bsize_y)
+        *bsize_x = estados[estado_atual][0];
+        *bsize_y = estados[estado_atual][1];
 
-        // Obter os valores de threads por bloco em X e Y para a ação escolhida.
-        int threads_por_bloco_X = estados[estado_atual][0];
-        int threads_por_bloco_Y = estados[estado_atual][1];
+        // Execute ação (bsize_x, bsize_y) e obtenha a recompensa
+        recompensa = -tempo_execucao; // Supomos que a recompensa é negativa o tempo de execução, pois queremos minimizá-lo
 
-        // Calcular o tempo de execução para a configuração escolhida.
-        //double tempo_execucao = calcular_tempo_execucao(threads_por_bloco_X, threads_por_bloco_Y);
+        // Obtenha o próximo estado, que é a ação que tem o maior Q para o estado atual
+        proximo_estado = obter_max_Q(Q, estados, num_combinacoes_validas);
 
-        // Calcular a recompensa com base no tempo de execução observado.
-        double recompensa = 1.0 / tempo_execucao;
+        // Calcula a diferença entre a recompensa obtida e a previsão anterior
+        Q_atual = Q[estado_atual][proximo_estado];
+        Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, estado_atual);
+        delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
 
-        // Atualizar a tabela Q com base no algoritmo de Q-learning.
-        int proximo_estado = acao_escolhida; // Para este exemplo, o próximo estado é o mesmo que a ação escolhida.
-        atualizar_Q(Q, estado_atual, acao_escolhida, recompensa, proximo_estado, taxa_aprendizado, fator_desconto);
+        // Atualiza a tabela Q
+        Q[estado_atual][proximo_estado] = Q_atual + taxa_aprendizado * delta_Q;
     }
 }
+
 
 void liberar_memoria(double** Q, int** estados, int num_estados, int num_combinacoes_validas) {
     for (int i = 0; i < num_estados; i++) {
@@ -267,7 +299,7 @@ for (int it=1; it<=st; it++) {
     double epsilon = 0.1; // Altere para o seu valor de epsilon.
     double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
     double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
-    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto, timeIt);
+    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
 
     printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
     printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
