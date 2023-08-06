@@ -230,6 +230,8 @@ for (int it=1; it<=st; it++) {
     timeIt=wtime()-t0;
     walltime+=timeIt;
 
+    printf("tempo deu: %lf\n", timeIt);
+
     tSim=it*dt;
     if (tSim >= tOut) {
       //DRIVER_Update_pointers(sx,sy,sz,pc);
