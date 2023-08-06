@@ -28,7 +28,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   int size = sx*sy*sz;
   float tSim=0.0, tOut=nOut*dtOutput;
 
-  const long samplesPropagate=(long)(sx-2*bord)*(long)(sy-2*bord)*(long)(sz-2*bord);
+  const long samplesPropagate=(long)(sx-2*(bord+1))*(long)(sy-2*(bord+1))*(long)(sz-2*(bord+1));
   const long totalSamples=samplesPropagate*(long)st;
 
   float *ch1dxx=NULL;  // isotropy simetry deep angle
@@ -106,7 +106,7 @@ for (int it=1; it<=st; it++) {
 
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
-      DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
       //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
 #endif
     }
