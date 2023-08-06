@@ -28,7 +28,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   int size = sx*sy*sz;
   float tSim=0.0, tOut=nOut*dtOutput;
 
-  const long samplesPropagate=(long)(sx-2*(bord+1))*(long)(sy-2*(bord+1))*(long)(sz-2*(bord+1));
+  const long samplesPropagate=(long)(sx-2*(bord))*(long)(sy-2*(bord))*(long)(sz-2*(bord));
   const long totalSamples=samplesPropagate*(long)st;
 
   float *ch1dxx=NULL;  // isotropy simetry deep angle
@@ -94,14 +94,14 @@ for (int it=1; it<=st; it++) {
     const double t0=wtime();
     
     DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc); //ajustar parametros
-    SwapArrays(&pp, &pc, &qp, &qc);
+    //SwapArrays(&pp, &pc, &qp, &qc);
 
     walltime+=wtime()-t0;
 
     tSim=it*dt;
     if (tSim >= tOut) {
-      DRIVER_Update_pointers(sx,sy,sz,pc);
-      DumpSliceFile(sx,sy,sz,pc,sPtr);
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DumpSliceFile(sx,sy,sz,pc,sPtr);
     //  CUDA_prefetch_pc(sx,sy,sz,pc);
 
       tOut=(++nOut)*dtOutput;
