@@ -8,123 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define MAX_GENERATIONS 1000 // Número máximo de gerações
-#define MUTATION_RATE 0.05   // Taxa de mutação
-#define TOURNAMENT_SIZE 5    // Tamanho do torneio para a seleção de pais
 
-#define POPULATION_SIZE 50
-// Valores possíveis para bsize_x e bsize_y
-int bsize_values[] = {2, 4, 8, 16, 32, 64, 128};
-int possible_values[] = {2, 4, 8, 16, 32, 64, 128};
-// Indivíduo na população
-typedef struct {
-    int bsize_x;
-    int bsize_y;
-    double timeIt;
-} Individual;
-
-Individual population[POPULATION_SIZE];
-Individual best_individual;
-
-//#define MODEL_GLOBALVARS
-//ARTHUR: Transformar em variável local.
-
-//#undef MODEL_GLOBALVARS
-
-// Inicializa a população com indivíduos aleatórios
-void initialize_population() {
-    srand(time(NULL));
-    for (int i = 0; i < POPULATION_SIZE; i++) {
-        do {
-            population[i].bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-            population[i].bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-        } while (population[i].bsize_x * population[i].bsize_y >= 1024);
-
-        population[i].timeIt = __DBL_MAX__;
-    }
-    best_individual = population[0];
-}
-
-// Realiza mutação em um indivíduo
-void mutate(Individual *individual) {
-    do {
-        individual->bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-        individual->bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-    } while (individual->bsize_x * individual->bsize_y >= 1024);
-}
-
-// Seleciona um indivíduo da população para cruzamento
-Individual tournament_selection() {
-    Individual selected = population[rand() % POPULATION_SIZE];
-    for (int i = 1; i < TOURNAMENT_SIZE; i++) { 
-        Individual competitor = population[rand() % POPULATION_SIZE];
-        if (competitor.timeIt < selected.timeIt) {
-            selected = competitor;
-        }
-    }
-    return selected;
-}
-
-// Realiza cruzamento entre dois indivíduos
-
-// Método de crossover alterado para pegar os valores de um dos pais aleatoriamente
-Individual crossover(Individual parent1, Individual parent2) {
-    Individual offspring;
-    if (rand() % 2 == 0) {  // 50% de chance de escolher o valor de um dos pais
-        offspring.bsize_x = parent1.bsize_x;
-        offspring.bsize_y = parent2.bsize_y;
-    } else {
-        offspring.bsize_x = parent2.bsize_x;
-        offspring.bsize_y = parent1.bsize_y;
-    }
-    // Checar se o valor de bsize_x e bsize_y é válido, senão, executar a mutação
-    if (offspring.bsize_x * offspring.bsize_y >= 1024) {
-        mutate(&offspring);
-    }
-    offspring.timeIt = __DBL_MAX__;
-    return offspring;
-}
-
-void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
-    static int generation = 0; // Mantém a geração atual
-
-    // Inicialize a população, se ainda não foi inicializada
-    if (generation == 0) {
-        initialize_population();
-    }
-
-    // Atualize o tempo do indivíduo da geração atual
-    population[generation].timeIt = timeIt;
-
-    // Verifique se o indivíduo atual é o melhor até agora
-    if (timeIt < best_individual.timeIt) {
-        best_individual.bsize_x = *bsize_x;
-        best_individual.bsize_y = *bsize_y;
-        best_individual.timeIt = timeIt;
-    }
-
-    // Verifique se atingimos o máximo de gerações
-    if (++generation == MAX_GENERATIONS) {
-        // Usamos o melhor indivíduo encontrado
-        *bsize_x = best_individual.bsize_x;
-        *bsize_y = best_individual.bsize_y;
-        return;
-    }
-
-    // Realize operações de cruzamento e mutação para gerar a próxima geração
-    for (int i = 0; i < POPULATION_SIZE; i++) {
-        Individual parent1 = tournament_selection();
-        Individual parent2 = tournament_selection();
-        population[i] = crossover(parent1, parent2);
-        if ((double) rand() / RAND_MAX < MUTATION_RATE) { // Chance de mutação
-            mutate(&population[i]);
-        }
-    }
-
-    // A próxima chamada para essa função usará o indivíduo da nova geração
-    *bsize_x = population[generation % POPULATION_SIZE].bsize_x;
-    *bsize_y = population[generation % POPULATION_SIZE].bsize_y;
-}
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
@@ -206,7 +90,6 @@ double timeIt=0.0;
 int bsize_x=16, bsize_y=16;
 
 
-
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
@@ -215,6 +98,7 @@ for (int it=1; it<=st; it++) {
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
+    //update_bsize_values(&bsize_x, &bsize_y, timeIt);
 
     const double t0=wtime();
     
@@ -225,7 +109,6 @@ for (int it=1; it<=st; it++) {
     walltime+=timeIt;
 
     printf("tempo deu: %lf\n", timeIt);
-    update_bsize_values(&bsize_x, &bsize_y, timeIt);
 
     tSim=it*dt;
     if (tSim >= tOut) {
