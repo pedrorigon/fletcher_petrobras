@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#define MAX_GENERATIONS 1000 // Número máximo de gerações
+#define MUTATION_RATE 0.05   // Taxa de mutação
+#define TOURNAMENT_SIZE 5    // Tamanho do torneio para a seleção de pais
+
 #define POPULATION_SIZE 50
 // Valores possíveis para bsize_x e bsize_y
 int bsize_values[] = {2, 4, 8, 16, 32, 64, 128};
@@ -51,14 +55,11 @@ void mutate(Individual *individual) {
 
 // Seleciona um indivíduo da população para cruzamento
 Individual tournament_selection() {
-    Individual selected;
-    int selected_index = rand() % POPULATION_SIZE;
-    selected = population[selected_index];
-    for (int i = 0; i < 5; i++) { // Compete com 5 outros indivíduos
-        int competitor_index = rand() % POPULATION_SIZE;
-        if (population[competitor_index].timeIt < selected.timeIt) {
-            selected = population[competitor_index];
-            selected_index = competitor_index;
+    Individual selected = population[rand() % POPULATION_SIZE];
+    for (int i = 1; i < TOURNAMENT_SIZE; i++) { 
+        Individual competitor = population[rand() % POPULATION_SIZE];
+        if (competitor.timeIt < selected.timeIt) {
+            selected = competitor;
         }
     }
     return selected;
@@ -69,23 +70,23 @@ Individual tournament_selection() {
 Individual crossover(Individual parent1, Individual parent2) {
     Individual offspring;
     do {
-        offspring.bsize_x = possible_values[rand() % 7];
-        offspring.bsize_y = possible_values[rand() % 7];
+        offspring.bsize_x = (parent1.bsize_x + parent2.bsize_x) / 2;
+        offspring.bsize_y = (parent1.bsize_y + parent2.bsize_y) / 2;
     } while (offspring.bsize_x * offspring.bsize_y >= 1024);
     offspring.timeIt = __DBL_MAX__;
     return offspring;
 }
 
-
 void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
-    // Se a população não foi inicializada, inicialize
-    if (best_individual.timeIt == __DBL_MAX__) {
+    static int generation = 0; // Mantém a geração atual
+
+    // Inicialize a população, se ainda não foi inicializada
+    if (generation == 0) {
         initialize_population();
     }
 
-    // Atualize o tempo do indivíduo correspondente à geração atual
-    int current_generation = (int) (*bsize_x == best_individual.bsize_x && *bsize_y == best_individual.bsize_y);
-    population[current_generation].timeIt = timeIt;
+    // Atualize o tempo do indivíduo da geração atual
+    population[generation].timeIt = timeIt;
 
     // Verifique se o indivíduo atual é o melhor até agora
     if (timeIt < best_individual.timeIt) {
@@ -94,19 +95,27 @@ void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
         best_individual.timeIt = timeIt;
     }
 
+    // Verifique se atingimos o máximo de gerações
+    if (++generation == MAX_GENERATIONS) {
+        // Usamos o melhor indivíduo encontrado
+        *bsize_x = best_individual.bsize_x;
+        *bsize_y = best_individual.bsize_y;
+        return;
+    }
+
     // Realize operações de cruzamento e mutação para gerar a próxima geração
     for (int i = 0; i < POPULATION_SIZE; i++) {
         Individual parent1 = tournament_selection();
         Individual parent2 = tournament_selection();
         population[i] = crossover(parent1, parent2);
-        if ((double) rand() / RAND_MAX < 0.1) { // 10% de chance de mutação
+        if ((double) rand() / RAND_MAX < MUTATION_RATE) { // Chance de mutação
             mutate(&population[i]);
         }
     }
 
-    // A próxima chamada para essa função usará o primeiro indivíduo da nova geração
-    *bsize_x = population[0].bsize_x;
-    *bsize_y = population[0].bsize_y;
+    // A próxima chamada para essa função usará o indivíduo da nova geração
+    *bsize_x = population[generation % POPULATION_SIZE].bsize_x;
+    *bsize_y = population[generation % POPULATION_SIZE].bsize_y;
 }
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
