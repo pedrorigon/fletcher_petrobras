@@ -73,7 +73,7 @@ void atualizar_Q(double** Q, int estado, int acao, double recompensa, int proxim
 
 // Função para inicializar a tabela Q
 double** inicializar_tabela_Q(int num_estados) {
-    double** Q = (double*)malloc(num_estados * sizeof(double));
+    double** Q = (double**)malloc(num_estados * sizeof(double*));
     for (int i = 0; i < num_estados; i++) {
         Q[i] = (double*)malloc(NUM_ACTIONS * sizeof(double));
         for (int j = 0; j < NUM_ACTIONS; j++) {
@@ -149,7 +149,7 @@ void liberar_memoria(double** Q, int** estados, int num_estados, int num_combina
 
 // Função para criar e inicializar a tabela Q.
 double** criar_tabela_Q(int num_estados, int num_acoes) {
-    double** Q = (double*)malloc(num_estados * sizeof(double));
+    double** Q = (double**)malloc(num_estados * sizeof(double*));
     for (int i = 0; i < num_estados; i++) {
         Q[i] = (double*)malloc(num_acoes * sizeof(double));
         for (int j = 0; j < num_acoes; j++) {
