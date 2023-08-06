@@ -250,7 +250,7 @@ void CUDA_Finalize(const int sx, const int sy, const int sz, const int bord,
    printf("CUDA_Finalize: SUCCESS\n");
 }
 
-void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
+/*void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
 {
     extern float* dev_pc[GPU_NUMBER];
     extern Gpu gpu_map[GPU_NUMBER];
@@ -280,6 +280,44 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
         CUDA_CALL(cudaDeviceSynchronize()); 
     }
 }
+*/
+
+void CUDA_Update_pointers(const int sx, const int sy, const int sz, float* pc)
+{
+    extern float* dev_pc[GPU_NUMBER];
+    extern Gpu gpu_map[GPU_NUMBER];
+    int deviceCount;
+    CUDA_CALL(cudaGetDeviceCount(&deviceCount));
+    const size_t sxsysz = ((size_t)sx * sy) * sz;
+    const size_t msize_vol = sxsysz * sizeof(float);
+    const size_t msize_vol_half = msize_vol / 2;
+    cudaStream_t copyStream[2];
+
+    for (int device = 0; device < 2; device++)
+    {
+        CUDA_CALL(cudaSetDevice(device));
+        CUDA_CALL(cudaStreamCreate(&copyStream[device]));
+
+        if (device == 0)
+        {
+            // Copiar a primeira metade do array dev_pc[0] --> primeira metade do array pc
+            CUDA_CALL(cudaMemcpyAsync(pc, dev_pc[0], msize_vol_half, cudaMemcpyDeviceToHost, copyStream[device]));
+        }
+        else
+        {
+            // Copiar a segunda metade do array dev_pc[device] --> segunda metade do array pc
+            CUDA_CALL(cudaMemcpyAsync(pc + (msize_vol_half / sizeof(float)), dev_pc[device] + (gpu_map[1].gpu_start_pointer), msize_vol_half, cudaMemcpyDeviceToHost, copyStream[device]));
+        }
+    }
+
+    for (int device = 0; device < 2; device++)
+    {
+        CUDA_CALL(cudaSetDevice(device));
+        CUDA_CALL(cudaStreamSynchronize(copyStream[device]));
+        CUDA_CALL(cudaStreamDestroy(copyStream[device]));
+    }
+}
+
 
 
 void CUDA_Allocate_Model_Variables(float **restrict ch1dxx, float **restrict ch1dyy, float **restrict ch1dzz, float **restrict ch1dxy,
