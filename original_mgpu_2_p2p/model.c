@@ -61,10 +61,6 @@ int choose_action(int state, float epsilon) {
 }
 
 
-#define EPSILON_START 1.0
-#define EPSILON_MIN 0.1
-#define EPSILON_DECAY 0.01
-
 void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
     static int old_Bsize_X = -1;
     static int old_Bsize_Y = -1;
