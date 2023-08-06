@@ -11,8 +11,8 @@
 #define ALPHA 0.5
 #define GAMMA 0.9
 #define EPSILON_START 1.0
-#define EPSILON_MIN 0.1
-#define EPSILON_DECAY 0.05
+#define EPSILON_MIN 0
+#define EPSILON_DECAY 0.01
 
 #define NUM_ACTIONS_X 5  // bsize_x pode ser {2, 4, 8, 16, 32}, então temos 5 ações possíveis
 #define NUM_ACTIONS_Y 4  // bsize_y pode ser {2, 4, 8, 16}, então temos 4 ações possíveis
@@ -79,7 +79,6 @@ int choose_action(int state, float epsilon, int actions[], int num_actions, floa
 
 
 
-
 void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
     static int old_Bsize_X = -1;
     static int old_Bsize_Y = -1;
@@ -92,7 +91,14 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
     }
 
     if (iteration != 1) {
-        int reward = old_walltime - *timeIt;
+        int reward = *timeIt - old_walltime;  // Alteração feita aqui.
+
+        // Limitar a recompensa a um intervalo [-1, 1]
+        if (reward > 1) {
+            reward = 1;
+        } else if (reward < -1) {
+            reward = -1;
+        }
 
         int old_state_index_X = -1;
         int old_action_index_X = -1;
@@ -154,6 +160,7 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
         epsilon -= EPSILON_DECAY;
     }
 }
+
 
 
 
