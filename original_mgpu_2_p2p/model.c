@@ -65,12 +65,12 @@ Individual tournament_selection() {
 }
 
 // Realiza cruzamento entre dois indivíduos
-// Realiza cruzamento entre dois indivíduos
+
 Individual crossover(Individual parent1, Individual parent2) {
     Individual offspring;
     do {
-        offspring.bsize_x = (rand() < 0.5) ? parent1.bsize_x : parent2.bsize_x;
-        offspring.bsize_y = (rand() < 0.5) ? parent1.bsize_y : parent2.bsize_y;
+        offspring.bsize_x = possible_values[rand() % 7];
+        offspring.bsize_y = possible_values[rand() % 7];
     } while (offspring.bsize_x * offspring.bsize_y >= 1024);
     offspring.timeIt = __DBL_MAX__;
     return offspring;
