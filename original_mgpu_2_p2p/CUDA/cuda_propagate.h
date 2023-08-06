@@ -16,7 +16,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
 void CUDA_SwapArrays(float **pp, float **pc, float **qp, float **qc);
 
-void CUDA_SwapBord(const int sx, const int sy, const int sz, cudaStream_t *swap_stream)
+void CUDA_SwapBord(const int sx, const int sy, const int sz)
 
 #ifdef __cplusplus
 }
