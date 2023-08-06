@@ -59,23 +59,23 @@ int choose_action(int state, float epsilon) {
 
 
 void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
-    static int old_Bsize_X = -1;
-    static int old_Bsize_Y = -1;
+    static int old_action_X = -1;
+    static int old_action_Y = -1;
     static double old_walltime = 0.0;
 
     // Gera valores iniciais aleatórios para Bsize_X e Bsize_Y na primeira chamada da função
-    if (old_Bsize_X == -1 || old_Bsize_Y == -1) {
-        old_Bsize_X = actions[rand() % NUM_ACTIONS];
-        old_Bsize_Y = actions[rand() % NUM_ACTIONS];
+    if (old_action_X == -1 || old_action_Y == -1) {
+        old_action_X = rand() % NUM_ACTIONS;
+        old_action_Y = rand() % NUM_ACTIONS;
     }
 
     // Se não for a primeira iteração, atualiza a tabela Q com base no tempo de execução anterior
     if (iteration != 1) {
         int reward = old_walltime - *timeIt;
-        int old_state = old_Bsize_X;
-        int old_action = old_Bsize_Y;
-        int new_state = choose_action(old_Bsize_X, EPSILON);
-        int new_action = choose_action(old_Bsize_Y, EPSILON);
+        int old_state = old_action_X;
+        int old_action = old_action_Y;
+        int new_state = choose_action(old_action_X, EPSILON);
+        int new_action = choose_action(old_action_Y, EPSILON);
 
         float old_q_value = q_table[old_state][old_action];
         float max_new_q_value = -1e9;
@@ -87,17 +87,18 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
 
         q_table[old_state][old_action] = old_q_value + ALPHA * (reward + GAMMA * max_new_q_value - old_q_value);
 
-        old_Bsize_X = new_state;
-        old_Bsize_Y = new_action;
+        old_action_X = new_state;
+        old_action_Y = new_action;
     }
 
     // Atualiza o tempo de execução antigo
     old_walltime = *timeIt;
 
     // Atualiza bsize_x e bsize_y
-    *bsize_x = old_Bsize_X;
-    *bsize_y = old_Bsize_Y;
+    *bsize_x = actions[old_action_X];
+    *bsize_y = actions[old_action_Y];
 }
+
 
 
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
