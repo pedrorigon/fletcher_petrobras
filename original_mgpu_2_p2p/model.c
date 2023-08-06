@@ -120,7 +120,7 @@ for (int it=1; it<=st; it++) {
   const long HWM;
   const double MSamples=(MEGA*(double)totalSamples)/walltime;
   
-  FILE *fp=fopen("/proc/self/status","r");
+  /*FILE *fp=fopen("/proc/self/status","r");
   while (fgets(line, 256, fp) != NULL){
     if (strncmp(line, StringHWM, 5) == 0) {
       sscanf(line+6,"%ld %s", &HWM, HWMUnit);
@@ -128,6 +128,7 @@ for (int it=1; it<=st; it++) {
     }
   }
   fclose(fp);
+  */  //nao vamos salvar em disco
 
   // Dump Execution Metrics
   

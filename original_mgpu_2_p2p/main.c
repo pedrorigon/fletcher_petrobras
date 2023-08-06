@@ -227,12 +227,12 @@ int main(int argc, char** argv) {
   int izStart=0;
   int izEnd=sz-1;
 
-  SlicePtr sPtr;
-  sPtr=OpenSliceFile(ixStart, ixEnd, iyStart, iyEnd, izStart, izEnd, dx, dy, dz, dt, fNameSec);
+  SlicePtr sPtr;  //nao vamos salvar em disco
+  //sPtr=OpenSliceFile(ixStart, ixEnd, iyStart, iyEnd, izStart, izEnd, dx, dy, dz, dt, fNameSec); //nao vamos salvar em disco
 
-  DumpSliceFile(sx,sy,sz,pc,sPtr);
+  //DumpSliceFile(sx,sy,sz,pc,sPtr); //nao vamos salvar em disco
 #ifdef _DUMP
-  DumpSlicePtr(sPtr);
+  //DumpSlicePtr(sPtr); //nao vamos salvar em disco
   //  DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,0);
 #endif
   
@@ -246,5 +246,5 @@ int main(int argc, char** argv) {
   // - Finalize
   Model(st, iSource, dtOutput, sPtr, sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, vpz, vsv, epsilon, delta, phi, theta);
 
-  CloseSliceFile(sPtr);
+  //CloseSliceFile(sPtr); //nao vamos salvar em disco
 }
