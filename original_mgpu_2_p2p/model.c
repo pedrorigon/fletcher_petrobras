@@ -44,7 +44,7 @@ void initialize_q_table() {
 int choose_action(int state, float epsilon) {
     // Escolhe uma ação aleatória com probabilidade epsilon
     if (((float) rand() / RAND_MAX) < epsilon) {
-        return rand() % NUM_ACTIONS;
+        return actions[rand() % NUM_ACTIONS];
     }
     // Caso contrário, escolhe a ação com maior valor Q
     else {
@@ -56,9 +56,10 @@ int choose_action(int state, float epsilon) {
                 max_action = action;
             }
         }
-        return max_action;
+        return actions[max_action];
     }
 }
+
 
 
 void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
@@ -76,21 +77,40 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
     // Se não for a primeira iteração, atualiza a tabela Q com base no tempo de execução anterior
     if (iteration != 1) {
         int reward = old_walltime - *timeIt;
-        int old_state = old_Bsize_X;
-        int old_action = old_Bsize_Y;
-        int new_state = choose_action(old_Bsize_X, epsilon);
-        int new_action = choose_action(old_Bsize_Y, epsilon);
+        
+        // Encontra o índice de old_Bsize_X e old_Bsize_Y
+        int old_state_index = -1;
+        int old_action_index = -1;
+        for (int i = 0; i < NUM_ACTIONS; i++) {
+            if (actions[i] == old_Bsize_X) old_state_index = i;
+            if (actions[i] == old_Bsize_Y) old_action_index = i;
+        }
 
-        float old_q_value = q_table[old_state][old_action];
+        // Seleciona uma nova ação e encontra o índice correspondente
+        int new_state = choose_action(old_state_index, epsilon);
+        int new_state_index = -1;
+        for (int i = 0; i < NUM_ACTIONS; i++) {
+            if (actions[i] == new_state) new_state_index = i;
+        }
+
+        int new_action = choose_action(old_action_index, epsilon);
+        int new_action_index = -1;
+        for (int i = 0; i < NUM_ACTIONS; i++) {
+            if (actions[i] == new_action) new_action_index = i;
+        }
+
+        // Atualiza a tabela Q
+        float old_q_value = q_table[old_state_index][old_action_index];
         float max_new_q_value = -1e9;
         for (int action = 0; action < NUM_ACTIONS; action++) {
-            if (q_table[new_state][action] > max_new_q_value) {
-                max_new_q_value = q_table[new_state][action];
+            if (q_table[new_state_index][action] > max_new_q_value) {
+                max_new_q_value = q_table[new_state_index][action];
             }
         }
 
-        q_table[old_state][old_action] = old_q_value + ALPHA * (reward + GAMMA * max_new_q_value - old_q_value);
+        q_table[old_state_index][old_action_index] = old_q_value + ALPHA * (reward + GAMMA * max_new_q_value - old_q_value);
 
+        // Atualiza os tamanhos de bloco
         old_Bsize_X = new_state;
         old_Bsize_Y = new_action;
     }
