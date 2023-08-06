@@ -5,7 +5,7 @@
 #include "../map.h"
 
 cudaStream_t stream[2];
-cudaStream_t swap_stream[2];
+cudaStream_t swap_stream[4];
 
 __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const int bord,
                                  const float dx, const float dy, const float dz, const float dt,
@@ -229,8 +229,10 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
 
     CUDA_CALL(cudaSetDevice(0));
     CUDA_CALL(cudaStreamCreate(&swap_stream[0]));
-    CUDA_CALL(cudaSetDevice(1));
     CUDA_CALL(cudaStreamCreate(&swap_stream[1]));
+    CUDA_CALL(cudaSetDevice(1));
+    CUDA_CALL(cudaStreamCreate(&swap_stream[2]));
+    CUDA_CALL(cudaStreamCreate(&swap_stream[3]));
 
     const int size_gpu0 = ind(0,0,(sz/2 - 5));
     const int size_gpu1 = ind(0,0,(sz/2 + 5));
@@ -256,8 +258,8 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[0] + gpu_map[0].gpu_end_pointer, 0, dev_pp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
     CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[1], 1, dev_pp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
 
-    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
-    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[2]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[3]));
 
     //CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
     //CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
