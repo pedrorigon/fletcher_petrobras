@@ -86,6 +86,8 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
               v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
 
 double walltime=0.0;
+double timeIt=0.0;
+int bsize_x=32, bsize_y=16;
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
@@ -93,10 +95,11 @@ for (int it=1; it<=st; it++) {
 
     const double t0=wtime();
     
-    DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc); //ajustar parametros
+    DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
     //SwapArrays(&pp, &pc, &qp, &qc);
 
-    walltime+=wtime()-t0;
+    timeIt=wtime()-t0;
+    walltime+=timeIt;
 
     tSim=it*dt;
     if (tSim >= tOut) {
