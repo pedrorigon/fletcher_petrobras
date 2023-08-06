@@ -126,10 +126,9 @@ double obter_max_valor_Q(double** Q, int** estados, int num_combinacoes_validas,
     return valor_max;
 }
 
-
 void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double* epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao, int* bsize_x, int* bsize_y) {
     static int primeira_chamada = 1;
-    int estado_atual, proximo_estado;
+    int estado_atual, acao, proximo_estado;
     double recompensa, Q_max, Q_atual, delta_Q;
 
     if (primeira_chamada) {
@@ -137,28 +136,27 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         *bsize_x = 16;
         *bsize_y = 16;
     } else {
-        if (((double) rand() / (RAND_MAX)) < *epsilon) {
-            estado_atual = rand() % num_combinacoes_validas;
-        } else {
-            estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
-        }
+        estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
 
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
-        recompensa = 1.0 / tempo_execucao; 
+        acao = escolher_acao(Q, estado_atual, epsilon); 
 
-        proximo_estado = obter_max_Q(Q, estados, num_combinacoes_validas);
+        recompensa = 1.0 / tempo_execucao;
 
-        Q_atual = Q[estado_atual][proximo_estado];
-        Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, estado_atual);
-        delta_Q = recompensa + 0.1 * Q_max - Q_atual;
+        proximo_estado = acao;
 
-        Q[estado_atual][proximo_estado] = Q_atual + taxa_aprendizado * delta_Q;
+        Q_atual = Q[estado_atual][acao];
+        Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, proximo_estado);
+        delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
+
+        Q[estado_atual][acao] = Q_atual + taxa_aprendizado * delta_Q;
 
         *epsilon *= EPS_DECAY_RATE;
     }
 }
+
 
 
 void liberar_memoria(double** Q, int** estados, int num_estados, int num_combinacoes_validas) {
