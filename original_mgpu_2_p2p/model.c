@@ -146,7 +146,7 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
-        recompensa = -tempo_execucao; 
+        recompensa = 1.0 / tempo_execucao; 
 
         proximo_estado = obter_max_Q(Q, estados, num_combinacoes_validas);
 
