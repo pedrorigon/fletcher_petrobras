@@ -45,7 +45,7 @@ int escolher_acao(double** Q, int estado, double* epsilon) {
         do {
             acao = rand() % NUM_ACTIONS;
         } while (!verifica_limite(valores_threads_X[acao / NUM_THREADS_Y], valores_threads_Y[acao % NUM_THREADS_Y]));
-        *epsilon *= EPS_DECAY_RATE;  // Decremento do epsilon após cada ação aleatória
+        *epsilon *= EPS_DECAY_RATE;
         return acao;
     } else {
         int melhor_acao = 0;
@@ -85,9 +85,7 @@ double** inicializar_tabela_Q(int num_estados) {
 
 // Função para criar o espaço de estados
 int** criar_espaco_estados(int num_estados) {
-    int valores_threads_X[NUM_THREADS_X] = {2, 4, 8, 16, 32, 64, 128};
-    int valores_threads_Y[NUM_THREADS_Y] = {2, 4, 8, 16, 32, 64, 128};
-    int** estados = (int*)malloc(num_estados * sizeof(int));
+    int** estados = (int**)malloc(num_estados * sizeof(int*));
     int num_combinacoes_validas = 0;
     for (int i = 0; i < NUM_THREADS_X; i++) {
         for (int j = 0; j < NUM_THREADS_Y; j++) {
@@ -158,7 +156,7 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
 
         Q[estado_atual][proximo_estado] = Q_atual + taxa_aprendizado * delta_Q;
 
-        *epsilon *= EPS_DECAY_RATE;  // Decremento do epsilon após cada ação
+        *epsilon *= EPS_DECAY_RATE;
     }
 }
 
