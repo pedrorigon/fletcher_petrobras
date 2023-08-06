@@ -152,7 +152,7 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
 
         Q_atual = Q[estado_atual][proximo_estado];
         Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, estado_atual);
-        delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
+        delta_Q = recompensa + 0.1 * Q_max - Q_atual;
 
         Q[estado_atual][proximo_estado] = Q_atual + taxa_aprendizado * delta_Q;
 
