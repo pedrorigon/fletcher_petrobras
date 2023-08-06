@@ -67,12 +67,20 @@ Individual tournament_selection() {
 
 // Realiza cruzamento entre dois indivíduos
 
+// Método de crossover alterado para pegar os valores de um dos pais aleatoriamente
 Individual crossover(Individual parent1, Individual parent2) {
     Individual offspring;
-    do {
-        offspring.bsize_x = (parent1.bsize_x + parent2.bsize_x) / 2;
-        offspring.bsize_y = (parent1.bsize_y + parent2.bsize_y) / 2;
-    } while (offspring.bsize_x * offspring.bsize_y >= 1024);
+    if (rand() % 2 == 0) {  // 50% de chance de escolher o valor de um dos pais
+        offspring.bsize_x = parent1.bsize_x;
+        offspring.bsize_y = parent2.bsize_y;
+    } else {
+        offspring.bsize_x = parent2.bsize_x;
+        offspring.bsize_y = parent1.bsize_y;
+    }
+    // Checar se o valor de bsize_x e bsize_y é válido, senão, executar a mutação
+    if (offspring.bsize_x * offspring.bsize_y >= 1024) {
+        mutate(&offspring);
+    }
     offspring.timeIt = __DBL_MAX__;
     return offspring;
 }
