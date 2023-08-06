@@ -41,18 +41,23 @@ int verifica_limite(int threads_X, int threads_Y) {
 int escolher_acao(double** Q, int estado, double epsilon) {
     if (rand() / (double)RAND_MAX < epsilon) {
         // Escolher uma ação aleatória (exploração).
-        return rand() % NUM_ACTIONS;
+        int acao;
+        do {
+            acao = rand() % NUM_ACTIONS;
+        } while (!verifica_limite(valores_threads_X[acao / NUM_THREADS_Y], valores_threads_Y[acao % NUM_THREADS_Y]));
+        return acao;
     } else {
         // Escolher a melhor ação com base na tabela Q (exploração).
         int melhor_acao = 0;
         for (int a = 1; a < NUM_ACTIONS; a++) {
-            if (Q[estado][a] > Q[estado][melhor_acao]) {
+            if (Q[estado][a] > Q[estado][melhor_acao] && verifica_limite(valores_threads_X[a / NUM_THREADS_Y], valores_threads_Y[a % NUM_THREADS_Y])) {
                 melhor_acao = a;
             }
         }
         return melhor_acao;
     }
 }
+
 
 // Função para atualizar a tabela Q com base no algoritmo de Q-learning.
 void atualizar_Q(double** Q, int estado, int acao, double recompensa, int proximo_estado, double taxa_aprendizado, double fator_desconto) {
