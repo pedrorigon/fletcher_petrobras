@@ -5,6 +5,15 @@
 #include "walltime.h"
 #include "model.h"
 #include "CUDA/cuda_stuff.h"
+#include <time.h>
+#define NUM_ACTIONS 6
+#define EPSILON 0.1
+#define ALPHA 0.5
+#define GAMMA 0.9
+
+int actions[NUM_ACTIONS] = {1, 2, 4, 8, 16, 32};
+float q_table[NUM_ACTIONS][NUM_ACTIONS];
+
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
 
@@ -18,6 +27,60 @@ void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bo
 void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, FILE *f){
   fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
 }
+
+void initialize_q_table() {
+    for (int i = 0; i < NUM_ACTIONS; i++) {
+        for (int j = 0; j < NUM_ACTIONS; j++) {
+            q_table[i][j] = 0.0;
+        }
+    }
+}
+
+void get_best_block_sizes(int *bsize_x, int *bsize_y, double walltime) {
+    srand(time(0));
+    static int last_x = 0;
+    static int last_y = 0;
+    int x, y;
+
+    if ((double)rand() / (double)RAND_MAX < EPSILON) {
+        // Explore: choose a random action
+        x = rand() % NUM_ACTIONS;
+        y = rand() % NUM_ACTIONS;
+    } else {
+        // Exploit: choose the action with the highest Q-value
+        float max_q_value = -1.0;
+        for (int i = 0; i < NUM_ACTIONS; i++) {
+            for (int j = 0; j < NUM_ACTIONS; j++) {
+                if (q_table[i][j] > max_q_value) {
+                    max_q_value = q_table[i][j];
+                    x = i;
+                    y = j;
+                }
+            }
+        }
+    }
+
+    *bsize_x = actions[x];
+    *bsize_y = actions[y];
+
+    // Update Q-table based on the reward from the last action
+    if (last_x != 0 || last_y != 0) {
+        float reward = -walltime;  // Lower walltime is better
+        float max_q_value = -1.0;
+        for (int i = 0; i < NUM_ACTIONS; i++) {
+            for (int j = 0; j < NUM_ACTIONS; j++) {
+                if (q_table[i][j] > max_q_value) {
+                    max_q_value = q_table[i][j];
+                }
+            }
+        }
+        q_table[last_x][last_y] = (1 - ALPHA) * q_table[last_x][last_y] + ALPHA * (reward + GAMMA * max_q_value);
+    }
+
+    last_x = x;
+    last_y = y;
+}
+
 
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
            const float dx, const float dy, const float dz, const float dt, const int it, float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
@@ -87,11 +150,16 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double timeIt=0.0;
-int bsize_x=32, bsize_y=16;
+int bsize_x, bsize_y;
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+
+    get_best_block_sizes(&bsize_x, &bsize_y, timeIt);
+
+    printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
+    printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
 
     const double t0=wtime();
     
