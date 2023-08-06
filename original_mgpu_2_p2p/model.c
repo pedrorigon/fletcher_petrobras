@@ -99,7 +99,7 @@ int** criar_espaco_estados(int num_estados) {
     return estados;
 }
 
-void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto) {
+void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao) {
     int estado_atual = 0;
     for (int iteracao = 0; iteracao < num_combinacoes_validas; iteracao++) {
         // Definir a configuração inicial como 16x16 na primeira iteração.
@@ -118,7 +118,7 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         int threads_por_bloco_Y = estados[estado_atual][1];
 
         // Calcular o tempo de execução para a configuração escolhida.
-        double tempo_execucao = calcular_tempo_execucao(threads_por_bloco_X, threads_por_bloco_Y);
+        //double tempo_execucao = calcular_tempo_execucao(threads_por_bloco_X, threads_por_bloco_Y);
 
         // Calcular a recompensa com base no tempo de execução observado.
         double recompensa = 1.0 / tempo_execucao;
@@ -262,7 +262,7 @@ for (int it=1; it<=st; it++) {
     double epsilon = 0.1; // Altere para o seu valor de epsilon.
     double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
     double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
-    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto);
+    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto, timeIt);
 
     printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
     printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
