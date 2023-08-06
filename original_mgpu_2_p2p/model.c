@@ -68,6 +68,7 @@ void atualizar_Q(double** Q, int estado, int acao, double recompensa, int proxim
         }
     }
     double novo_valor_Q = Q[estado][acao] + taxa_aprendizado * (recompensa + fator_desconto * valor_maximo_proximo_estado - Q[estado][acao]);
+    printf("valor Q %f", novo_valor_Q);
     Q[estado][acao] = novo_valor_Q;
 }
 
@@ -144,7 +145,7 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         acao = escolher_acao(Q, estado_atual, epsilon); 
 
         recompensa = 1.0 / tempo_execucao;
-
+        printf("recompensa %f", recompensa);
         proximo_estado = acao;
 
         Q_atual = Q[estado_atual][acao];
@@ -289,7 +290,7 @@ for (int it=1; it<=st; it++) {
 
     //optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
     // Loop de iterações do Q-learning.
-    double epsilon = 0.1; // Altere para o seu valor de epsilon.
+    double epsilon = 1.0; // Altere para o seu valor de epsilon.
     double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
     double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
     executar_Q_learning(Q, estados, num_combinacoes_validas, &epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
