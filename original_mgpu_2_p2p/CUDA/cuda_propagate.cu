@@ -145,15 +145,13 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaGetLastError());
     CUDA_CALL(cudaDeviceSynchronize());
 
-    cudaStream_t stream[2], swap_stream[2];
+    cudaStream_t stream[2];
     CUDA_CALL(cudaSetDevice(0));
     CUDA_CALL(cudaStreamCreate(&stream[0]));
-    CUDA_CALL(cudaStreamCreate(&swap_stream[0]));
     CUDA_CALL(cudaSetDevice(1));
     CUDA_CALL(cudaStreamCreate(&stream[1]));
-    CUDA_CALL(cudaStreamCreate(&swap_stream[1]));
 
-    CUDA_SwapBord(sx, sy, sz, swap_stream);
+    CUDA_SwapBord(sx, sy, sz);
 
     for (int gpu = 0; gpu < 2; gpu++)
     {
@@ -186,8 +184,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
                                                          dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
     }
 
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
     //CUDA_CALL(cudaGetLastError());
     //CUDA_CALL(cudaDeviceSynchronize()); 
     //CUDA_SwapBord(sx, sy, sz);
@@ -203,8 +199,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
     CUDA_CALL(cudaStreamDestroy(stream[0]));
     CUDA_CALL(cudaStreamDestroy(stream[1]));
-    CUDA_CALL(cudaStreamDestroy(swap_stream[0]));
-    CUDA_CALL(cudaStreamDestroy(swap_stream[1]));
 
 }
 
@@ -222,11 +216,17 @@ void CUDA_SwapArrays(float **pp, float **pc, float **qp, float **qc)
     *qc = tmp;
 }
 
-void CUDA_SwapBord(const int sx, const int sy, const int sz, cudaStream_t *swap_stream){
+void CUDA_SwapBord(const int sx, const int sy, const int sz){
 
     extern float* dev_pp[GPU_NUMBER];
     extern float* dev_qp[GPU_NUMBER];
     extern Gpu gpu_map[GPU_NUMBER];
+
+    cudaStream_t swap_stream[2];
+    CUDA_CALL(cudaSetDevice(0));
+    CUDA_CALL(cudaStreamCreate(&swap_stream[0]));
+    CUDA_CALL(cudaSetDevice(1));
+    CUDA_CALL(cudaStreamCreate(&swap_stream[1]));
 
     const int size_gpu0 = ind(0,0,(sz/2 - 5));
     const int size_gpu1 = ind(0,0,(sz/2 + 5));
@@ -236,17 +236,10 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, cudaStream_t *swap_
     CUDA_CALL(cudaDeviceCanAccessPeer(&can_access_peer_1_0, 1, 0));
     
     if (can_access_peer_0_1 && can_access_peer_1_0) {
-        int already_enabled;
-        CUDA_CALL(cudaDeviceCanAccessPeer(&already_enabled, 0, 1));
-        if (!already_enabled) {
-            CUDA_CALL(cudaSetDevice(0));
-            CUDA_CALL(cudaDeviceEnablePeerAccess(1, 0)); 
-        }
-        CUDA_CALL(cudaDeviceCanAccessPeer(&already_enabled, 1, 0));
-        if (!already_enabled) {
-            CUDA_CALL(cudaSetDevice(1));
-            CUDA_CALL(cudaDeviceEnablePeerAccess(0, 0)); 
-        }
+        CUDA_CALL(cudaSetDevice(0));
+        CUDA_CALL(cudaDeviceEnablePeerAccess(1, 0));
+        CUDA_CALL(cudaSetDevice(1));
+        CUDA_CALL(cudaDeviceEnablePeerAccess(0, 0));
     }
 
     CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[0] + gpu_map[0].gpu_end_pointer, 0, dev_pp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
@@ -254,6 +247,12 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz, cudaStream_t *swap_
 
     CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
     CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
+
+    CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
+    CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
+
+    CUDA_CALL(cudaStreamDestroy(swap_stream[0]));
+    CUDA_CALL(cudaStreamDestroy(swap_stream[1]));
 }
 
 
