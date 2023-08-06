@@ -12,6 +12,7 @@
 #define NUM_THREADS_X 7
 #define NUM_THREADS_Y 7
 #define NUM_ACTIONS (NUM_THREADS_X * NUM_THREADS_Y)
+#define EPS_DECAY_RATE 0.90
 
 // Definição dos valores possíveis de threads por bloco em X e Y.
 int valores_threads_X[NUM_THREADS_X] = {2, 4, 8, 16, 32, 64, 128};
@@ -38,16 +39,15 @@ int verifica_limite(int threads_X, int threads_Y) {
 }
 
 // Função para escolher uma ação com base na política ε-greedy.
-int escolher_acao(double** Q, int estado, double epsilon) {
-    if (rand() / (double)RAND_MAX < epsilon) {
-        // Escolher uma ação aleatória (exploração).
+int escolher_acao(double** Q, int estado, double* epsilon) {
+    if (rand() / (double)RAND_MAX < *epsilon) {
         int acao;
         do {
             acao = rand() % NUM_ACTIONS;
         } while (!verifica_limite(valores_threads_X[acao / NUM_THREADS_Y], valores_threads_Y[acao % NUM_THREADS_Y]));
+        *epsilon *= EPS_DECAY_RATE;  // Decremento do epsilon após cada ação aleatória
         return acao;
     } else {
-        // Escolher a melhor ação com base na tabela Q (exploração).
         int melhor_acao = 0;
         for (int a = 1; a < NUM_ACTIONS; a++) {
             if (Q[estado][a] > Q[estado][melhor_acao] && verifica_limite(valores_threads_X[a / NUM_THREADS_Y], valores_threads_Y[a % NUM_THREADS_Y])) {
@@ -129,7 +129,7 @@ double obter_max_valor_Q(double** Q, int** estados, int num_combinacoes_validas,
 }
 
 
-void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao, int* bsize_x, int* bsize_y) {
+void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double* epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao, int* bsize_x, int* bsize_y) {
     static int primeira_chamada = 1;
     int estado_atual, proximo_estado;
     double recompensa, Q_max, Q_atual, delta_Q;
@@ -139,29 +139,26 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         *bsize_x = 16;
         *bsize_y = 16;
     } else {
-        if (((double) rand() / (RAND_MAX)) < epsilon) {
+        if (((double) rand() / (RAND_MAX)) < *epsilon) {
             estado_atual = rand() % num_combinacoes_validas;
         } else {
             estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
         }
 
-        // Supondo que estados é uma matriz 2D onde cada linha é um par (bsize_x, bsize_y)
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
-        // Execute ação (bsize_x, bsize_y) e obtenha a recompensa
-        recompensa = -tempo_execucao; // Supomos que a recompensa é negativa o tempo de execução, pois queremos minimizá-lo
+        recompensa = -tempo_execucao; 
 
-        // Obtenha o próximo estado, que é a ação que tem o maior Q para o estado atual
         proximo_estado = obter_max_Q(Q, estados, num_combinacoes_validas);
 
-        // Calcula a diferença entre a recompensa obtida e a previsão anterior
         Q_atual = Q[estado_atual][proximo_estado];
         Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, estado_atual);
         delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
 
-        // Atualiza a tabela Q
         Q[estado_atual][proximo_estado] = Q_atual + taxa_aprendizado * delta_Q;
+
+        *epsilon *= EPS_DECAY_RATE;  // Decremento do epsilon após cada ação
     }
 }
 
@@ -299,7 +296,7 @@ for (int it=1; it<=st; it++) {
     double epsilon = 0.1; // Altere para o seu valor de epsilon.
     double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
     double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
-    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
+    executar_Q_learning(Q, estados, num_combinacoes_validas, &epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
 
     printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
     printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
