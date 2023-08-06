@@ -11,7 +11,7 @@
 #define POPULATION_SIZE 50
 // Valores possíveis para bsize_x e bsize_y
 int bsize_values[] = {2, 4, 8, 16, 32, 64, 128};
-
+int possible_values[] = {2, 4, 8, 16, 32, 64, 128};
 // Indivíduo na população
 typedef struct {
     int bsize_x;
@@ -69,13 +69,12 @@ Individual tournament_selection() {
 Individual crossover(Individual parent1, Individual parent2) {
     Individual offspring;
     do {
-        offspring.bsize_x = (rand() < 0.5) ? parent1.bsize_x : parent2.bsize_x;
-        offspring.bsize_y = (rand() < 0.5) ? parent1.bsize_y : parent2.bsize_y;
+        offspring.bsize_x = possible_values[rand() % 7];
+        offspring.bsize_y = possible_values[rand() % 7];
     } while (offspring.bsize_x * offspring.bsize_y > 1024);
     offspring.timeIt = __DBL_MAX__;
     return offspring;
 }
-
 
 void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
     // Se a população não foi inicializada, inicialize
