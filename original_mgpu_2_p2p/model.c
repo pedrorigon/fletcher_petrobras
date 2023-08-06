@@ -138,19 +138,26 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
         *bsize_y = 16;
     } else {
         estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
+        printf("dentro do Q learning");
+        print("estado atual %f", estado_atual);
 
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
         acao = escolher_acao(Q, estado_atual, epsilon); 
+        print("acao %f", acao);
 
         recompensa = 1.0 / tempo_execucao;
         printf("recompensa %f", recompensa);
         proximo_estado = acao;
 
         Q_atual = Q[estado_atual][acao];
+        print("Q atual %f", Q_atual);
         Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, proximo_estado);
+        print("Q max %f", Q_max);
+
         delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
+        print("delta Q %f", delta_Q);
 
         Q[estado_atual][acao] = Q_atual + taxa_aprendizado * delta_Q;
 
@@ -265,6 +272,7 @@ int num_estados = NUM_THREADS_X * NUM_THREADS_Y;
 
 //CRIA estados
 int** estados = criar_espaco_estados(num_estados);
+printf("estados %f", estados);
 
 // Contagem das combinações válidas
     int num_combinacoes_validas = 0;
@@ -278,9 +286,11 @@ int** estados = criar_espaco_estados(num_estados);
         }
     }
 
+printf("comb validas %f", num_combinacoes_validas);
+
 // Inicialização da tabela Q com valores arbitrários (ou zeros).
 double** Q = inicializar_tabela_Q(num_estados);
-
+printf("tabela  Q %f", Q);
 
 
 for (int it=1; it<=st; it++) {
@@ -296,7 +306,7 @@ for (int it=1; it<=st; it++) {
     double fator_desconto = 0.8;
     executar_Q_learning(Q, estados, num_combinacoes_validas, &epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
 
-    printf("Bsize_x: %d \n", bsize_x);
+    printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
 
     const double t0=wtime();
