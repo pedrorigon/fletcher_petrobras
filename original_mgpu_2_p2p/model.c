@@ -14,8 +14,15 @@
 #define EPSILON_MIN 0.1
 #define EPSILON_DECAY 0.05
 
-int actions[NUM_ACTIONS] = {2, 4, 8, 16, 32};
-float q_table[NUM_ACTIONS][NUM_ACTIONS]= {0};
+#define NUM_ACTIONS_X 5  // bsize_x pode ser {2, 4, 8, 16, 32}, então temos 5 ações possíveis
+#define NUM_ACTIONS_Y 4  // bsize_y pode ser {2, 4, 8, 16}, então temos 4 ações possíveis
+
+
+int actions_X[NUM_ACTIONS_X] = {2, 4, 8, 16, 32};
+int actions_Y[NUM_ACTIONS_Y] = {2, 4, 8, 16};
+
+float q_table_X[NUM_ACTIONS_X][NUM_ACTIONS_X]= {0};
+float q_table_Y[NUM_ACTIONS_Y][NUM_ACTIONS_Y]= {0};
 
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
@@ -31,29 +38,33 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
   fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
 }
 
-// Função para inicializar a tabela Q
+// Função para inicializar as tabelas Q
 void initialize_q_table() {
-    for (int i = 0; i < NUM_ACTIONS; i++) {
-        for (int j = 0; j < NUM_ACTIONS; j++) {
-            q_table[i][j] = 0.0;
+    // Inicializar a tabela Q para bsize_x
+    for (int i = 0; i < NUM_ACTIONS_X; i++) {
+        for (int j = 0; j < NUM_ACTIONS_X; j++) {
+            q_table_X[i][j] = 0.0;
+        }
+    }
+    // Inicializar a tabela Q para bsize_y
+    for (int i = 0; i < NUM_ACTIONS_Y; i++) {
+        for (int j = 0; j < NUM_ACTIONS_Y; j++) {
+            q_table_Y[i][j] = 0.0;
         }
     }
 }
 
+
 // Função para escolher a próxima ação
-int choose_action(int state, float epsilon) {
+int choose_action(int state, float epsilon, int actions[], int num_actions, float q_table[][num_actions]) {
     int action;
-    // Continua a gerar ações aleatórias até que uma ação válida seja gerada
     do {
-        // Escolhe uma ação aleatória com probabilidade epsilon
         if (((float) rand() / RAND_MAX) < epsilon) {
-            action = actions[rand() % NUM_ACTIONS];
-        }
-        // Caso contrário, escolhe a ação com maior valor Q
-        else {
+            action = actions[rand() % num_actions];
+        } else {
             float max_val = -1e9;
             int max_action = -1;
-            for (int action = 0; action < NUM_ACTIONS; action++) {
+            for (int action = 0; action < num_actions; action++) {
                 if (q_table[state][action] > max_val) {
                     max_val = q_table[state][action];
                     max_action = action;
@@ -61,11 +72,10 @@ int choose_action(int state, float epsilon) {
             }
             action = actions[max_action];
         }
-    } while (action == 0);  // Continua se a ação for 0
+    } while (action == 0);
 
     return action;
 }
-
 
 
 
@@ -75,65 +85,75 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
     static double old_walltime = 0.0;
     static double epsilon = EPSILON_START;
 
-    // Gera valores iniciais aleatórios para Bsize_X e Bsize_Y na primeira chamada da função
     if (old_Bsize_X == -1 || old_Bsize_Y == -1) {
-        old_Bsize_X = actions[rand() % NUM_ACTIONS];
-        old_Bsize_Y = actions[rand() % NUM_ACTIONS];
+        old_Bsize_X = actions_X[rand() % NUM_ACTIONS_X];
+        old_Bsize_Y = actions_Y[rand() % NUM_ACTIONS_Y];
     }
 
-    // Se não for a primeira iteração, atualiza a tabela Q com base no tempo de execução anterior
     if (iteration != 1) {
         int reward = old_walltime - *timeIt;
-        
-        // Encontra o índice de old_Bsize_X e old_Bsize_Y
-        int old_state_index = -1;
-        int old_action_index = -1;
-        for (int i = 0; i < NUM_ACTIONS; i++) {
-            if (actions[i] == old_Bsize_X) old_state_index = i;
-            if (actions[i] == old_Bsize_Y) old_action_index = i;
+
+        int old_state_index_X = -1;
+        int old_action_index_X = -1;
+        for (int i = 0; i < NUM_ACTIONS_X; i++) {
+            if (actions_X[i] == old_Bsize_X) old_state_index_X = i;
+            if (actions_X[i] == old_Bsize_Y) old_action_index_X = i;
         }
 
-        // Seleciona uma nova ação e encontra o índice correspondente
-        int new_state = choose_action(old_state_index, epsilon);
-        int new_state_index = -1;
-        for (int i = 0; i < NUM_ACTIONS; i++) {
-            if (actions[i] == new_state) new_state_index = i;
+        int new_state_X = choose_action(old_state_index_X, epsilon, actions_X, NUM_ACTIONS_X, q_table_X);
+        int new_state_index_X = -1;
+        for (int i = 0; i < NUM_ACTIONS_X; i++) {
+            if (actions_X[i] == new_state_X) new_state_index_X = i;
         }
 
-        int new_action = choose_action(old_action_index, epsilon);
-        int new_action_index = -1;
-        for (int i = 0; i < NUM_ACTIONS; i++) {
-            if (actions[i] == new_action) new_action_index = i;
-        }
-
-        // Atualiza a tabela Q
-        float old_q_value = q_table[old_state_index][old_action_index];
-        float max_new_q_value = -1e9;
-        for (int action = 0; action < NUM_ACTIONS; action++) {
-            if (q_table[new_state_index][action] > max_new_q_value) {
-                max_new_q_value = q_table[new_state_index][action];
+        float old_q_value_X = q_table_X[old_state_index_X][old_action_index_X];
+        float max_new_q_value_X = -1e9;
+        for (int action = 0; action < NUM_ACTIONS_X; action++) {
+            if (q_table_X[new_state_index_X][action] > max_new_q_value_X) {
+                max_new_q_value_X = q_table_X[new_state_index_X][action];
             }
         }
 
-        q_table[old_state_index][old_action_index] = old_q_value + ALPHA * (reward + GAMMA * max_new_q_value - old_q_value);
+        q_table_X[old_state_index_X][old_action_index_X] = old_q_value_X + ALPHA * (reward + GAMMA * max_new_q_value_X - old_q_value_X);
 
-        // Atualiza os tamanhos de bloco
-        old_Bsize_X = new_state;
-        old_Bsize_Y = new_action;
+        old_Bsize_X = new_state_X;
+
+        // Repita o processo acima para Y
+        int old_state_index_Y = -1;
+        int old_action_index_Y = -1;
+        for (int i = 0; i < NUM_ACTIONS_Y; i++) {
+            if (actions_Y[i] == old_Bsize_X) old_state_index_Y = i;
+            if (actions_Y[i] == old_Bsize_Y) old_action_index_Y = i;
+        }
+
+        int new_state_Y = choose_action(old_state_index_Y, epsilon, actions_Y, NUM_ACTIONS_Y, q_table_Y);
+        int new_state_index_Y = -1;
+        for (int i = 0; i < NUM_ACTIONS_Y; i++) {
+            if (actions_Y[i] == new_state_Y) new_state_index_Y = i;
+        }
+
+        float old_q_value_Y = q_table_Y[old_state_index_Y][old_action_index_Y];
+        float max_new_q_value_Y = -1e9;
+        for (int action = 0; action < NUM_ACTIONS_Y; action++) {
+            if (q_table_Y[new_state_index_Y][action] > max_new_q_value_Y) {
+                max_new_q_value_Y = q_table_Y[new_state_index_Y][action];
+            }
+        }
+
+        q_table_Y[old_state_index_Y][old_action_index_Y] = old_q_value_Y + ALPHA * (reward + GAMMA * max_new_q_value_Y - old_q_value_Y);
+
+        old_Bsize_Y = new_state_Y;
     }
 
-    // Atualiza o tempo de execução antigo
     old_walltime = *timeIt;
-
-    // Atualiza bsize_x e bsize_y
     *bsize_x = old_Bsize_X;
     *bsize_y = old_Bsize_Y;
 
-    // Decaimento de epsilon
     if (epsilon > EPSILON_MIN) {
         epsilon -= EPSILON_DECAY;
     }
 }
+
 
 
 
