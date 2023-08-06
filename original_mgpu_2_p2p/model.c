@@ -5,24 +5,18 @@
 #include "walltime.h"
 #include "model.h"
 #include "CUDA/cuda_stuff.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-#define NUM_ACTIONS 6
-#define EPSILON 0.1
-#define ALPHA 0.5
-#define GAMMA 0.9
-#define EPSILON_START 1.0
-#define EPSILON_MIN 0
-#define EPSILON_DECAY 0.01
 
-#define NUM_ACTIONS_X 5  // bsize_x pode ser {2, 4, 8, 16, 32}, então temos 5 ações possíveis
-#define NUM_ACTIONS_Y 4  // bsize_y pode ser {2, 4, 8, 16}, então temos 4 ações possíveis
+#define NUM_THREADS_X 7
+#define NUM_THREADS_Y 7
+#define NUM_ACTIONS (NUM_THREADS_X * NUM_THREADS_Y)
 
+// Definição dos valores possíveis de threads por bloco em X e Y.
+int valores_threads_X[NUM_THREADS_X] = {2, 4, 8, 16, 32, 64, 128};
+int valores_threads_Y[NUM_THREADS_Y] = {2, 4, 8, 16, 32, 64, 128};
 
-int actions_X[NUM_ACTIONS_X] = {2, 4, 8, 16, 32};
-int actions_Y[NUM_ACTIONS_Y] = {2, 4, 8, 16};
-
-float q_table_X[NUM_ACTIONS_X][NUM_ACTIONS_X]= {0};
-float q_table_Y[NUM_ACTIONS_Y][NUM_ACTIONS_Y]= {0};
 
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
@@ -38,129 +32,128 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
   fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
 }
 
-// Função para inicializar as tabelas Q
-void initialize_q_table() {
-    // Inicializar a tabela Q para bsize_x
-    for (int i = 0; i < NUM_ACTIONS_X; i++) {
-        for (int j = 0; j < NUM_ACTIONS_X; j++) {
-            q_table_X[i][j] = 0.0;
-        }
-    }
-    // Inicializar a tabela Q para bsize_y
-    for (int i = 0; i < NUM_ACTIONS_Y; i++) {
-        for (int j = 0; j < NUM_ACTIONS_Y; j++) {
-            q_table_Y[i][j] = 0.0;
-        }
-    }
+// Função para verificar se a combinação de threads por bloco respeita o limite de 1024.
+int verifica_limite(int threads_X, int threads_Y) {
+    return (threads_X * threads_Y < 1024);
 }
 
-
-// Função para escolher a próxima ação
-// Função para escolher a próxima ação
-int choose_action(int state, float epsilon, int actions[], int num_actions, float q_table[][num_actions]) {
-    float random_number = (float)rand() / RAND_MAX;
-    if (random_number < epsilon) {
-        // Ação aleatória para exploração
-        return actions[rand() % num_actions];
+// Função para escolher uma ação com base na política ε-greedy.
+int escolher_acao(double** Q, int estado, double epsilon) {
+    if (rand() / (double)RAND_MAX < epsilon) {
+        // Escolher uma ação aleatória (exploração).
+        return rand() % NUM_ACTIONS;
     } else {
-        // Escolhe a ação com o maior valor Q para explotação
-        int best_action_index = 0;
-        float best_q_value = q_table[state][0];
-        for (int i = 1; i < num_actions; i++) {
-            if (q_table[state][i] > best_q_value) {
-                best_q_value = q_table[state][i];
-                best_action_index = i;
+        // Escolher a melhor ação com base na tabela Q (exploração).
+        int melhor_acao = 0;
+        for (int a = 1; a < NUM_ACTIONS; a++) {
+            if (Q[estado][a] > Q[estado][melhor_acao]) {
+                melhor_acao = a;
             }
         }
-        return actions[best_action_index];
+        return melhor_acao;
     }
 }
 
-
-
-
-void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
-    static int old_Bsize_X = -1;
-    static int old_Bsize_Y = -1;
-    static double old_walltime = 0.0;
-    static double epsilon = EPSILON_START;
-
-    if (old_Bsize_X == -1 || old_Bsize_Y == -1) {
-        old_Bsize_X = actions_X[rand() % NUM_ACTIONS_X];
-        old_Bsize_Y = actions_Y[rand() % NUM_ACTIONS_Y];
+// Função para atualizar a tabela Q com base no algoritmo de Q-learning.
+void atualizar_Q(double** Q, int estado, int acao, double recompensa, int proximo_estado, double taxa_aprendizado, double fator_desconto) {
+    double valor_maximo_proximo_estado = Q[proximo_estado][0];
+    for (int a = 1; a < NUM_ACTIONS; a++) {
+        if (Q[proximo_estado][a] > valor_maximo_proximo_estado) {
+            valor_maximo_proximo_estado = Q[proximo_estado][a];
+        }
     }
+    double novo_valor_Q = Q[estado][acao] + taxa_aprendizado * (recompensa + fator_desconto * valor_maximo_proximo_estado - Q[estado][acao]);
+    Q[estado][acao] = novo_valor_Q;
+}
 
-    if (iteration != 1) {
-        int reward = old_walltime - *timeIt; // Redução de tempo resulta em recompensa positiva
-        if (reward < 0) {
-            reward = -reward; // Aumento de tempo resulta em recompensa negativa
+// Função para inicializar a tabela Q
+double** inicializar_tabela_Q(int num_estados) {
+    double** Q = (double*)malloc(num_estados * sizeof(double));
+    for (int i = 0; i < num_estados; i++) {
+        Q[i] = (double*)malloc(NUM_ACTIONS * sizeof(double));
+        for (int j = 0; j < NUM_ACTIONS; j++) {
+            Q[i][j] = 0.0;
         }
+    }
+    return Q;
+}
 
-        int old_state_index_X = -1;
-        int old_action_index_X = -1;
-        for (int i = 0; i < NUM_ACTIONS_X; i++) {
-            if (actions_X[i] == old_Bsize_X) old_state_index_X = i;
-            if (actions_X[i] == old_Bsize_Y) old_action_index_X = i;
-        }
-
-        int new_state_X = choose_action(old_state_index_X, epsilon, actions_X, NUM_ACTIONS_X, q_table_X);
-        int new_state_index_X = -1;
-        for (int i = 0; i < NUM_ACTIONS_X; i++) {
-            if (actions_X[i] == new_state_X) new_state_index_X = i;
-        }
-
-        float old_q_value_X = q_table_X[old_state_index_X][old_action_index_X];
-        float max_new_q_value_X = -1e9;
-        for (int action = 0; action < NUM_ACTIONS_X; action++) {
-            if (q_table_X[new_state_index_X][action] > max_new_q_value_X) {
-                max_new_q_value_X = q_table_X[new_state_index_X][action];
+// Função para criar o espaço de estados
+int** criar_espaco_estados(int num_estados) {
+    int valores_threads_X[NUM_THREADS_X] = {2, 4, 8, 16, 32, 64, 128};
+    int valores_threads_Y[NUM_THREADS_Y] = {2, 4, 8, 16, 32, 64, 128};
+    int** estados = (int*)malloc(num_estados * sizeof(int));
+    int num_combinacoes_validas = 0;
+    for (int i = 0; i < NUM_THREADS_X; i++) {
+        for (int j = 0; j < NUM_THREADS_Y; j++) {
+            int threads_X = valores_threads_X[i];
+            int threads_Y = valores_threads_Y[j];
+            if (verifica_limite(threads_X, threads_Y)) {
+                estados[num_combinacoes_validas] = (int*)malloc(2 * sizeof(int));
+                estados[num_combinacoes_validas][0] = threads_X;
+                estados[num_combinacoes_validas][1] = threads_Y;
+                num_combinacoes_validas++;
             }
         }
-
-        q_table_X[old_state_index_X][old_action_index_X] = old_q_value_X + ALPHA * (reward + GAMMA * max_new_q_value_X - old_q_value_X);
-
-        old_Bsize_X = new_state_X;
-
-        // Repita o processo acima para Y
-        int old_state_index_Y = -1;
-        int old_action_index_Y = -1;
-        for (int i = 0; i < NUM_ACTIONS_Y; i++) {
-            if (actions_Y[i] == old_Bsize_X) old_state_index_Y = i;
-            if (actions_Y[i] == old_Bsize_Y) old_action_index_Y = i;
-        }
-
-        int new_state_Y = choose_action(old_state_index_Y, epsilon, actions_Y, NUM_ACTIONS_Y, q_table_Y);
-        int new_state_index_Y = -1;
-        for (int i = 0; i < NUM_ACTIONS_Y; i++) {
-            if (actions_Y[i] == new_state_Y) new_state_index_Y = i;
-        }
-
-        float old_q_value_Y = q_table_Y[old_state_index_Y][old_action_index_Y];
-        float max_new_q_value_Y = -1e9;
-        for (int action = 0; action < NUM_ACTIONS_Y; action++) {
-            if (q_table_Y[new_state_index_Y][action] > max_new_q_value_Y) {
-                max_new_q_value_Y = q_table_Y[new_state_index_Y][action];
-            }
-        }
-
-        q_table_Y[old_state_index_Y][old_action_index_Y] = old_q_value_Y + ALPHA * (reward + GAMMA * max_new_q_value_Y - old_q_value_Y);
-
-        old_Bsize_Y = new_state_Y;
     }
+    return estados;
+}
 
-    old_walltime = *timeIt;
-    *bsize_x = old_Bsize_X;
-    *bsize_y = old_Bsize_Y;
+void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double epsilon, double taxa_aprendizado, double fator_desconto) {
+    int estado_atual = 0;
+    for (int iteracao = 0; iteracao < num_combinacoes_validas; iteracao++) {
+        // Definir a configuração inicial como 16x16 na primeira iteração.
+        if (iteracao == 0) {
+            estado_atual = num_combinacoes_validas - 1; // Última configuração (16x16).
+        } else {
+            // Escolher um estado atual (configuração atual) aleatoriamente.
+            estado_atual = rand() % num_combinacoes_validas;
+        }
 
-    if (epsilon > EPSILON_MIN) {
-        epsilon -= EPSILON_DECAY;
+        // Escolher uma ação (configuração) com base na política ε-greedy.
+        int acao_escolhida = escolher_acao(Q, estado_atual, epsilon);
+
+        // Obter os valores de threads por bloco em X e Y para a ação escolhida.
+        int threads_por_bloco_X = estados[estado_atual][0];
+        int threads_por_bloco_Y = estados[estado_atual][1];
+
+        // Calcular o tempo de execução para a configuração escolhida.
+        double tempo_execucao = calcular_tempo_execucao(threads_por_bloco_X, threads_por_bloco_Y);
+
+        // Calcular a recompensa com base no tempo de execução observado.
+        double recompensa = 1.0 / tempo_execucao;
+
+        // Atualizar a tabela Q com base no algoritmo de Q-learning.
+        int proximo_estado = acao_escolhida; // Para este exemplo, o próximo estado é o mesmo que a ação escolhida.
+        atualizar_Q(Q, estado_atual, acao_escolhida, recompensa, proximo_estado, taxa_aprendizado, fator_desconto);
     }
 }
 
+void liberar_memoria(double** Q, int** estados, int num_estados, int num_combinacoes_validas) {
+    for (int i = 0; i < num_estados; i++) {
+        free(Q[i]);
+    }
+    free(Q);
+
+    for (int i = 0; i < num_combinacoes_validas; i++) {
+        free(estados[i]);
+    }
+    free(estados);
+}
 
 
-
-
+// Função para criar e inicializar a tabela Q.
+double** criar_tabela_Q(int num_estados, int num_acoes) {
+    double** Q = (double*)malloc(num_estados * sizeof(double));
+    for (int i = 0; i < num_estados; i++) {
+        Q[i] = (double*)malloc(num_acoes * sizeof(double));
+        for (int j = 0; j < num_acoes; j++) {
+            Q[i][j] = 0.0; // Inicialização com zeros.
+            // Alternativamente, você pode inicializar com valores arbitrários.
+        }
+    }
+    return Q;
+}
 
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
            const float dx, const float dy, const float dz, const float dt, const int it, float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
@@ -233,15 +226,43 @@ double timeIt=0.0;
 int bsize_x, bsize_y;
 
 // Inicialize a tabela Q e o gerador de números aleatórios
-initialize_q_table();
+//initialize_q_table();
 srand(time(NULL));
+
+// Definição dos valores possíveis de threads por bloco em X e Y.
+int num_estados = NUM_THREADS_X * NUM_THREADS_Y;
+
+//CRIA estados
+int** estados = criar_espaco_estados(num_estados);
+
+// Contagem das combinações válidas
+    int num_combinacoes_validas = 0;
+    for (int i = 0; i < NUM_THREADS_X; i++) {
+        for (int j = 0; j < NUM_THREADS_Y; j++) {
+            int threads_X = valores_threads_X[i];
+            int threads_Y = valores_threads_Y[j];
+            if (verifica_limite(threads_X, threads_Y)) {
+                num_combinacoes_validas++;
+            }
+        }
+    }
+
+// Inicialização da tabela Q com valores arbitrários (ou zeros).
+double** Q = inicializar_tabela_Q(num_estados);
+
+
 
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
 
-    optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
+    //optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
+    // Loop de iterações do Q-learning.
+    double epsilon = 0.1; // Altere para o seu valor de epsilon.
+    double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
+    double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
+    executar_Q_learning(Q, estados, num_combinacoes_validas, epsilon, taxa_aprendizado, fator_desconto);
 
     printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
     printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
