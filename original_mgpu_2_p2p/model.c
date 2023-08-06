@@ -64,24 +64,18 @@ Individual tournament_selection() {
     return selected;
 }
 
-// Função para gerar um valor válido para bsize_x ou bsize_y
-int generate_valid_bsize_value(int counterpart) {
-    int possible_values[] = {2, 4, 8, 16, 32, 64, 128};
-    int value;
-    do {
-        value = possible_values[rand() % 7];
-    } while (value * counterpart >= 1024);
-    return value;
-}
-
-// Função de crossover
+// Realiza cruzamento entre dois indivíduos
+// Realiza cruzamento entre dois indivíduos
 Individual crossover(Individual parent1, Individual parent2) {
     Individual offspring;
-    offspring.bsize_x = (rand() < 0.5) ? parent1.bsize_x : parent2.bsize_x;
-    offspring.bsize_y = generate_valid_bsize_value(offspring.bsize_x);
+    do {
+        offspring.bsize_x = (rand() < 0.5) ? parent1.bsize_x : parent2.bsize_x;
+        offspring.bsize_y = (rand() < 0.5) ? parent1.bsize_y : parent2.bsize_y;
+    } while (offspring.bsize_x * offspring.bsize_y >= 1024);
     offspring.timeIt = __DBL_MAX__;
     return offspring;
 }
+
 
 void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
     // Se a população não foi inicializada, inicialize
