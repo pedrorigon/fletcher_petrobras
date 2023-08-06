@@ -12,7 +12,7 @@
 #define GAMMA 0.9
 
 int actions[NUM_ACTIONS] = {1, 2, 4, 8, 16, 32};
-float q_table[NUM_ACTIONS][NUM_ACTIONS];
+float q_table[NUM_ACTIONS][NUM_ACTIONS]= {0};
 
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
@@ -28,6 +28,7 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
   fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
 }
 
+// Função para inicializar a tabela Q
 void initialize_q_table() {
     for (int i = 0; i < NUM_ACTIONS; i++) {
         for (int j = 0; j < NUM_ACTIONS; j++) {
@@ -36,49 +37,66 @@ void initialize_q_table() {
     }
 }
 
-void get_best_block_sizes(int *bsize_x, int *bsize_y, double walltime) {
-    srand(time(0));
-    static int last_x = 0;
-    static int last_y = 0;
-    int x, y;
-
-    if ((double)rand() / (double)RAND_MAX < EPSILON) {
-        // Explore: choose a random action
-        x = rand() % NUM_ACTIONS;
-        y = rand() % NUM_ACTIONS;
-    } else {
-        // Exploit: choose the action with the highest Q-value
-        float max_q_value = -1.0;
-        for (int i = 0; i < NUM_ACTIONS; i++) {
-            for (int j = 0; j < NUM_ACTIONS; j++) {
-                if (q_table[i][j] > max_q_value) {
-                    max_q_value = q_table[i][j];
-                    x = i;
-                    y = j;
-                }
+// Função para escolher a próxima ação
+int choose_action(int state, float epsilon) {
+    // Escolhe uma ação aleatória com probabilidade epsilon
+    if (((float) rand() / RAND_MAX) < epsilon) {
+        return rand() % NUM_ACTIONS;
+    }
+    // Caso contrário, escolhe a ação com maior valor Q
+    else {
+        float max_val = -1e9;
+        int max_action = -1;
+        for (int action = 0; action < NUM_ACTIONS; action++) {
+            if (q_table[state][action] > max_val) {
+                max_val = q_table[state][action];
+                max_action = action;
             }
         }
+        return max_action;
+    }
+}
+
+
+void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsize_y) {
+    static int old_Bsize_X = -1;
+    static int old_Bsize_Y = -1;
+    static double old_walltime = 0.0;
+
+    // Gera valores iniciais aleatórios para Bsize_X e Bsize_Y na primeira chamada da função
+    if (old_Bsize_X == -1 || old_Bsize_Y == -1) {
+        old_Bsize_X = actions[rand() % NUM_ACTIONS];
+        old_Bsize_Y = actions[rand() % NUM_ACTIONS];
     }
 
-    *bsize_x = actions[x];
-    *bsize_y = actions[y];
+    // Se não for a primeira iteração, atualiza a tabela Q com base no tempo de execução anterior
+    if (iteration != 1) {
+        int reward = old_walltime - *timeIt;
+        int old_state = old_Bsize_X;
+        int old_action = old_Bsize_Y;
+        int new_state = choose_action(old_Bsize_X, EPSILON);
+        int new_action = choose_action(old_Bsize_Y, EPSILON);
 
-    // Update Q-table based on the reward from the last action
-    if (last_x != 0 || last_y != 0) {
-        float reward = -walltime;  // Lower walltime is better
-        float max_q_value = -1.0;
-        for (int i = 0; i < NUM_ACTIONS; i++) {
-            for (int j = 0; j < NUM_ACTIONS; j++) {
-                if (q_table[i][j] > max_q_value) {
-                    max_q_value = q_table[i][j];
-                }
+        float old_q_value = q_table[old_state][old_action];
+        float max_new_q_value = -1e9;
+        for (int action = 0; action < NUM_ACTIONS; action++) {
+            if (q_table[new_state][action] > max_new_q_value) {
+                max_new_q_value = q_table[new_state][action];
             }
         }
-        q_table[last_x][last_y] = (1 - ALPHA) * q_table[last_x][last_y] + ALPHA * (reward + GAMMA * max_q_value);
+
+        q_table[old_state][old_action] = old_q_value + ALPHA * (reward + GAMMA * max_new_q_value - old_q_value);
+
+        old_Bsize_X = new_state;
+        old_Bsize_Y = new_action;
     }
 
-    last_x = x;
-    last_y = y;
+    // Atualiza o tempo de execução antigo
+    old_walltime = *timeIt;
+
+    // Atualiza bsize_x e bsize_y
+    *bsize_x = old_Bsize_X;
+    *bsize_y = old_Bsize_Y;
 }
 
 
@@ -151,12 +169,17 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 double walltime=0.0;
 double timeIt=0.0;
 int bsize_x, bsize_y;
+
+// Inicialize a tabela Q e o gerador de números aleatórios
+initialize_q_table();
+srand(time(NULL));
+
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
 
-    get_best_block_sizes(&bsize_x, &bsize_y, timeIt);
+    optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
 
     printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
     printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
