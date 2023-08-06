@@ -90,25 +90,40 @@ double** inicializar_tabela_Q(int num_estados) {
 }
 
 // Função para criar o espaço de estados
-int** criar_espaco_estados(int num_estados) {
-    int** estados = (int**)malloc(num_estados * sizeof(int*));
-    int num_combinacoes_validas = 0;
+// Função para criar o espaço de estados
+int** criar_espaco_estados(int* num_combinacoes_validas) {
+    // Calcula o número de combinações válidas primeiro
+    *num_combinacoes_validas = 0;
     for (int i = 0; i < NUM_THREADS_X; i++) {
         for (int j = 0; j < NUM_THREADS_Y; j++) {
             int threads_X = valores_threads_X[i];
             int threads_Y = valores_threads_Y[j];
             int validade = verifica_limite(threads_X, threads_Y);
-            printf("validade threads x * y : %d", validade);
             if (validade == 1) {
-                estados[num_combinacoes_validas] = (int*)malloc(2 * sizeof(int));
-                estados[num_combinacoes_validas][0] = threads_X;
-                estados[num_combinacoes_validas][1] = threads_Y;
-                num_combinacoes_validas++;
+                (*num_combinacoes_validas)++;
+            }
+        }
+    }
+    
+    int** estados = (int**)malloc(*num_combinacoes_validas * sizeof(int*));
+
+    int num_combinacoes_adicionadas = 0;
+    for (int i = 0; i < NUM_THREADS_X; i++) {
+        for (int j = 0; j < NUM_THREADS_Y; j++) {
+            int threads_X = valores_threads_X[i];
+            int threads_Y = valores_threads_Y[j];
+            int validade = verifica_limite(threads_X, threads_Y);
+            if (validade == 1) {
+                estados[num_combinacoes_adicionadas] = (int*)malloc(2 * sizeof(int));
+                estados[num_combinacoes_adicionadas][0] = threads_X;
+                estados[num_combinacoes_adicionadas][1] = threads_Y;
+                num_combinacoes_adicionadas++;
             }
         }
     }
     return estados;
 }
+
 
 int obter_max_Q(double** Q, int** estados, int num_combinacoes_validas) {
     int indice_max = 0;
