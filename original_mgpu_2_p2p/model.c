@@ -91,13 +91,9 @@ void optimize_block_sizes(int iteration, double *timeIt, int *bsize_x, int *bsiz
     }
 
     if (iteration != 1) {
-        int reward = *timeIt - old_walltime;  // Alteração feita aqui.
-
-        // Limitar a recompensa a um intervalo [-1, 1]
-        if (reward > 1) {
-            reward = 1;
-        } else if (reward < -1) {
-            reward = -1;
+        int reward = old_walltime - *timeIt; // Redução de tempo resulta em recompensa positiva
+        if (reward > 0) {
+            reward = -reward; // Aumento de tempo resulta em recompensa negativa
         }
 
         int old_state_index_X = -1;
