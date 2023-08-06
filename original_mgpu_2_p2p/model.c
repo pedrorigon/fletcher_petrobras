@@ -34,7 +34,7 @@ void initialize_population() {
         do {
             population[i].bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
             population[i].bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-        } while (population[i].bsize_x * population[i].bsize_y > 1024);
+        } while (population[i].bsize_x * population[i].bsize_y >= 1024);
 
         population[i].timeIt = __DBL_MAX__;
     }
@@ -46,7 +46,7 @@ void mutate(Individual *individual) {
     do {
         individual->bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
         individual->bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
-    } while (individual->bsize_x * individual->bsize_y > 1024);
+    } while (individual->bsize_x * individual->bsize_y >= 1024);
 }
 
 // Seleciona um indivíduo da população para cruzamento
