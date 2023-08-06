@@ -42,23 +42,30 @@ void initialize_q_table() {
 
 // Função para escolher a próxima ação
 int choose_action(int state, float epsilon) {
-    // Escolhe uma ação aleatória com probabilidade epsilon
-    if (((float) rand() / RAND_MAX) < epsilon) {
-        return actions[rand() % NUM_ACTIONS];
-    }
-    // Caso contrário, escolhe a ação com maior valor Q
-    else {
-        float max_val = -1e9;
-        int max_action = -1;
-        for (int action = 0; action < NUM_ACTIONS; action++) {
-            if (q_table[state][action] > max_val) {
-                max_val = q_table[state][action];
-                max_action = action;
-            }
+    int action;
+    // Continua a gerar ações aleatórias até que uma ação válida seja gerada
+    do {
+        // Escolhe uma ação aleatória com probabilidade epsilon
+        if (((float) rand() / RAND_MAX) < epsilon) {
+            action = actions[rand() % NUM_ACTIONS];
         }
-        return actions[max_action];
-    }
+        // Caso contrário, escolhe a ação com maior valor Q
+        else {
+            float max_val = -1e9;
+            int max_action = -1;
+            for (int action = 0; action < NUM_ACTIONS; action++) {
+                if (q_table[state][action] > max_val) {
+                    max_val = q_table[state][action];
+                    max_action = action;
+                }
+            }
+            action = actions[max_action];
+        }
+    } while (action == 0);  // Continua se a ação for 0
+
+    return action;
 }
+
 
 
 
