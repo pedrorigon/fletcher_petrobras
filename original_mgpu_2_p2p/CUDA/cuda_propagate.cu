@@ -259,8 +259,8 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
     CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
 
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
+    //CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
+    //CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
 
 }
 
