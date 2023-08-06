@@ -8,22 +8,106 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#define POPULATION_SIZE 50
+// Valores possíveis para bsize_x e bsize_y
+int bsize_values[] = {2, 4, 8, 16, 32, 64, 128};
 
-#define NUM_THREADS_X 7
-#define NUM_THREADS_Y 7
-#define NUM_ACTIONS (NUM_THREADS_X * NUM_THREADS_Y)
-#define EPS_DECAY_RATE 0.90
+// Indivíduo na população
+typedef struct {
+    int bsize_x;
+    int bsize_y;
+    double timeIt;
+} Individual;
 
-// Definição dos valores possíveis de threads por bloco em X e Y.
-int valores_threads_X[NUM_THREADS_X] = {2, 4, 8, 16, 32, 64, 128};
-int valores_threads_Y[NUM_THREADS_Y] = {2, 4, 8, 16, 32, 64, 128};
-
+Individual population[POPULATION_SIZE];
+Individual best_individual;
 
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
 
 //#undef MODEL_GLOBALVARS
 
+// Inicializa a população com indivíduos aleatórios
+void initialize_population() {
+    srand(time(NULL));
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        do {
+            population[i].bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
+            population[i].bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
+        } while (population[i].bsize_x * population[i].bsize_y > 1024);
+
+        population[i].timeIt = __DBL_MAX__;
+    }
+    best_individual = population[0];
+}
+
+// Realiza mutação em um indivíduo
+void mutate(Individual *individual) {
+    do {
+        individual->bsize_x = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
+        individual->bsize_y = bsize_values[rand() % (sizeof(bsize_values) / sizeof(int))];
+    } while (individual->bsize_x * individual->bsize_y > 1024);
+}
+
+// Seleciona um indivíduo da população para cruzamento
+Individual tournament_selection() {
+    Individual selected;
+    int selected_index = rand() % POPULATION_SIZE;
+    selected = population[selected_index];
+    for (int i = 0; i < 5; i++) { // Compete com 5 outros indivíduos
+        int competitor_index = rand() % POPULATION_SIZE;
+        if (population[competitor_index].timeIt < selected.timeIt) {
+            selected = population[competitor_index];
+            selected_index = competitor_index;
+        }
+    }
+    return selected;
+}
+
+// Realiza cruzamento entre dois indivíduos
+Individual crossover(Individual parent1, Individual parent2) {
+    Individual offspring;
+    offspring.bsize_x = (rand() < 0.5) ? parent1.bsize_x : parent2.bsize_x;
+    offspring.bsize_y = (rand() < 0.5) ? parent1.bsize_y : parent2.bsize_y;
+    if (offspring.bsize_x * offspring.bsize_y > 1024) {
+        offspring.bsize_x = 2;
+        offspring.bsize_y = 2;
+    }
+    offspring.timeIt = __DBL_MAX__;
+    return offspring;
+}
+
+void update_bsize_values(int *bsize_x, int *bsize_y, double timeIt) {
+    // Se a população não foi inicializada, inicialize
+    if (best_individual.timeIt == __DBL_MAX__) {
+        initialize_population();
+    }
+
+    // Atualize o tempo do indivíduo correspondente à geração atual
+    int current_generation = (int) (*bsize_x == best_individual.bsize_x && *bsize_y == best_individual.bsize_y);
+    population[current_generation].timeIt = timeIt;
+
+    // Verifique se o indivíduo atual é o melhor até agora
+    if (timeIt < best_individual.timeIt) {
+        best_individual.bsize_x = *bsize_x;
+        best_individual.bsize_y = *bsize_y;
+        best_individual.timeIt = timeIt;
+    }
+
+    // Realize operações de cruzamento e mutação para gerar a próxima geração
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        Individual parent1 = tournament_selection();
+        Individual parent2 = tournament_selection();
+        population[i] = crossover(parent1, parent2);
+        if ((double) rand() / RAND_MAX < 0.1) { // 10% de chance de mutação
+            mutate(&population[i]);
+        }
+    }
+
+    // A próxima chamada para essa função usará o primeiro indivíduo da nova geração
+    *bsize_x = population[0].bsize_x;
+    *bsize_y = population[0].bsize_y;
+}
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
@@ -33,187 +117,6 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
   fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
 }
 
-// Função para verificar se a combinação de threads por bloco respeita o limite de 1024.
-int verifica_limite(int threads_X, int threads_Y) {
-    if (threads_X * threads_Y < 1024){
-      return 1;
-    }
-    else {
-      return 0;
-    }
-}
-
-// Função para escolher uma ação com base na política ε-greedy.
-int escolher_acao(double** Q, int estado, double* epsilon) {
-    if (rand() / (double)RAND_MAX < *epsilon) {
-        int acao;
-        do {
-            acao = rand() % NUM_ACTIONS;
-        } while (!verifica_limite(valores_threads_X[acao / NUM_THREADS_Y], valores_threads_Y[acao % NUM_THREADS_Y]));
-        *epsilon *= EPS_DECAY_RATE;
-        return acao;
-    } else {
-        int melhor_acao = 0;
-        for (int a = 1; a < NUM_ACTIONS; a++) {
-            if (Q[estado][a] > Q[estado][melhor_acao] && verifica_limite(valores_threads_X[a / NUM_THREADS_Y], valores_threads_Y[a % NUM_THREADS_Y])) {
-                melhor_acao = a;
-            }
-        }
-        return melhor_acao;
-    }
-}
-
-
-// Função para atualizar a tabela Q com base no algoritmo de Q-learning.
-void atualizar_Q(double** Q, int estado, int acao, double recompensa, int proximo_estado, double taxa_aprendizado, double fator_desconto) {
-    double valor_maximo_proximo_estado = Q[proximo_estado][0];
-    for (int a = 1; a < NUM_ACTIONS; a++) {
-        if (Q[proximo_estado][a] > valor_maximo_proximo_estado) {
-            valor_maximo_proximo_estado = Q[proximo_estado][a];
-        }
-    }
-    double novo_valor_Q = Q[estado][acao] + taxa_aprendizado * (recompensa + fator_desconto * valor_maximo_proximo_estado - Q[estado][acao]);
-    printf("valor Q %f", novo_valor_Q);
-    Q[estado][acao] = novo_valor_Q;
-}
-
-// Função para inicializar a tabela Q
-double** inicializar_tabela_Q(int num_estados) {
-    double** Q = (double**)malloc(num_estados * sizeof(double*));
-    for (int i = 0; i < num_estados; i++) {
-        Q[i] = (double*)malloc(NUM_ACTIONS * sizeof(double));
-        for (int j = 0; j < NUM_ACTIONS; j++) {
-            Q[i][j] = 0.0;
-        }
-    }
-    return Q;
-}
-
-// Função para criar o espaço de estados
-// Função para criar o espaço de estados
-int** criar_espaco_estados(int* num_combinacoes_validas) {
-    // Calcula o número de combinações válidas primeiro
-    *num_combinacoes_validas = 0;
-    for (int i = 0; i < NUM_THREADS_X; i++) {
-        for (int j = 0; j < NUM_THREADS_Y; j++) {
-            int threads_X = valores_threads_X[i];
-            int threads_Y = valores_threads_Y[j];
-            int validade = verifica_limite(threads_X, threads_Y);
-            if (validade == 1) {
-                (*num_combinacoes_validas)++;
-            }
-        }
-    }
-    
-    int** estados = (int**)malloc(*num_combinacoes_validas * sizeof(int*));
-
-    int num_combinacoes_adicionadas = 0;
-    for (int i = 0; i < NUM_THREADS_X; i++) {
-        for (int j = 0; j < NUM_THREADS_Y; j++) {
-            int threads_X = valores_threads_X[i];
-            int threads_Y = valores_threads_Y[j];
-            int validade = verifica_limite(threads_X, threads_Y);
-            if (validade == 1) {
-                estados[num_combinacoes_adicionadas] = (int*)malloc(2 * sizeof(int));
-                estados[num_combinacoes_adicionadas][0] = threads_X;
-                estados[num_combinacoes_adicionadas][1] = threads_Y;
-                num_combinacoes_adicionadas++;
-            }
-        }
-    }
-    return estados;
-}
-
-
-int obter_max_Q(double** Q, int** estados, int num_combinacoes_validas) {
-    int indice_max = 0;
-    double valor_max = Q[0][0];
-    for (int i = 0; i < num_combinacoes_validas; i++) {
-        for (int j = 0; j < num_combinacoes_validas; j++) {
-            if (Q[i][j] > valor_max) {
-                valor_max = Q[i][j];
-                indice_max = i;
-            }
-        }
-    }
-    return indice_max;
-}
-
-double obter_max_valor_Q(double** Q, int** estados, int num_combinacoes_validas, int estado_atual) {
-    double valor_max = Q[estado_atual][0];
-    for (int j = 1; j < num_combinacoes_validas; j++) {
-        if (Q[estado_atual][j] > valor_max) {
-            valor_max = Q[estado_atual][j];
-        }
-    }
-    return valor_max;
-}
-
-void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas, double* epsilon, double taxa_aprendizado, double fator_desconto, double tempo_execucao, int* bsize_x, int* bsize_y) {
-    static int primeira_chamada = 1;
-    int estado_atual, acao, proximo_estado;
-    double recompensa, Q_max, Q_atual, delta_Q;
-
-    if (primeira_chamada) {
-        primeira_chamada = 0;
-        *bsize_x = 16;
-        *bsize_y = 16;
-    } else {
-        estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
-        printf("dentro do Q learning");
-        printf("estado atual %d", estado_atual);
-
-        *bsize_x = estados[estado_atual][0];
-        *bsize_y = estados[estado_atual][1];
-
-        acao = escolher_acao(Q, estado_atual, epsilon); 
-        printf("acao %d", acao);
-
-        recompensa = 1.0 / tempo_execucao;
-        printf("recompensa %f", recompensa);
-        proximo_estado = acao;
-
-        Q_atual = Q[estado_atual][acao];
-        printf("Q atual %f", Q_atual);
-        Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, proximo_estado);
-        printf("Q max %f", Q_max);
-
-        delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
-        printf("delta Q %f", delta_Q);
-
-        Q[estado_atual][acao] = Q_atual + taxa_aprendizado * delta_Q;
-
-        *epsilon *= EPS_DECAY_RATE;
-    }
-}
-
-
-
-void liberar_memoria(double** Q, int** estados, int num_estados, int num_combinacoes_validas) {
-    for (int i = 0; i < num_estados; i++) {
-        free(Q[i]);
-    }
-    free(Q);
-
-    for (int i = 0; i < num_combinacoes_validas; i++) {
-        free(estados[i]);
-    }
-    free(estados);
-}
-
-
-// Função para criar e inicializar a tabela Q.
-double** criar_tabela_Q(int num_estados, int num_acoes) {
-    double** Q = (double**)malloc(num_estados * sizeof(double*));
-    for (int i = 0; i < num_estados; i++) {
-        Q[i] = (double*)malloc(num_acoes * sizeof(double));
-        for (int j = 0; j < num_acoes; j++) {
-            Q[i][j] = 0.0; // Inicialização com zeros.
-            // Alternativamente, você pode inicializar com valores arbitrários.
-        }
-    }
-    return Q;
-}
 
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
            const float dx, const float dy, const float dz, const float dt, const int it, float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
@@ -283,50 +186,15 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double timeIt=0.0;
-int bsize_x, bsize_y;
+int bsize_x=16, bsize_y=16;
 
-// Inicialize a tabela Q e o gerador de números aleatórios
-//initialize_q_table();
-srand(time(NULL));
 
-// Definição dos valores possíveis de threads por bloco em X e Y.
-int num_estados = NUM_THREADS_X * NUM_THREADS_Y;
-
-//CRIA estados
-int** estados = criar_espaco_estados(num_estados);
-printf("estados %d", estados);
-
-// Contagem das combinações válidas
-int num_combinacoes_validas = 0;
-  for (int i = 0; i < NUM_THREADS_X; i++) {
-      for (int j = 0; j < NUM_THREADS_Y; j++) {
-          int threads_X = valores_threads_X[i];
-          int threads_Y = valores_threads_Y[j];
-          if (verifica_limite(threads_X, threads_Y)) {
-            num_combinacoes_validas++;
-            printf(num_combinacoes_validas);
-          }
-      }
-  }
-
-printf("comb validas %d", num_combinacoes_validas);
-
-// Inicialização da tabela Q com valores arbitrários (ou zeros).
-double** Q = inicializar_tabela_Q(num_estados);
-printf("tabela  Q %f", Q);
 
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
 
-    //optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
-    // Loop de iterações do Q-learning.
-    double epsilon = 0.9; // Altere para o seu valor de epsilon.
-    double taxa_aprendizado = 0.2; // Altere para o seu valor de taxa de aprendizado.
-    //double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
-    double fator_desconto = 0.8;
-    executar_Q_learning(Q, estados, num_combinacoes_validas, &epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
@@ -340,6 +208,7 @@ for (int it=1; it<=st; it++) {
     walltime+=timeIt;
 
     printf("tempo deu: %lf\n", timeIt);
+    update_bsize_values(&bsize_x, &bsize_y, timeIt);
 
     tSim=it*dt;
     if (tSim >= tOut) {
