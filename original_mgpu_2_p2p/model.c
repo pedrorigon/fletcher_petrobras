@@ -35,7 +35,12 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
 
 // Função para verificar se a combinação de threads por bloco respeita o limite de 1024.
 int verifica_limite(int threads_X, int threads_Y) {
-    return (threads_X * threads_Y < 1024);
+    if (threads_X * threads_Y < 1024){
+      return 1;
+    }
+    else {
+      return 0;
+    }
 }
 
 // Função para escolher uma ação com base na política ε-greedy.
@@ -92,7 +97,9 @@ int** criar_espaco_estados(int num_estados) {
         for (int j = 0; j < NUM_THREADS_Y; j++) {
             int threads_X = valores_threads_X[i];
             int threads_Y = valores_threads_Y[j];
-            if (verifica_limite(threads_X, threads_Y)) {
+            int validade = verifica_limite(threads_X, threads_Y);
+            printf("validade threads x * y : %d", validade);
+            if (validade == 1) {
                 estados[num_combinacoes_validas] = (int*)malloc(2 * sizeof(int));
                 estados[num_combinacoes_validas][0] = threads_X;
                 estados[num_combinacoes_validas][1] = threads_Y;
@@ -139,13 +146,13 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
     } else {
         estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
         printf("dentro do Q learning");
-        printf("estado atual %f", estado_atual);
+        printf("estado atual %d", estado_atual);
 
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
         acao = escolher_acao(Q, estado_atual, epsilon); 
-        printf("acao %f", acao);
+        printf("acao %d", acao);
 
         recompensa = 1.0 / tempo_execucao;
         printf("recompensa %f", recompensa);
@@ -272,26 +279,26 @@ int num_estados = NUM_THREADS_X * NUM_THREADS_Y;
 
 //CRIA estados
 int** estados = criar_espaco_estados(num_estados);
-printf("estados %f", estados);
+printf("estados %d", estados);
 
 // Contagem das combinações válidas
-    int num_combinacoes_validas = 0;
-    for (int i = 0; i < NUM_THREADS_X; i++) {
-        for (int j = 0; j < NUM_THREADS_Y; j++) {
-            int threads_X = valores_threads_X[i];
-            int threads_Y = valores_threads_Y[j];
-            if (verifica_limite(threads_X, threads_Y)) {
-                num_combinacoes_validas++;
-            }
-        }
-    }
+int num_combinacoes_validas = 0;
+  for (int i = 0; i < NUM_THREADS_X; i++) {
+      for (int j = 0; j < NUM_THREADS_Y; j++) {
+          int threads_X = valores_threads_X[i];
+          int threads_Y = valores_threads_Y[j];
+          if (verifica_limite(threads_X, threads_Y)) {
+            num_combinacoes_validas++;
+            printf(num_combinacoes_validas);
+          }
+      }
+  }
 
-printf("comb validas %f", num_combinacoes_validas);
+printf("comb validas %d", num_combinacoes_validas);
 
 // Inicialização da tabela Q com valores arbitrários (ou zeros).
 double** Q = inicializar_tabela_Q(num_estados);
 printf("tabela  Q %f", Q);
-
 
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
