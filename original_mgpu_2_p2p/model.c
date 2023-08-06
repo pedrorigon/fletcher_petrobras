@@ -290,13 +290,14 @@ for (int it=1; it<=st; it++) {
 
     //optimize_block_sizes(it, &timeIt, &bsize_x, &bsize_y);
     // Loop de iterações do Q-learning.
-    double epsilon = 1.0; // Altere para o seu valor de epsilon.
-    double taxa_aprendizado = 0.5; // Altere para o seu valor de taxa de aprendizado.
-    double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
+    double epsilon = 0.9; // Altere para o seu valor de epsilon.
+    double taxa_aprendizado = 0.2; // Altere para o seu valor de taxa de aprendizado.
+    //double fator_desconto = 1 / timeIt; // Altere para o seu valor de fator de desconto.
+    double fator_desconto = 0.8;
     executar_Q_learning(Q, estados, num_combinacoes_validas, &epsilon, taxa_aprendizado, fator_desconto, timeIt, &bsize_x, &bsize_y);
 
-    printf("valor de Bsize_x usado inicialmente: %d \n", bsize_x);
-    printf("valor de Bsize_y usado inicialmente: %d \n", bsize_y);
+    printf("Bsize_x: %d \n", bsize_x);
+    printf("Bsize_y: %d \n", bsize_y);
 
     const double t0=wtime();
     
