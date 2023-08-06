@@ -14,7 +14,7 @@
 #define EPSILON_MIN 0.1
 #define EPSILON_DECAY 0.05
 
-int actions[NUM_ACTIONS] = {1, 2, 4, 8, 16, 32};
+int actions[NUM_ACTIONS] = {2, 4, 8, 16, 32};
 float q_table[NUM_ACTIONS][NUM_ACTIONS]= {0};
 
 //#define MODEL_GLOBALVARS
