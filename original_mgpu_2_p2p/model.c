@@ -56,26 +56,27 @@ void initialize_q_table() {
 
 
 // Função para escolher a próxima ação
+// Função para escolher a próxima ação
 int choose_action(int state, float epsilon, int actions[], int num_actions, float q_table[][num_actions]) {
-    int action;
-    do {
-        if (((float) rand() / RAND_MAX) < epsilon) {
-            action = actions[rand() % num_actions];
-        } else {
-            float max_val = -1e9;
-            int max_action = -1;
-            for (int action = 0; action < num_actions; action++) {
-                if (q_table[state][action] > max_val) {
-                    max_val = q_table[state][action];
-                    max_action = action;
-                }
+    float random_number = (float)rand() / RAND_MAX;
+    if (random_number < epsilon) {
+        // Ação aleatória para exploração
+        return actions[rand() % num_actions];
+    } else {
+        // Escolhe a ação com o maior valor Q para explotação
+        int best_action_index = 0;
+        float best_q_value = q_table[state][0];
+        for (int i = 1; i < num_actions; i++) {
+            if (q_table[state][i] > best_q_value) {
+                best_q_value = q_table[state][i];
+                best_action_index = i;
             }
-            action = actions[max_action];
         }
-    } while (action == 0);
-
-    return action;
+        return actions[best_action_index];
+    }
 }
+
+
 
 
 
