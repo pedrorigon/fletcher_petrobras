@@ -139,25 +139,25 @@ void executar_Q_learning(double** Q, int** estados, int num_combinacoes_validas,
     } else {
         estado_atual = obter_max_Q(Q, estados, num_combinacoes_validas);
         printf("dentro do Q learning");
-        print("estado atual %f", estado_atual);
+        printf("estado atual %f", estado_atual);
 
         *bsize_x = estados[estado_atual][0];
         *bsize_y = estados[estado_atual][1];
 
         acao = escolher_acao(Q, estado_atual, epsilon); 
-        print("acao %f", acao);
+        printf("acao %f", acao);
 
         recompensa = 1.0 / tempo_execucao;
         printf("recompensa %f", recompensa);
         proximo_estado = acao;
 
         Q_atual = Q[estado_atual][acao];
-        print("Q atual %f", Q_atual);
+        printf("Q atual %f", Q_atual);
         Q_max = obter_max_valor_Q(Q, estados, num_combinacoes_validas, proximo_estado);
-        print("Q max %f", Q_max);
+        printf("Q max %f", Q_max);
 
         delta_Q = recompensa + fator_desconto * Q_max - Q_atual;
-        print("delta Q %f", delta_Q);
+        printf("delta Q %f", delta_Q);
 
         Q[estado_atual][acao] = Q_atual + taxa_aprendizado * delta_Q;
 
