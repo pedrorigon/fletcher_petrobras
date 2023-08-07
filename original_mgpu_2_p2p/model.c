@@ -248,15 +248,15 @@ for (int it=1; it<=st; it++) {
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
     
-    if (it-1 >= NUM_CONFIGURACOES){
-      ConfiguracaoThreads configuracao_otima = encontrar_configuracao_otima();
-      int bsize_x = configuracao_otima.x;
-      int bsize_y = configuracao_otima.y;
-    }else{
-      ConfiguracaoThreads configuracao_atual = configuracoes[it - 1];
-      int bsize_x = configuracao_atual.x;
-      int bsize_y = configuracao_atual.y;
-    }
+    //if (it-1 >= NUM_CONFIGURACOES){
+      //ConfiguracaoThreads configuracao_otima = encontrar_configuracao_otima();
+      //int bsize_x = configuracao_otima.x;
+      //int bsize_y = configuracao_otima.y;
+    //}else{
+    //ConfiguracaoThreads configuracao_atual = configuracoes[it - 1];
+    //int bsize_x = configuracao_atual.x;
+    //int bsize_y = configuracao_atual.y;
+    //}
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
