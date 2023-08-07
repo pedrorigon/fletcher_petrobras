@@ -8,157 +8,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>
+#include <limits.h>
+
+// A estrutura a seguir armazena o tempo mínimo e as configurações correspondentes de bsize_x e bsize_y
+typedef struct optimal_block {
+    int bsize_x;
+    int bsize_y;
+    double min_time;
+} optimal_block;
 
 
-// Definição das configurações de threads por bloco (x, y)
-typedef struct
-{
-    int x;
-    int y;
-} ConfiguracaoThreads;
+void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
+    static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
+    static int sizes[] = {2, 4, 8, 16, 32, 64, 128};
+    static int index_x = 0;
+    static int index_y = 0;
 
-// Número de configurações de threads por bloco
-#define NUM_CONFIGURACOES 7
-
-// Configurações de threads por bloco (x, y)
-ConfiguracaoThreads configuracoes[NUM_CONFIGURACOES] = {
-    {4, 16},
-    {16, 4},
-    {4, 32},
-    {32, 4},
-    {16, 32},
-    {32, 16},
-    {16, 16}};
-
-// Matriz Q para armazenar os valores de recompensa estimados para cada estado-ação
-float matrizQ[NUM_CONFIGURACOES][NUM_CONFIGURACOES] = {0};
-
-// Parâmetros do algoritmo Q-learning
-#define TAXA_APRENDIZADO 0.1
-#define FATOR_DESCONTO 0.9
-#define NUM_EPISODIOS 100
-#define EPSILON_INICIAL 0.9
-#define EPSILON_MINIMO 0.05
-#define DECAIMENTO_EPSILON (EPSILON_INICIAL - EPSILON_MINIMO) / NUM_EPISODIOS
-
-// Função para escolher uma ação usando a política e-greedy
-int escolher_acao(int estado, float epsilon)
-{
-    // Com probabilidade epsilon, escolha uma ação aleatória (exploração)
-    if ((float)rand() / RAND_MAX < epsilon)
-    {
-        return rand() % NUM_CONFIGURACOES;
+    // Verificamos se todas as combinações foram exploradas, se sim, retornamos a combinação ótima
+    if(index_x == sizeof(sizes) / sizeof(int)) {
+        *bsize_x = opt_block.bsize_x;
+        *bsize_y = opt_block.bsize_y;
+        return;
     }
 
-    // Caso contrário, escolha a ação com maior valor Q (explotação)
-    int melhor_acao = 0;
-    for (int acao = 1; acao < NUM_CONFIGURACOES; ++acao)
-    {
-        if (matrizQ[estado][acao] > matrizQ[estado][melhor_acao])
-        {
-            melhor_acao = acao;
-        }
-    }
-    return melhor_acao;
-}
-
-// Função principal do algoritmo Q-learning
-void q_learning(int* num_threadsX, int* num_threadsY, double tempo_execucao)
-{
-    srand(time(NULL));
-
-    for (int episodio = 0; episodio < NUM_EPISODIOS; ++episodio)
-    {
-        // Encontre o índice da configuração atual no vetor de configurações
-        int estado_atual = -1;
-        for (int i = 0; i < NUM_CONFIGURACOES; ++i)
-        {
-            if (configuracoes[i].x == *num_threadsX && configuracoes[i].y == *num_threadsY)
-            {
-                estado_atual = i;
-                break;
-            }
-        }
-
-        if (estado_atual == -1)
-        {
-            // A configuração atual não foi encontrada no vetor de configurações
-            printf("Erro: Configuração inválida: (%d, %d)\n", *num_threadsX, *num_threadsY);
-            return;
-        }
-
-        // Escolha a próxima ação usando a política e-greedy
-        float epsilon = EPSILON_INICIAL - DECAIMENTO_EPSILON * episodio;
-        if (epsilon < EPSILON_MINIMO)
-        {
-            epsilon = EPSILON_MINIMO;
-        }
-        int proxima_acao = escolher_acao(estado_atual, epsilon);
-        ConfiguracaoThreads proxima_configuracao = configuracoes[proxima_acao];
-
-        // Obtenha a recompensa com base na diferença de tempo de execução
-        float recompensa = 1.0 / tempo_execucao;
-
-        // Atualize a matriz Q com o algoritmo Q-learning
-        float valor_max_q_proxima_acao = matrizQ[proxima_acao][0];
-        for (int acao = 1; acao < NUM_CONFIGURACOES; ++acao)
-        {
-            if (matrizQ[proxima_acao][acao] > valor_max_q_proxima_acao)
-            {
-                valor_max_q_proxima_acao = matrizQ[proxima_acao][acao];
-            }
-        }
-
-        matrizQ[estado_atual][proxima_acao] = matrizQ[estado_atual][proxima_acao] +
-                                              TAXA_APRENDIZADO * (recompensa +  valor_max_q_proxima_acao -
-                                                                  matrizQ[estado_atual][proxima_acao]);
-
-        // Avance para o próximo estado
-        *num_threadsX = proxima_configuracao.x;
-        *num_threadsY = proxima_configuracao.y;
-    }
-}
-
-// Função para encontrar a configuração ótima com base na matriz Q aprendida
-ConfiguracaoThreads encontrar_configuracao_otima()
-{
-    int estado_atual = 0;
-    int melhor_acao = 0;
-
-    // Encontre a ação com maior valor Q para o estado inicial
-    for (int acao = 0; acao < NUM_CONFIGURACOES; ++acao)
-    {
-        if (matrizQ[estado_atual][acao] > matrizQ[estado_atual][melhor_acao])
-        {
-            melhor_acao = acao;
-        }
+    // Atualizamos o tempo mínimo, se necessário
+    if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
+        opt_block.min_time = timeIt;
+        opt_block.bsize_x = *bsize_x;
+        opt_block.bsize_y = *bsize_y;
     }
 
-    return configuracoes[melhor_acao];
-}
+    // Geramos uma nova combinação de bsize_x e bsize_y
+    *bsize_x = sizes[index_x];
+    *bsize_y = sizes[index_y];
 
-void imprimir_matriz_Q()
-{
-    printf("Matriz Q:\n");
-    for (int estado = 0; estado < NUM_CONFIGURACOES; ++estado)
-    {
-        for (int acao = 0; acao < NUM_CONFIGURACOES; ++acao)
-        {
-            printf("%.2f ", matrizQ[estado][acao]);
-        }
-        printf("\n");
+    // Atualizamos os índices para a próxima combinação
+    if(++index_y == sizeof(sizes) / sizeof(int)) {
+        index_y = 0;
+        index_x++;
     }
 }
-
-// Simulação da chamada do kernel para obter o tempo de execução
-float simular_execucao_kernel(ConfiguracaoThreads configuracao)
-{
-    // Simule a chamada do kernel e retorne um valor aleatório como tempo de execução
-    return rand() % 100 + 1; // Valor aleatório entre 1 e 100 para simulação.
-}
-
-
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
@@ -237,12 +126,10 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double timeIt=0.0;
-int bsize_x=16, bsize_y=16;
-srand(time(NULL));
+int bsize_x=2, bsize_y=2;
 
 // Loop para executar o kernel com cada configuração e coletar os tempos de execução
 
-double tempos_execucao[NUM_CONFIGURACOES];
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
@@ -257,6 +144,7 @@ for (int it=1; it<=st; it++) {
     //int bsize_x = configuracao_atual.x;
     //int bsize_y = configuracao_atual.y;
     //}
+    find_optimal_block_size(timeIt, &bsize_x, &bsize_y);
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
@@ -270,10 +158,7 @@ for (int it=1; it<=st; it++) {
     timeIt=wtime()-t0;
     walltime+=timeIt;
 
-    q_learning(&bsize_x, &bsize_y, timeIt);
-
-    tempos_execucao[it-1] = timeIt;
-
+    find_optimal_block_size(timeIt, &bsize_x, &bsize_y);
 
     printf("tempo deu: %lf\n", timeIt);
 
@@ -290,14 +175,6 @@ for (int it=1; it<=st; it++) {
 #endif
     }
   }
-
-  imprimir_matriz_Q();
-  ConfiguracaoThreads configuracao_otima = encontrar_configuracao_otima();
-
-    printf("Configuração ótima de threads por bloco: (%d, %d)\n",
-           configuracao_otima.x, configuracao_otima.y);
-
-
 
 
   const char StringHWM[6]="VmHWM";
