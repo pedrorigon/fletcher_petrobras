@@ -111,7 +111,7 @@ void q_learning(int* num_threadsX, int* num_threadsY, double tempo_execucao)
         }
 
         matrizQ[estado_atual][proxima_acao] = matrizQ[estado_atual][proxima_acao] +
-                                              TAXA_APRENDIZADO * (recompensa + FATOR_DESCONTO * valor_max_q_proxima_acao -
+                                              TAXA_APRENDIZADO * (recompensa +  valor_max_q_proxima_acao -
                                                                   matrizQ[estado_atual][proxima_acao]);
 
         // Avance para o próximo estado
