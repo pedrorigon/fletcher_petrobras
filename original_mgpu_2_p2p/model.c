@@ -26,21 +26,14 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
     static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
     static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
     static int index = 0;
-
-    // Atualizamos o tempo mínimo, se necessário
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
         opt_block.bsize_y = *bsize_y;
     }
-
-    // Verificamos se todas as combinações foram exploradas, se sim, retornamos a combinação ótima
     if(index < sizeof(sizes) / sizeof(block_size)) {
-        // Atualizamos bsize_x e bsize_y com o próximo par na lista
         *bsize_x = sizes[index].bsize_x;
         *bsize_y = sizes[index].bsize_y;
-
-        // Atualizamos o índice para a próxima combinação
         index++;
     } else {
         *bsize_x = opt_block.bsize_x;
@@ -128,27 +121,13 @@ double walltime=0.0;
 double timeIt=0.0;
 int bsize_x=2, bsize_y=2;
 
-// Loop para executar o kernel com cada configuração e coletar os tempos de execução
-
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
-    
-    //if (it-1 >= NUM_CONFIGURACOES){
-      //ConfiguracaoThreads configuracao_otima = encontrar_configuracao_otima();
-      //int bsize_x = configuracao_otima.x;
-      //int bsize_y = configuracao_otima.y;
-    //}else{
-    //ConfiguracaoThreads configuracao_atual = configuracoes[it - 1];
-    //int bsize_x = configuracao_atual.x;
-    //int bsize_y = configuracao_atual.y;
-    //}
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
-    //update_bsize_values(&bsize_x, &bsize_y, timeIt);
-
     const double t0=wtime();
     
     DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
@@ -158,7 +137,6 @@ for (int it=1; it<=st; it++) {
     walltime+=timeIt;
 
     find_optimal_block_size(timeIt, &bsize_x, &bsize_y);
-
     printf("tempo deu: %lf\n", timeIt);
 
     tSim=it*dt;
