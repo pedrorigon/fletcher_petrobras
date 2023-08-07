@@ -49,7 +49,6 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
 }
 
 
-
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
 }
@@ -145,7 +144,6 @@ for (int it=1; it<=st; it++) {
     //int bsize_x = configuracao_atual.x;
     //int bsize_y = configuracao_atual.y;
     //}
-    find_optimal_block_size(timeIt, &bsize_x, &bsize_y);
 
     printf("\nBsize_x: %d \n", bsize_x);
     printf("Bsize_y: %d \n", bsize_y);
