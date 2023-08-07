@@ -74,7 +74,7 @@ void q_learning(int* num_threadsX, int* num_threadsY, double tempo_execucao)
         int estado_atual = -1;
         for (int i = 0; i < NUM_CONFIGURACOES; ++i)
         {
-            if (configuracoes[i].x == num_threadsX && configuracoes[i].y == num_threadsY)
+            if (configuracoes[i].x == *num_threadsX && configuracoes[i].y == *num_threadsY)
             {
                 estado_atual = i;
                 break;
@@ -84,7 +84,7 @@ void q_learning(int* num_threadsX, int* num_threadsY, double tempo_execucao)
         if (estado_atual == -1)
         {
             // A configuração atual não foi encontrada no vetor de configurações
-            printf("Erro: Configuração inválida: (%d, %d)\n", num_threadsX, num_threadsY);
+            printf("Erro: Configuração inválida: (%d, %d)\n", *num_threadsX, *num_threadsY);
             return;
         }
 
