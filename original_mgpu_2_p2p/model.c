@@ -10,22 +10,25 @@
 #include <time.h>
 #include <limits.h>
 
-// A estrutura a seguir armazena o tempo mínimo e as configurações correspondentes de bsize_x e bsize_y
+
+typedef struct block_size {
+    int bsize_x;
+    int bsize_y;
+} block_size;
+
 typedef struct optimal_block {
     int bsize_x;
     int bsize_y;
     double min_time;
 } optimal_block;
 
-
 void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
+    static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
     static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
-    static int sizes[] = {2, 4, 8, 16, 32, 64, 128};
-    static int index_x = 0;
-    static int index_y = 0;
+    static int index = 0;
 
     // Verificamos se todas as combinações foram exploradas, se sim, retornamos a combinação ótima
-    if(index_x == sizeof(sizes) / sizeof(int)) {
+    if(index == sizeof(sizes) / sizeof(block_size)) {
         *bsize_x = opt_block.bsize_x;
         *bsize_y = opt_block.bsize_y;
         return;
@@ -38,16 +41,15 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
         opt_block.bsize_y = *bsize_y;
     }
 
-    // Geramos uma nova combinação de bsize_x e bsize_y
-    *bsize_x = sizes[index_x];
-    *bsize_y = sizes[index_y];
+    // Atualizamos bsize_x e bsize_y com o próximo par na lista
+    *bsize_x = sizes[index].bsize_x;
+    *bsize_y = sizes[index].bsize_y;
 
-    // Atualizamos os índices para a próxima combinação
-    if(++index_y == sizeof(sizes) / sizeof(int)) {
-        index_y = 0;
-        index_x++;
-    }
+    // Atualizamos o índice para a próxima combinação
+    index++;
 }
+
+
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
