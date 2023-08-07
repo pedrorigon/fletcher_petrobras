@@ -248,7 +248,7 @@ for (int it=1; it<=st; it++) {
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
     
-    if (it >= NUM_CONFIGURACOES){
+    if (it-1 >= NUM_CONFIGURACOES){
       ConfiguracaoThreads configuracao_otima = encontrar_configuracao_otima();
       int bsize_x = configuracao_otima.x;
       int bsize_y = configuracao_otima.y;
