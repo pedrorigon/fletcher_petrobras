@@ -27,13 +27,6 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
     static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
     static int index = 0;
 
-    // Verificamos se todas as combinações foram exploradas, se sim, retornamos a combinação ótima
-    if(index == sizeof(sizes) / sizeof(block_size)) {
-        *bsize_x = opt_block.bsize_x;
-        *bsize_y = opt_block.bsize_y;
-        return;
-    }
-
     // Atualizamos o tempo mínimo, se necessário
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
@@ -41,12 +34,18 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
         opt_block.bsize_y = *bsize_y;
     }
 
-    // Atualizamos bsize_x e bsize_y com o próximo par na lista
-    *bsize_x = sizes[index].bsize_x;
-    *bsize_y = sizes[index].bsize_y;
+    // Verificamos se todas as combinações foram exploradas, se sim, retornamos a combinação ótima
+    if(index < sizeof(sizes) / sizeof(block_size)) {
+        // Atualizamos bsize_x e bsize_y com o próximo par na lista
+        *bsize_x = sizes[index].bsize_x;
+        *bsize_y = sizes[index].bsize_y;
 
-    // Atualizamos o índice para a próxima combinação
-    index++;
+        // Atualizamos o índice para a próxima combinação
+        index++;
+    } else {
+        *bsize_x = opt_block.bsize_x;
+        *bsize_y = opt_block.bsize_y;
+    }
 }
 
 
