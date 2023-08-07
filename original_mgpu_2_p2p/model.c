@@ -241,21 +241,6 @@ int bsize_x=16, bsize_y=16;
 srand(time(NULL));
 
 // Loop para executar o kernel com cada configuração e coletar os tempos de execução
-double tempos_execucao[NUM_CONFIGURACOES];
-for (int i = 0; i < NUM_CONFIGURACOES; ++i)
-{
-    // Simule a chamada do kernel e colete o tempo de execução real
-    ConfiguracaoThreads configuracao_atual = configuracoes[i];
-    int num_threadsX = configuracao_atual.x;
-    int num_threadsY = configuracao_atual.y;
-    double tempo_execucao_atual = simular_execucao_kernel(configuracao_atual); // Substitua por sua chamada real do kernel
-
-    // Chame a função q_learning para aprender com a configuração e tempo atual
-    q_learning(num_threadsX, num_threadsY, tempo_execucao_atual);
-
-    // Armazene o tempo de execução para cada configuração
-    tempos_execucao[i] = tempo_execucao_atual;
-}
 
 double tempos_execucao[NUM_CONFIGURACOES];
 for (int it=1; it<=st; it++) {
