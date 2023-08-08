@@ -11,11 +11,11 @@
 #include <limits.h>
 
 #define POPULATION_SIZE 10
-#define MAX_NUM_THREADS 127
+#define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
-#define MUTATION_Y_PROBABILITY 0.3
-#define MUTATION_X_PROBABILITY 0.2
+#define MUTATION_Y_PROBABILITY 0
+#define MUTATION_X_PROBABILITY 0
 
 typedef struct
 {
@@ -100,7 +100,7 @@ void selecaoPorTorneio(Individuo *populacao, Individuo *pais)
 int gerarNovoValorAleatorioY()
 {
     int lower_bound = 2;
-    int upper_bound = MAX_NUM_THREADS;
+    int upper_bound = 64;
 
     int range = upper_bound - lower_bound + 1; // +1 para incluir o limite superior
     int random_value = rand() % range;         // Gera um valor entre 0 e range - 1
@@ -112,7 +112,7 @@ int gerarNovoValorAleatorioY()
 int gerarNovoValorAleatorioX()
 {
     int lower_bound = 32;
-    int upper_bound = MAX_NUM_THREADS;
+    int upper_bound = 64;
 
     int range = upper_bound - lower_bound + 1; // +1 para incluir o limite superior
     int random_value = rand() % range;         // Gera um valor entre 0 e range - 1
