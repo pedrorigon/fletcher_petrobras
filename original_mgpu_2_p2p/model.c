@@ -39,9 +39,10 @@ void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
     if (file) {
         fprintf(file, "%s | %d | %d | %d\n", gpu_name, sx, ob.bsize_x, ob.bsize_y);
         fclose(file);
+    } else {
+        perror("Erro ao abrir o arquivo configurations.txt para escrita");
     }
 }
-
 
 int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y) {
     FILE* file = fopen("configurations.txt", "r");
@@ -54,23 +55,25 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
         while (fgets(buffer, sizeof(buffer), file)) {
             char stored_device_name[128];
             int stored_sx, stored_bsize_x, stored_bsize_y;
-            sscanf(buffer, "%127s | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y);
             
-            printf("Lido do arquivo: %s | %d | %d | %d\n", stored_device_name, stored_sx, stored_bsize_x, stored_bsize_y);  // Imprime a linha que foi lida
-            
-            if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
-                printf("Configuração encontrada para %s com sx=%d. Bsize_x=%d, Bsize_y=%d\n", gpu_name, sx, stored_bsize_x, stored_bsize_y);
+            if (sscanf(buffer, "%127[^|] | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y) == 4) {
+                printf("Lido do arquivo: %s | %d | %d | %d\n", stored_device_name, stored_sx, stored_bsize_x, stored_bsize_y);
                 
-                *bsize_x = stored_bsize_x;
-                *bsize_y = stored_bsize_y;
-                found = 1;
-                break;
+                if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
+                    printf("Configuração encontrada para %s com sx=%d. Bsize_x=%d, Bsize_y=%d\n", gpu_name, sx, stored_bsize_x, stored_bsize_y);
+                    *bsize_x = stored_bsize_x;
+                    *bsize_y = stored_bsize_y;
+                    found = 1;
+                    break;
+                }
+            } else {
+                printf("Formato inválido na linha: %s", buffer);
             }
         }
         
         fclose(file);
     } else {
-        printf("Erro ao abrir o arquivo configurations.txt.\n");
+        perror("Erro ao abrir o arquivo configurations.txt para leitura");
     }
 
     if (!found) {
