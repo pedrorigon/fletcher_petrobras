@@ -25,10 +25,10 @@ typedef struct optimal_block {
     double min_time;
 } optimal_block;
 
-// Colocando as declarações depois das definições das structs.
 static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
 static int block_index = 0;
 static int saved = 0;
+
 
 
 void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
@@ -59,7 +59,6 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
     fclose(file);
     return 0; // Configuração não encontrada
 }
-
 
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
