@@ -7,13 +7,11 @@
 #include "CUDA/cuda_stuff.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <limits.h>
 #include <stdbool.h>
 
-static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
-static int index = 0;
-static int saved = 0;
 
 
 typedef struct block_size {
@@ -26,6 +24,11 @@ typedef struct optimal_block {
     int bsize_y;
     double min_time;
 } optimal_block;
+
+// Colocando as declarações depois das definições das structs.
+static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
+static int block_index = 0;
+static int saved = 0;
 
 
 void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
@@ -58,6 +61,7 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 }
 
 
+
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
     double stored_time = INT_MAX;
@@ -77,10 +81,10 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         saved = 0;  // Como encontramos uma configuração melhor, ainda não salvamos.
     }
 
-    if(index < sizeof(sizes) / sizeof(block_size)) {
-        *bsize_x = sizes[index].bsize_x;
-        *bsize_y = sizes[index].bsize_y;
-        index++;
+    if(block_index < sizeof(sizes) / sizeof(block_size)) {
+        *bsize_x = sizes[block_index].bsize_x;
+        *bsize_y = sizes[block_index].bsize_y;
+        block_index++;
     } else {
         if (!saved) { // Só salva a configuração ótima uma vez.
             save_optimal_config(device_name, sx, opt_block);
