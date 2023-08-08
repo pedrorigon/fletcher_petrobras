@@ -27,6 +27,9 @@ typedef struct optimal_block {
 
 static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
 static int already_optimized = 0;
+static int saved = 0;
+static int block_index = 0;
+static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
 
 
 
@@ -64,28 +67,31 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
-
-    // Se a configuração ótima já foi encontrada, retorne imediatamente.
-    if (already_optimized) {
-        *bsize_x = opt_block.bsize_x;
-        *bsize_y = opt_block.bsize_y;
-        return;
-    }
-
+    
     // Verificando se já há uma configuração no arquivo para esta GPU e valor de sx.
     if (load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
-        opt_block.bsize_x = *bsize_x;
-        opt_block.bsize_y = *bsize_y;
-        already_optimized = 1;
         return;
     }
 
-    // A lógica exaustiva de busca pelo tamanho de bloco ótimo irá aqui.
-    // Depois de encontrar a configuração ótima:
-    opt_block.bsize_x = *bsize_x;
-    opt_block.bsize_y = *bsize_y;
-    already_optimized = 1;
-    save_optimal_config(device_name, sx, opt_block);
+    if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
+        opt_block.min_time = timeIt;
+        opt_block.bsize_x = *bsize_x;
+        opt_block.bsize_y = *bsize_y;
+        saved = 0;  // Como encontramos uma configuração melhor, ainda não salvamos.
+    }
+
+    if(block_index < sizeof(sizes) / sizeof(block_size)) {
+        *bsize_x = sizes[block_index].bsize_x;
+        *bsize_y = sizes[block_index].bsize_y;
+        block_index++;
+    } else {
+        if (!saved) { // Só salva a configuração ótima uma vez.
+            save_optimal_config(device_name, sx, opt_block);
+            saved = 1;  // Atualiza o status para salvo.
+        }
+        *bsize_x = opt_block.bsize_x;
+        *bsize_y = opt_block.bsize_y;
+    }
 }
 
 
