@@ -23,6 +23,35 @@ typedef struct optimal_block {
     double min_time;
 } optimal_block;
 
+
+void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
+    FILE* file = fopen("configurations.txt", "a");
+    if (file) {
+        fprintf(file, "%s | %d | %d | %d | %lf\n", gpu_name, sx, ob.bsize_x, ob.bsize_y, ob.min_time);
+        fclose(file);
+    }
+}
+
+int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y, double* stored_time) {
+    FILE* file = fopen("configurations.txt", "r");
+    if (!file) {
+        return 0; // Não conseguiu abrir o arquivo
+    }
+
+    char line[256];
+    char device[100];
+    int loaded_sx;
+    while (fgets(line, sizeof(line), file)) {
+        sscanf(line, "%99s | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time);
+        if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
+            fclose(file);
+            return 1; // Configuração encontrada
+        }
+    }
+    fclose(file);
+    return 0; // Configuração não encontrada
+}
+
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
     double stored_time = INT_MAX;
@@ -52,35 +81,6 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         save_optimal_config(device_name, sx, opt_block);
     }
 }
-
-void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
-    FILE* file = fopen("configurations.txt", "a");
-    if (file) {
-        fprintf(file, "%s | %d | %d | %d | %lf\n", gpu_name, sx, ob.bsize_x, ob.bsize_y, ob.min_time);
-        fclose(file);
-    }
-}
-
-bool load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y, double* stored_time) {
-    FILE* file = fopen("configurations.txt", "r");
-    if (!file) {
-        return false; // Não conseguiu abrir o arquivo
-    }
-
-    char line[256];
-    char device[100];
-    int loaded_sx;
-    while (fgets(line, sizeof(line), file)) {
-        sscanf(line, "%99s | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time);
-        if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
-            fclose(file);
-            return true; // Configuração encontrada
-        }
-    }
-    fclose(file);
-    return false; // Configuração não encontrada
-}
-
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
