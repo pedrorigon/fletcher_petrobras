@@ -329,7 +329,7 @@ for (int it=1; it<=st; it++) {
                     populacao[j] = novaSubpopulacao[j];
                     // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
                 }
-                free(novaSubpopulacao);
+                //free(novaSubpopulacao);
             }
         }
         else if (it <= POPULATION_SIZE * 2)
@@ -354,7 +354,7 @@ for (int it=1; it<=st; it++) {
                     populacao[j] = novaSubpopulacao[j];
                     // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
                 }
-                free(novaSubpopulacao);
+                //free(novaSubpopulacao);
             }
         }
         else if (it <= POPULATION_SIZE * 3)
@@ -379,7 +379,7 @@ for (int it=1; it<=st; it++) {
                     populacao[j] = novaSubpopulacao[j];
                     // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
                 }
-                free(novaSubpopulacao);
+                //free(novaSubpopulacao);
             }
         }
         else
