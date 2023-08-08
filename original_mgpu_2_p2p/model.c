@@ -83,8 +83,11 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
             save_optimal_config(device_name, sx, opt_block);
             saved = 1;  // Atualiza o status para salvo.
         }
+        *bsize_x = opt_block.bsize_x;  // Ajusta os valores de bsize_x e bsize_y para os valores ótimos.
+        *bsize_y = opt_block.bsize_y;
     }
 }
+
 
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
