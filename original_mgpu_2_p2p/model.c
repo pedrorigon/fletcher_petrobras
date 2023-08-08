@@ -93,26 +93,25 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 
 
 
-void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
+void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) {
     const char* device_name = get_default_device_name();
-    
-    // Check if we already have the optimal configuration.
+
+    // Verifica se já temos a configuração ótima armazenada.
     if (!already_optimized && load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
-        // Found a previously stored optimal config. Use it and return.
-        already_optimized = 1; // Mark that we've already optimized
-        block_index = 0;  // Reset for the next call
+        // Encontrou uma configuração ótima previamente armazenada. Usa-a e retorna.
+        already_optimized = 1; // Marca que já otimizamos anteriormente
         saved = 0;
         return;
     }
 
-    // If already_optimized is set, simply use the optimal block size without further checks.
+    // Se already_optimized estiver definida, simplesmente usa o tamanho de bloco ótimo sem mais verificações.
     if (already_optimized) {
         *bsize_x = opt_block.bsize_x;
         *bsize_y = opt_block.bsize_y;
         return;
     }
 
-    // Check current time against optimal
+    // Verifica o tempo atual em relação ao ótimo
     if (*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
@@ -120,7 +119,7 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         saved = 0;
     }
 
-    // Move to the next block size
+    // Move para o próximo tamanho de bloco
     if (block_index < sizeof(sizes) / sizeof(block_size)) {
         *bsize_x = sizes[block_index].bsize_x;
         *bsize_y = sizes[block_index].bsize_y;
@@ -131,14 +130,16 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
             saved = 1;
         }
 
-        // Use the optimal sizes found.
+        // Usa os tamanhos ótimos encontrados.
         *bsize_x = opt_block.bsize_x;
         *bsize_y = opt_block.bsize_y;
 
-        block_index = 0;  // Reset for the next call
-        already_optimized = 1; // Mark that we've found the optimal size
+        // Reinicia para a próxima chamada
+        block_index = 0;
+        already_optimized = 1; // Marca que encontramos o tamanho ótimo
     }
 }
+
 
 
 
