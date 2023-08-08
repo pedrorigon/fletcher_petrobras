@@ -92,6 +92,7 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
 
 
 
+
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
 }
