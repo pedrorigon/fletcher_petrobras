@@ -67,8 +67,6 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
-    static int block_index = 0;  // Initialize block_index here
-    static int saved = 0;        // Initialize saved here
     
     // Check if we already have the optimal configuration.
     if (load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
@@ -77,8 +75,6 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         saved = 0;
         return;
     }
-
-    block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
 
     // Check current time against optimal
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
@@ -106,7 +102,6 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         block_index = 0;  // Reset for the next call
     }
 }
-
 
 
 
