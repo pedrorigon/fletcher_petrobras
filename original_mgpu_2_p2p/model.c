@@ -32,6 +32,12 @@ static int saved = 0;
 static int block_index = 0;
 static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
 
+char* rtrim(char* str) {
+    char* end = str + strlen(str) - 1;
+    while(end > str && isspace((unsigned char)*end)) end--;
+    *(end+1) = 0;
+    return str;
+}
 
 
 void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
@@ -56,9 +62,10 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
             char stored_device_name[128];
             int stored_sx, stored_bsize_x, stored_bsize_y;
             
-            if (sscanf(buffer, "%127[^|] | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y) == 4) {
-                printf("Lido do arquivo: %s | %d | %d | %d\n", stored_device_name, stored_sx, stored_bsize_x, stored_bsize_y);
-                
+           if (sscanf(buffer, "%127[^|] | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y) == 4) {
+              rtrim(stored_device_name); // Adicione esta linha
+              printf("Lido do arquivo: %s | %d | %d | %d\n", stored_device_name, stored_sx, stored_bsize_x, stored_bsize_y);
+                          
                 if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
                     printf("Configuração encontrada para %s com sx=%d. Bsize_x=%d, Bsize_y=%d\n", gpu_name, sx, stored_bsize_x, stored_bsize_y);
                     *bsize_x = stored_bsize_x;
