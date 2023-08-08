@@ -11,6 +11,10 @@
 #include <limits.h>
 #include <stdbool.h>
 
+static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
+static int index = 0;
+static int saved = 0;
+
 
 typedef struct block_size {
     int bsize_x;
@@ -42,15 +46,17 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
     char device[100];
     int loaded_sx;
     while (fgets(line, sizeof(line), file)) {
-        sscanf(line, "%99s | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time);
-        if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
-            fclose(file);
-            return 1; // Configuração encontrada
+        if(sscanf(line, "%[^|] | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time) == 5) {
+            if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
+                fclose(file);
+                return 1; // Configuração encontrada
+            }
         }
     }
     fclose(file);
     return 0; // Configuração não encontrada
 }
+
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
@@ -63,9 +69,6 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
     }
 
     static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
-    static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
-    static int index = 0;
-    static int saved = 0;  // Variável para verificar se a configuração já foi salva.
 
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
