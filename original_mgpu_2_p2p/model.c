@@ -36,6 +36,7 @@ static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}
 static int optimal_bsize_x = 0;
 static int optimal_bsize_y = 0;
 static int optimal_bsize_initialized = 0;
+static int configMatch = 0;
 
 char* rtrim(char* str) {
     char* end = str + strlen(str) - 1;
@@ -150,6 +151,29 @@ void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) 
     }
 }
 
+int find_optimal_config_for_gpu(int sx, int* bsize_x, int* bsize_y) {
+
+     const char* device_name = get_default_device_name();
+    // Verifica se a configuração ideal já foi encontrada anteriormente
+    if (optimal_bsize_initialized) {
+        *bsize_x = optimal_bsize_x;
+        *bsize_y = optimal_bsize_y;
+        configMatch = 1; // Indica que a configuração ideal foi encontrada
+        return 1; // Configuração ótima encontrada
+    }
+
+    // Verifica se há uma configuração ótima para a GPU e sx específicos.
+    if (!already_optimized && load_optimal_config(device_name, sx)) {
+        // Configuração ótima encontrada, configMatch foi definida como 1 na função load_optimal_config.
+        // Vamos diretamente para o loop de otimização.
+        *bsize_x = optimal_bsize_x;
+        *bsize_y = optimal_bsize_y;
+        configMatch = 1; // Indica que a configuração ideal foi encontrada
+        return 1;
+    }
+
+    return 0; // Configuração ótima não encontrada
+}
 
 
 
@@ -235,6 +259,44 @@ double walltime=0.0;
 double timeIt=0.0;
 int bsize_x=32, bsize_y=16;
 
+int optBsize = find_optimal_config_for_gpu(sx, &bsize_x, &bsize_y);
+
+if(optBsize == 1){
+
+  for (int it=1; it<=st; it++) {
+    // Calculate / obtain source value on i timestep
+    float src = Source(dt, it-1);
+    DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+
+    printf("\nBsize_x: %d \n", bsize_x);
+    printf("Bsize_y: %d \n", bsize_y);
+    const double t0=wtime();
+    
+    DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
+    //SwapArrays(&pp, &pc, &qp, &qc);
+
+    timeIt=wtime()-t0;
+    walltime+=timeIt;
+
+    //find_optimal_block_size(sx, timeIt, &bsize_x, &bsize_y);
+    printf("tempo deu: %lf\n", timeIt);
+
+    tSim=it*dt;
+    if (tSim >= tOut) {
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DumpSliceFile(sx,sy,sz,pc,sPtr);
+    //  CUDA_prefetch_pc(sx,sy,sz,pc);
+
+      tOut=(++nOut)*dtOutput;
+#ifdef _DUMP
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
+#endif
+    }
+  }
+
+}else{
+
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
@@ -266,7 +328,7 @@ for (int it=1; it<=st; it++) {
 #endif
     }
   }
-
+}
 
   const char StringHWM[6]="VmHWM";
   char line[256], title[12],HWMUnit[8];
