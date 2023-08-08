@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <float.h> // for DBL_MAX
 #include <limits.h>
 #include <stdbool.h>
 
@@ -25,7 +26,7 @@ typedef struct optimal_block {
     double min_time;
 } optimal_block;
 
-static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
+static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = DBL_MAX };
 static int already_optimized = 0;
 static int saved = 0;
 static int block_index = 0;
@@ -50,7 +51,7 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
         while (fgets(buffer, sizeof(buffer), file)) {
             char stored_device_name[128];
             int stored_sx, stored_bsize_x, stored_bsize_y;
-            sscanf(buffer, "%s | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y);
+            sscanf(buffer, "%127s | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y);
             if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
                 *bsize_x = stored_bsize_x;
                 *bsize_y = stored_bsize_y;
