@@ -65,22 +65,27 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
     static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
     static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
     static int index = 0;
+    static int saved = 0;  // Variável para verificar se a configuração já foi salva.
 
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
         opt_block.bsize_y = *bsize_y;
+        saved = 0;  // Como encontramos uma configuração melhor, ainda não salvamos.
     }
+
     if(index < sizeof(sizes) / sizeof(block_size)) {
         *bsize_x = sizes[index].bsize_x;
         *bsize_y = sizes[index].bsize_y;
         index++;
     } else {
-        *bsize_x = opt_block.bsize_x;
-        *bsize_y = opt_block.bsize_y;
-        save_optimal_config(device_name, sx, opt_block);
+        if (!saved) { // Só salva a configuração ótima uma vez.
+            save_optimal_config(device_name, sx, opt_block);
+            saved = 1;  // Atualiza o status para salvo.
+        }
     }
 }
+
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
   fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
