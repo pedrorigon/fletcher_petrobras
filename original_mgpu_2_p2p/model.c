@@ -70,15 +70,23 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
     const char* device_name = get_default_device_name();
     
     // Check if we already have the optimal configuration.
-    if (load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
+    if (!already_optimized && load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
         // Found a previously stored optimal config. Use it and return.
+        already_optimized = 1; // Mark that we've already optimized
         block_index = 0;  // Reset for the next call
         saved = 0;
         return;
     }
 
+    // If already_optimized is set, simply use the optimal block size without further checks.
+    if (already_optimized) {
+        *bsize_x = opt_block.bsize_x;
+        *bsize_y = opt_block.bsize_y;
+        return;
+    }
+
     // Check current time against optimal
-    if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
+    if (*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
         opt_block.bsize_y = *bsize_y;
@@ -86,7 +94,7 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
     }
 
     // Move to the next block size
-    if(block_index < sizeof(sizes) / sizeof(block_size)) {
+    if (block_index < sizeof(sizes) / sizeof(block_size)) {
         *bsize_x = sizes[block_index].bsize_x;
         *bsize_y = sizes[block_index].bsize_y;
         block_index++;
@@ -101,8 +109,10 @@ void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) 
         *bsize_y = opt_block.bsize_y;
 
         block_index = 0;  // Reset for the next call
+        already_optimized = 1; // Mark that we've found the optimal size
     }
 }
+
 
 
 
