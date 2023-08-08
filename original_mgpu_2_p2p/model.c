@@ -92,7 +92,6 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 
 
 
-
 void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) {
     const char* device_name = get_default_device_name();
 
@@ -100,6 +99,7 @@ void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) 
     if (!already_optimized && load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
         // Encontrou uma configuração ótima previamente armazenada. Usa-a e retorna.
         already_optimized = 1; // Marca que já otimizamos anteriormente
+        block_index = 0;  // Reinicia o índice para a próxima chamada
         saved = 0;
         return;
     }
@@ -139,6 +139,7 @@ void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) 
         already_optimized = 1; // Marca que encontramos o tamanho ótimo
     }
 }
+
 
 
 
