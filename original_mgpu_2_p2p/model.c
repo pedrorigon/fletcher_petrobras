@@ -67,32 +67,46 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
+    static int block_index = 0;  // Initialize block_index here
+    static int saved = 0;        // Initialize saved here
     
-    // Verificando se já há uma configuração no arquivo para esta GPU e valor de sx.
+    // Check if we already have the optimal configuration.
     if (load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
+        // Found a previously stored optimal config. Use it and return.
+        block_index = 0;  // Reset for the next call
+        saved = 0;
         return;
     }
 
+    block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
+
+    // Check current time against optimal
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
         opt_block.bsize_y = *bsize_y;
-        saved = 0;  // Como encontramos uma configuração melhor, ainda não salvamos.
+        saved = 0;
     }
 
+    // Move to the next block size
     if(block_index < sizeof(sizes) / sizeof(block_size)) {
         *bsize_x = sizes[block_index].bsize_x;
         *bsize_y = sizes[block_index].bsize_y;
         block_index++;
     } else {
-        if (!saved) { // Só salva a configuração ótima uma vez.
+        if (!saved) {
             save_optimal_config(device_name, sx, opt_block);
-            saved = 1;  // Atualiza o status para salvo.
+            saved = 1;
         }
+
+        // Use the optimal sizes found.
         *bsize_x = opt_block.bsize_x;
         *bsize_y = opt_block.bsize_y;
+
+        block_index = 0;  // Reset for the next call
     }
 }
+
 
 
 
