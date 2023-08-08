@@ -233,7 +233,7 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double timeIt=0.0;
-int bsize_x=2, bsize_y=2;
+int bsize_x=32, bsize_y=16;
 
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
