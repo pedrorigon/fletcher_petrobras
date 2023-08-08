@@ -32,6 +32,11 @@ static int saved = 0;
 static int block_index = 0;
 static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
 
+// Variável global para armazenar o tamanho de bloco ótimo encontrado
+static int optimal_bsize_x = 0;
+static int optimal_bsize_y = 0;
+static int optimal_bsize_initialized = 0;
+
 char* rtrim(char* str) {
     char* end = str + strlen(str) - 1;
     while(end > str && isspace((unsigned char)*end)) end--;
@@ -50,7 +55,7 @@ void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
     }
 }
 
-int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y) {
+int load_optimal_config(const char* gpu_name, int sx) {
     FILE* file = fopen("configurations.txt", "r");
     char buffer[256];
     int found = 0;
@@ -68,8 +73,8 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
                           
                 if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
                     printf("Configuração encontrada para %s com sx=%d. Bsize_x=%d, Bsize_y=%d\n", gpu_name, sx, stored_bsize_x, stored_bsize_y);
-                    *bsize_x = stored_bsize_x;
-                    *bsize_y = stored_bsize_y;
+                    optimal_bsize_x = stored_bsize_x;
+                    optimal_bsize_y = stored_bsize_y;
                     found = 1;
                     break;
                 }
@@ -91,23 +96,25 @@ int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y
 }
 
 
-
 void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) {
     const char* device_name = get_default_device_name();
 
+    // Se a configuração ótima já estiver armazenada, basta usá-la diretamente.
+    if (optimal_bsize_initialized) {
+        *bsize_x = optimal_bsize_x;
+        *bsize_y = optimal_bsize_y;
+        return;
+    }
+
     // Verifica se já temos a configuração ótima armazenada.
-    if (!already_optimized && load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
+    if (!already_optimized && load_optimal_config(device_name, sx)) {
         // Encontrou uma configuração ótima previamente armazenada. Usa-a e retorna.
         already_optimized = 1; // Marca que já otimizamos anteriormente
         block_index = 0;  // Reinicia o índice para a próxima chamada
         saved = 0;
-        return;
-    }
-
-    // Se already_optimized estiver definida, simplesmente usa o tamanho de bloco ótimo sem mais verificações.
-    if (already_optimized) {
-        *bsize_x = opt_block.bsize_x;
-        *bsize_y = opt_block.bsize_y;
+        optimal_bsize_initialized = 1; // Marca que a configuração ótima foi inicializada
+        *bsize_x = optimal_bsize_x;
+        *bsize_y = optimal_bsize_y;
         return;
     }
 
@@ -137,9 +144,11 @@ void find_optimal_block_size(int sx, double timeIt, int* bsize_x, int* bsize_y) 
         // Reinicia para a próxima chamada
         block_index = 0;
         already_optimized = 1; // Marca que encontramos o tamanho ótimo
+        optimal_bsize_initialized = 1; // Marca que a configuração ótima foi inicializada
+        optimal_bsize_x = opt_block.bsize_x; // Armazena a configuração ótima em variáveis globais
+        optimal_bsize_y = opt_block.bsize_y;
     }
 }
-
 
 
 
