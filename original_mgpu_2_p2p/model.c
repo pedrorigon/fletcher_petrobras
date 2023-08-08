@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
+#include <stdbool.h>
 
 
 typedef struct block_size {
@@ -22,10 +23,20 @@ typedef struct optimal_block {
     double min_time;
 } optimal_block;
 
-void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
+void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
+    const char* device_name = get_default_device_name();
+    double stored_time = INT_MAX;
+
+    // Verificando se já há uma configuração no arquivo para esta GPU e valor de sx.
+    if (load_optimal_config(device_name, sx, bsize_x, bsize_y, &stored_time)) {
+        // Se encontramos uma configuração e ela é mais eficiente, retornamos diretamente.
+        return;
+    }
+
     static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
     static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
     static int index = 0;
+
     if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
         opt_block.min_time = timeIt;
         opt_block.bsize_x = *bsize_x;
@@ -38,7 +49,36 @@ void find_optimal_block_size(double timeIt, int *bsize_x, int *bsize_y) {
     } else {
         *bsize_x = opt_block.bsize_x;
         *bsize_y = opt_block.bsize_y;
+        save_optimal_config(device_name, sx, opt_block);
     }
+}
+
+void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
+    FILE* file = fopen("configurations.txt", "a");
+    if (file) {
+        fprintf(file, "%s | %d | %d | %d | %lf\n", gpu_name, sx, ob.bsize_x, ob.bsize_y, ob.min_time);
+        fclose(file);
+    }
+}
+
+bool load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y, double* stored_time) {
+    FILE* file = fopen("configurations.txt", "r");
+    if (!file) {
+        return false; // Não conseguiu abrir o arquivo
+    }
+
+    char line[256];
+    char device[100];
+    int loaded_sx;
+    while (fgets(line, sizeof(line), file)) {
+        sscanf(line, "%99s | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time);
+        if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
+            fclose(file);
+            return true; // Configuração encontrada
+        }
+    }
+    fclose(file);
+    return false; // Configuração não encontrada
 }
 
 
@@ -136,7 +176,7 @@ for (int it=1; it<=st; it++) {
     timeIt=wtime()-t0;
     walltime+=timeIt;
 
-    find_optimal_block_size(timeIt, &bsize_x, &bsize_y);
+    find_optimal_block_size(sx, timeIt, &bsize_x, &bsize_y);
     printf("tempo deu: %lf\n", timeIt);
 
     tSim=it*dt;
