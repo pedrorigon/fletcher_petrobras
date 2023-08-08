@@ -26,73 +26,66 @@ typedef struct optimal_block {
 } optimal_block;
 
 static optimal_block opt_block = { .bsize_x = 0, .bsize_y = 0, .min_time = INT_MAX };
-static int block_index = 0;
-static int saved = 0;
+static int already_optimized = 0;
 
 
 
 void save_optimal_config(const char* gpu_name, int sx, optimal_block ob) {
     FILE* file = fopen("configurations.txt", "a");
     if (file) {
-        fprintf(file, "%s | %d | %d | %d | %lf\n", gpu_name, sx, ob.bsize_x, ob.bsize_y, ob.min_time);
+        fprintf(file, "%s | %d | %d | %d\n", gpu_name, sx, ob.bsize_x, ob.bsize_y);
         fclose(file);
     }
 }
 
-int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y, double* stored_time) {
-    FILE* file = fopen("configurations.txt", "r");
-    if (!file) {
-        return 0; // Não conseguiu abrir o arquivo
-    }
 
-    char line[256];
-    char device[100];
-    int loaded_sx;
-    while (fgets(line, sizeof(line), file)) {
-        if(sscanf(line, "%[^|] | %d | %d | %d | %lf", device, &loaded_sx, bsize_x, bsize_y, stored_time) == 5) {
-            if (strcmp(device, gpu_name) == 0 && loaded_sx == sx) {
-                fclose(file);
-                return 1; // Configuração encontrada
+int load_optimal_config(const char* gpu_name, int sx, int* bsize_x, int* bsize_y) {
+    FILE* file = fopen("configurations.txt", "r");
+    char buffer[256];
+    int found = 0;
+    if (file) {
+        while (fgets(buffer, sizeof(buffer), file)) {
+            char stored_device_name[128];
+            int stored_sx, stored_bsize_x, stored_bsize_y;
+            sscanf(buffer, "%s | %d | %d | %d", stored_device_name, &stored_sx, &stored_bsize_x, &stored_bsize_y);
+            if (strcmp(stored_device_name, gpu_name) == 0 && stored_sx == sx) {
+                *bsize_x = stored_bsize_x;
+                *bsize_y = stored_bsize_y;
+                found = 1;
+                break;
             }
         }
+        fclose(file);
     }
-    fclose(file);
-    return 0; // Configuração não encontrada
+    return found;
 }
+
 
 
 void find_optimal_block_size(int sx, double timeIt, int *bsize_x, int *bsize_y) {
     const char* device_name = get_default_device_name();
-    double stored_time = INT_MAX;
 
-    // Verificando se já há uma configuração no arquivo para esta GPU e valor de sx.
-    if (load_optimal_config(device_name, sx, bsize_x, bsize_y, &stored_time)) {
-        // Se encontramos uma configuração e ela é mais eficiente, retornamos diretamente.
+    // Se a configuração ótima já foi encontrada, retorne imediatamente.
+    if (already_optimized) {
+        *bsize_x = opt_block.bsize_x;
+        *bsize_y = opt_block.bsize_y;
         return;
     }
 
-    static block_size sizes[] = { {2, 2}, {4, 4}, {8, 8}, {32, 16}, {32, 8}, {32, 4}, {32, 2}, {16, 16}, {16, 4}, {16, 32} };
-
-    if(*bsize_x * *bsize_y < 1024 && timeIt < opt_block.min_time) {
-        opt_block.min_time = timeIt;
+    // Verificando se já há uma configuração no arquivo para esta GPU e valor de sx.
+    if (load_optimal_config(device_name, sx, bsize_x, bsize_y)) {
         opt_block.bsize_x = *bsize_x;
         opt_block.bsize_y = *bsize_y;
-        saved = 0;  // Como encontramos uma configuração melhor, ainda não salvamos.
+        already_optimized = 1;
+        return;
     }
 
-    if(block_index < sizeof(sizes) / sizeof(block_size)) {
-        *bsize_x = sizes[block_index].bsize_x;
-        *bsize_y = sizes[block_index].bsize_y;
-        block_index++;
-    } else {
-        if (!saved) { // Só salva a configuração ótima uma vez.
-            save_optimal_config(device_name, sx, opt_block);
-            saved = 1;  // Atualiza o status para salvo.
-        }
-        // Agora, asseguramos que os valores ótimos sejam usados ao retornar da função.
-        *bsize_x = opt_block.bsize_x;
-        *bsize_y = opt_block.bsize_y;
-    }
+    // A lógica exaustiva de busca pelo tamanho de bloco ótimo irá aqui.
+    // Depois de encontrar a configuração ótima:
+    opt_block.bsize_x = *bsize_x;
+    opt_block.bsize_y = *bsize_y;
+    already_optimized = 1;
+    save_optimal_config(device_name, sx, opt_block);
 }
 
 
