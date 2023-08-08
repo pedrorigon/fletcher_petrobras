@@ -10,12 +10,12 @@
 #include <time.h>
 #include <limits.h>
 
-#define POPULATION_SIZE 3
+#define POPULATION_SIZE 10
 #define MAX_NUM_THREADS 512
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
-#define MUTATION_Y_PROBABILITY 0.01
-#define MUTATION_X_PROBABILITY 0.01
+#define MUTATION_Y_PROBABILITY 0.3
+#define MUTATION_X_PROBABILITY 0.2
 
 typedef struct
 {
