@@ -266,23 +266,40 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz){
     const int size_med = ind(0,0,(sz/4));
 
     if (!g_peer_access_enabled) {
-        for (int i = 0; i < GPU_NUMBER; i++) {
-            CUDA_CALL(cudaSetDevice(i));
-            CUDA_CALL(cudaStreamCreate(&swap_stream[i]));
+    for (int i = 0; i < GPU_NUMBER; i++) {
+        cudaError_t error = cudaSetDevice(i);
+        if (error != cudaSuccess) {
+            fprintf(stderr, "Error setting device %d: %s\n", i, cudaGetErrorString(error));
+            exit(EXIT_FAILURE);
+        }
 
-            for (int j = 0; j < GPU_NUMBER; j++) {
-                if (i != j) {
-                    int can_access;
-                    CUDA_CALL(cudaDeviceCanAccessPeer(&can_access, i, j));
-                    if(can_access) {
-                        CUDA_CALL(cudaDeviceEnablePeerAccess(j, 0));
+        error = cudaStreamCreate(&swap_stream[i]);
+        if (error != cudaSuccess) {
+            fprintf(stderr, "Error creating stream for device %d: %s\n", i, cudaGetErrorString(error));
+            exit(EXIT_FAILURE);
+        }
+
+        for (int j = 0; j < GPU_NUMBER; j++) {
+            if (i != j) {
+                int can_access;
+                error = cudaDeviceCanAccessPeer(&can_access, i, j);
+                if (error != cudaSuccess) {
+                    fprintf(stderr, "Error checking if device %d can access device %d: %s\n", i, j, cudaGetErrorString(error));
+                    exit(EXIT_FAILURE);
+                }
+
+                if(can_access) {
+                    error = cudaDeviceEnablePeerAccess(j, 0);
+                    if (error != cudaSuccess) {
+                        fprintf(stderr, "Error enabling peer access from device %d to device %d: %s\n", i, j, cudaGetErrorString(error));
+                        exit(EXIT_FAILURE);
                     }
                 }
             }
         }
-        g_peer_access_enabled = 1;
     }
-
+    g_peer_access_enabled = 1;
+}
     // GPU 0 <-> GPU 1
     CUDA_CALL(cudaSetDevice(0));
     CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[1]));
