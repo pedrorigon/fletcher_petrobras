@@ -235,6 +235,9 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaStreamDestroy(swap_stream[2]));
     CUDA_CALL(cudaStreamDestroy(swap_stream[3]));
 
+    CUDA_CALL(cudaStreamDestroy(compute_stream[1]));
+    CUDA_CALL(cudaStreamDestroy(compute_stream[2]));
+
 }
 
 // swap array pointers on time forward array propagation
