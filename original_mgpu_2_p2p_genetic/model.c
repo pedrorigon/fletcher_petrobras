@@ -14,8 +14,8 @@
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
-#define MUTATION_Y_PROBABILITY 0
-#define MUTATION_X_PROBABILITY 0
+#define MUTATION_Y_PROBABILITY 0.1
+#define MUTATION_X_PROBABILITY 0.1
 
 typedef struct
 {
@@ -97,29 +97,21 @@ void selecaoPorTorneio(Individuo *populacao, Individuo *pais)
     }
 }
 
-int gerarNovoValorAleatorioY()
+int gerarNovoValorAleatorio()
 {
-    int lower_bound = 2;
-    int upper_bound = 64;
+    int vetor[] = {2, 4, 8, 16, 32, 64};
+    int tamanho_vetor = sizeof(vetor) / sizeof(vetor[0]);
 
-    int range = upper_bound - lower_bound + 1; // +1 para incluir o limite superior
-    int random_value = rand() % range;         // Gera um valor entre 0 e range - 1
-    random_value += lower_bound;               // Desloca o valor para o intervalo desejado [8, MAX_NUM_THREADS]
+    // Inicializa a semente para geração de números aleatórios
+    srand(time(NULL));
+
+    // Gera um número aleatório entre 0 e 5
+    int indice_aleatorio = rand() % tamanho_vetor;
+    int random_value = vetor[indice_aleatorio];
 
     return random_value;
 }
 
-int gerarNovoValorAleatorioX()
-{
-    int lower_bound = 32;
-    int upper_bound = 64;
-
-    int range = upper_bound - lower_bound + 1; // +1 para incluir o limite superior
-    int random_value = rand() % range;         // Gera um valor entre 0 e range - 1
-    random_value += lower_bound;               // Desloca o valor para o intervalo desejado [8, MAX_NUM_THREADS]
-
-    return random_value;
-}
 
 void crossoverEMutacao(Individuo *pais, Individuo *filhos)
 { // Verificar se a multiplicação dos valores de thread_x * thread_y é inferior a 1024
@@ -144,30 +136,29 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     // for (int i = 0; i < 2; i++)
     //{
     if ((double)rand() / RAND_MAX < MUTATION_Y_PROBABILITY)
+{
+    int new_thread_y = gerarNovoValorAleatorio();
+
+    // Garantir que o novo valor de thread_y é válido para mutação
+    while (new_thread_y * filhos[0].thread_x >= MAX_MULTIPLICATION)
     {
-        int new_thread_y = gerarNovoValorAleatorioY();
-
-        // Garantir que o novo valor de thread_y seja uma potência de 2 e válido para mutação
-        while (!isPowerOfTwo(new_thread_y) || (new_thread_y * filhos[0].thread_x >= MAX_MULTIPLICATION))
-        {
-            new_thread_y = gerarNovoValorAleatorioY();
-        }
-
-        filhos[0].thread_y = new_thread_y;
+        new_thread_y = gerarNovoValorAleatorioY();
     }
 
-    if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+    filhos[0].thread_y = new_thread_y;
+}
+
+if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+{
+    int new_thread_x = gerarNovoValorAleatorio();
+   
+    while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
     {
-
-        int new_thread_x = gerarNovoValorAleatorioX();
-        // Garantir que o novo valor de thread_y seja uma potência de 2 e válido para mutação
-        while (!isPowerOfTwo(new_thread_x) || (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION))
-        {
-            new_thread_x = gerarNovoValorAleatorioX();
-        }
-
-        filhos[0].thread_x = new_thread_x;
+        new_thread_x = gerarNovoValorAleatorioX();
     }
+
+    filhos[0].thread_x = new_thread_x;
+}
     //}
 }
 
