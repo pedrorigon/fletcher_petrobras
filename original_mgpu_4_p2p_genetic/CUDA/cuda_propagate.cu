@@ -265,10 +265,10 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz) {
     const int size_gpu1 = ind(0, 0, (sz / 4 + 5));
     const int size_med = ind(0, 0, (sz / 4));
 
+    // Check and enable peer access if not already enabled
     if (!g_peer_access_enabled) {
         for (int i = 0; i < GPU_NUMBER; i++) {
             CUDA_CALL(cudaSetDevice(i));
-
             CUDA_CALL(cudaStreamCreate(&swap_stream[i]));
 
             for (int j = 0; j < GPU_NUMBER; j++) {
@@ -284,29 +284,28 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz) {
         g_peer_access_enabled = 1;
     }
 
-    // Use uma função para evitar duplicação de código
-    auto perform_copy = [&](int src, int dst, float* src_ptr, float* dst_ptr, size_t size) {
-        CUDA_CALL(cudaSetDevice(dst));
-        CUDA_CALL(cudaMemcpyPeerAsync(dst_ptr, dst, src_ptr, src, size, swap_stream[dst]));
-    };
-
     // GPU 0 <-> GPU 1
-    perform_copy(0, 1, dev_qp[0] + gpu_map[0].gpu_end_pointer, dev_qp[1] + gpu_map[1].gpu_start_pointer, gpu_map[0].gpu_size_bord);
-    perform_copy(0, 1, dev_pp[0] + gpu_map[0].gpu_end_pointer, dev_pp[1] + gpu_map[1].gpu_start_pointer, gpu_map[0].gpu_size_bord);
-    perform_copy(1, 0, dev_pp[1], dev_pp[0] + size_gpu0, gpu_map[1].gpu_size_bord);
-    perform_copy(1, 0, dev_qp[1], dev_qp[0] + size_gpu0, gpu_map[1].gpu_size_bord);
+    CUDA_CALL(cudaSetDevice(0));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[0] + gpu_map[0].gpu_end_pointer, 0, dev_pp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[0] + gpu_map[0].gpu_end_pointer, 0, dev_qp[1] + gpu_map[1].gpu_start_pointer, 1, gpu_map[0].gpu_size_bord, swap_stream[0]));
+
+    CUDA_CALL(cudaSetDevice(1));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[1], 1, dev_pp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1], 1, dev_qp[0] + size_gpu0, 0, gpu_map[1].gpu_size_bord, swap_stream[1]));
 
     // GPU 1 <-> GPU 2
-    perform_copy(1, 2, dev_qp[1] + gpu_map[1].gpu_end_pointer, dev_qp[2] + gpu_map[2].gpu_start_pointer, gpu_map[1].gpu_size_bord);
-    perform_copy(1, 2, dev_pp[1] + gpu_map[1].gpu_end_pointer, dev_pp[2] + gpu_map[2].gpu_start_pointer, gpu_map[1].gpu_size_bord);
-    perform_copy(2, 1, dev_pp[2], dev_pp[1] + size_med, gpu_map[2].gpu_size_bord);
-    perform_copy(2, 1, dev_qp[2], dev_qp[1] + size_med, gpu_map[2].gpu_size_bord);
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[1] + gpu_map[1].gpu_end_pointer, 1, dev_pp[2] + gpu_map[2].gpu_start_pointer, 2, gpu_map[1].gpu_size_bord, swap_stream[1]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[1] + gpu_map[1].gpu_end_pointer, 1, dev_qp[2] + gpu_map[2].gpu_start_pointer, 2, gpu_map[1].gpu_size_bord, swap_stream[1]));
+
+    CUDA_CALL(cudaSetDevice(2));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[2], 2, dev_pp[1] + size_med, 1, gpu_map[2].gpu_size_bord, swap_stream[2]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[2], 2, dev_qp[1] + size_med, 1, gpu_map[2].gpu_size_bord, swap_stream[2]));
 
     // GPU 2 <-> GPU 3
-    perform_copy(2, 3, dev_qp[2] + gpu_map[2].gpu_end_pointer, dev_qp[3] + gpu_map[3].gpu_start_pointer, gpu_map[2].gpu_size_bord);
-    perform_copy(2, 3, dev_pp[2] + gpu_map[2].gpu_end_pointer, dev_pp[3] + gpu_map[3].gpu_start_pointer, gpu_map[2].gpu_size_bord);
-    perform_copy(3, 2, dev_pp[3], dev_pp[2] + size_med, gpu_map[3].gpu_size_bord);
-    perform_copy(3, 2, dev_qp[3], dev_qp[2] + size_med, gpu_map[3].gpu_size_bord);
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[2] + gpu_map[2].gpu_end_pointer, 2, dev_pp[3] + gpu_map[3].gpu_start_pointer, 3, gpu_map[2].gpu_size_bord, swap_stream[2]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[2] + gpu_map[2].gpu_end_pointer, 2, dev_qp[3] + gpu_map[3].gpu_start_pointer, 3, gpu_map[2].gpu_size_bord, swap_stream[2]));
+
+    CUDA_CALL(cudaSetDevice(3));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_pp[3], 3, dev_pp[2] + size_med, 2, gpu_map[3].gpu_size_bord, swap_stream[3]));
+    CUDA_CALL(cudaMemcpyPeerAsync(dev_qp[3], 3, dev_qp[2] + size_med, 2, gpu_map[3].gpu_size_bord, swap_stream[3]));
 }
-
-
