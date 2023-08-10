@@ -33,7 +33,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}};
+    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
