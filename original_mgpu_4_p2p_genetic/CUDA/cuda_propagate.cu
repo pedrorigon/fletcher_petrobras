@@ -201,7 +201,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
           upper = sz/4 + 5 - 1;
         } else{
           lower = bord + 1 + 5;
-          upper = sz/4;
+          upper = sz/4-1;
         }
 
         const int width = upper - lower;
