@@ -3,7 +3,7 @@
 #include "driver.h"
 #include "fletcher.h"
 #include "walltime.h"
-#include "model.h
+#include "model.h"
 #include "CUDA/cuda_stuff.h"
 #include <stdio.h>
 #include <stdlib.h>
