@@ -30,7 +30,7 @@ void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, 
   CUDA_CALL(cudaGetDeviceCount(&num_gpus));
   for (int gpu = 0; gpu < num_gpus; gpu++)
     {
-        cudaDeviceProp prop;
+        //cudaDeviceProp prop;
         cudaSetDevice(gpu);
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
         {
