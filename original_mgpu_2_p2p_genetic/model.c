@@ -288,6 +288,7 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double kernel_time=0.0;
+double res=0.0;
 //int bsize_x=32, bsize_y=16;
 
 Individuo populacao[POPULATION_SIZE];
@@ -314,7 +315,9 @@ for (int it=1; it<=st; it++) {
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
             kernel_time=wtime()-t0;
             walltime+=kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
             populacao[it - 1].fitness = 1 / kernel_time;
+            printf("Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf", it, populacao[it - 1].thread_x, populacao[it - 1].thread_y, kernel_time, res);
             // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[i - 1].thread_x, populacao[i - 1].thread_y, populacao[i - 1].fitness);
             //  printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i, populacao[i - 1].thread_x, populacao[i - 1].thread_y, populacao[i - 1].fitness);
             //    inicio primeira seleção genética
@@ -341,6 +344,9 @@ for (int it=1; it<=st; it++) {
             kernel_time=wtime()-t1;
             walltime+=kernel_time;
             populacao[it - POPULATION_SIZE - 1].fitness = 1 / kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+
+            printf("Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf", it, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y, kernel_time, res);
             // printf("SEGUNDA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i, i - POPULATION_SIZE - 1, populacao[i - POPULATION_SIZE - 1].thread_x, populacao[i - POPULATION_SIZE - 1].thread_y, populacao[i - POPULATION_SIZE - 1].fitness);
             //  printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
             //  Gerar a nova subpopulação
@@ -366,6 +372,8 @@ for (int it=1; it<=st; it++) {
             kernel_time=wtime()-t2;
             walltime+=kernel_time;
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+            printf("Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
             printf("TERCEIRA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", it, it - 1 - 2 * POPULATION_SIZE, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, populacao[it - 1 - 2 * POPULATION_SIZE].fitness);
             // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
             // Gerar a nova subpopulação
@@ -392,6 +400,8 @@ for (int it=1; it<=st; it++) {
             kernel_time=wtime()-t3;
             walltime+=kernel_time;
             printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+            printf("Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
         }
 
     //const double t0=wtime();
