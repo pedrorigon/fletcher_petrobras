@@ -94,7 +94,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
                     float *restrict ch1dzz, float *restrict ch1dxy, float *restrict ch1dyz,
                     float *restrict ch1dxz, float *restrict v2px, float *restrict v2pz,
                     float *restrict v2sz, float *restrict v2pn, float *pp, float *pc,
-                    float *qp, float *qc)
+                    float *qp, float *qc, int bsize_x, int bsize_y)
 {
     extern Gpu gpu_map[GPU_NUMBER];
     extern float* dev_ch1dxx[GPU_NUMBER];
@@ -123,7 +123,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         cudaSetDevice(gpu);
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
-        dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
+        dim3 threadsPerBlock(bsize_x, bsize_x);
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         if (gpu == 0)
@@ -207,7 +207,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         const int width = upper - lower;
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
-        dim3 threadsPerBlock(BSIZE_X, BSIZE_Y);
+        dim3 threadsPerBlock(bsize_x, bsize_y);
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         // Executar o kernel no dispositivo da iteração
