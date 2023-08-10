@@ -1,7 +1,7 @@
 mkdir -p bin/
 cd ../
 
-for version in original_mgpu_4_p2p_genetic original_mgpu_2_p2p; do
+for version in original_mgpu_8_p2p_genetic original_mgpu_4_p2p_genetic original_mgpu_8; do
 	cd $version
 	for backend in CUDA; do
 		echo "-----------------------------------------------------"
