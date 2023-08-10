@@ -10,7 +10,7 @@
 #include <time.h>
 #include <limits.h>
 
-#define POPULATION_SIZE 10
+#define POPULATION_SIZE 20
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
