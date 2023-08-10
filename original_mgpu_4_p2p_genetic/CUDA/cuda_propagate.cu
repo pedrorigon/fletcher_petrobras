@@ -123,7 +123,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         cudaSetDevice(gpu);
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
-        dim3 threadsPerBlock(32, 4);
+        dim3 threadsPerBlock(bsize_x, bsize_y);
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         if (gpu == 0)
@@ -207,7 +207,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
         const int width = upper - lower;
 
         // Calcula o número de blocos e threads por bloco para a GPU atual
-        dim3 threadsPerBlock(32, 4);
+        dim3 threadsPerBlock(bsize_x, bsize_y);
         dim3 numBlocks(sx / threadsPerBlock.x, sy / threadsPerBlock.y);
 
         // Executar o kernel no dispositivo da iteração
