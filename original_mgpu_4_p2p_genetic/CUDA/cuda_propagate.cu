@@ -146,13 +146,13 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
           lower = sz/4;
           upper = sz/4 + 5;
           
-          //CUDA_CALL(cudaSetDevice(gpu));
-         // CUDA_CALL(cudaStreamCreate(&compute_stream[gpu]));
+          CUDA_CALL(cudaSetDevice(gpu));
+          CUDA_CALL(cudaStreamCreate(&compute_stream[gpu]));
 
           // Executar o kernel no dispositivo da iteração
-          //kernel_Propagate<<<numBlocks, threadsPerBlock, 0, compute_stream[gpu]>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
-                                                      //   dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
-                                                     //    dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], (bord + 1), (bord + 1 + 5));
+          kernel_Propagate<<<numBlocks, threadsPerBlock, 0, compute_stream[gpu]>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
+                                                         dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
+                                                         dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], (bord + 1), (bord + 1 + 5));
 
         }
 
@@ -162,6 +162,8 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
                                                          dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
     }
 
+    CUDA_CALL(cudaStreamSynchronize(compute_stream[1]));
+    CUDA_CALL(cudaStreamSynchronize(compute_stream[2]));
     CUDA_CALL(cudaGetLastError());
     CUDA_CALL(cudaDeviceSynchronize()); 
 
@@ -218,6 +220,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaStreamSynchronize(stream[1]));
     CUDA_CALL(cudaStreamSynchronize(stream[2]));
     CUDA_CALL(cudaStreamSynchronize(stream[3]));
+
 
     for (int gpu = 0; gpu < 4; gpu++)
     {
