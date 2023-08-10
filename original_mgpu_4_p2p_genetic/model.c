@@ -97,19 +97,19 @@ for (int it=1; it<=st; it++) {
     const double t0=wtime();
     
     DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc); //ajustar parametros
-    SwapArrays(&pp, &pc, &qp, &qc);
+    //SwapArrays(&pp, &pc, &qp, &qc);
 
     walltime+=wtime()-t0;
 
     tSim=it*dt;
     if (tSim >= tOut) {
-      DRIVER_Update_pointers(sx,sy,sz,pc);
-      DumpSliceFile(sx,sy,sz,pc,sPtr);
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
+     // DumpSliceFile(sx,sy,sz,pc,sPtr);
     //  CUDA_prefetch_pc(sx,sy,sz,pc);
 
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
-      DRIVER_Update_pointers(sx,sy,sz,pc);
+      //DRIVER_Update_pointers(sx,sy,sz,pc);
       //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
 #endif
     }
