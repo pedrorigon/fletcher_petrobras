@@ -198,10 +198,10 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
           //  upper = sz - bord - 1;
           //lower = gpu_map[1].gpu_lower_z;
           lower = bord + 1 + 5;
-          upper = sz/4 + 5 - 1;
+          upper = sz/4 - 1;
         } else{
           lower = bord + 1 + 5;
-          upper = sz/4-1;
+          upper = sz/4;
         }
 
         const int width = upper - lower;
@@ -228,10 +228,10 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     }
     CUDA_CALL(cudaDeviceSynchronize());
 
-   // CUDA_CALL(cudaStreamDestroy(stream[0]));
-    //CUDA_CALL(cudaStreamDestroy(stream[1]));
-    //CUDA_CALL(cudaStreamDestroy(stream[2]));
-    //CUDA_CALL(cudaStreamDestroy(stream[3]));
+    CUDA_CALL(cudaStreamDestroy(stream[0]));
+    CUDA_CALL(cudaStreamDestroy(stream[1]));
+    CUDA_CALL(cudaStreamDestroy(stream[2]));
+    CUDA_CALL(cudaStreamDestroy(stream[3]));
 
     CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
     CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
