@@ -27,14 +27,11 @@ cd bin/
 
 for app in *.`hostname`.x; do
     echo "---------------------------------------------------"
-    echo $app
+    echo $app | tee -a ../output/logs/${app}_summary.txt
     echo "---------------------------------------------------"
     
     for size in $(seq 88 32 408); do
-        echo "Size: $size"
-
-        # Redirecionar saída padrão e erros padrão para o arquivo de log específico do tamanho
-        exec > ../output/logs/${app}_size_${size}.txt 2>&1
+        echo "Size: $size" | tee -a ../output/logs/${app}_size_${size}.txt
 
         total_msamples=0
         num_runs=10
@@ -42,21 +39,21 @@ for app in *.`hostname`.x; do
 
         for run in $(seq 1 $num_runs); do
             if [[ $app == *"OpenACC"* ]]; then
-                echo "GPU"
-                echo "---------------------------------------------------"
+                echo "GPU" | tee -a ../output/logs/${app}_size_${size}.txt
+                echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
                 unset -v ACC_NUM_CORES
                 export ACC_DEVICE_TYPE=nvidia
-                ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | grep "MSamples/s"
+                ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | tee -a ../output/logs/${app}_size_${size}.txt | grep "MSamples/s"
                 export ACC_DEVICE_TYPE=host
                 export ACC_NUM_CORES=$(lscpu | grep "^CPU(s):" | awk {'print $2'})
-                echo "---------------------------------------------------"
-                echo "CPU"
-                echo "---------------------------------------------------"
+                echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
+                echo "CPU" | tee -a ../output/logs/${app}_size_${size}.txt
+                echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
             fi
 
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32; } 2>&1 )
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | tee -a ../output/logs/${app}_size_${size}.txt; } 2>&1 )
             msamples=$(echo "$result" | grep "MSamples/s" || true)
-            echo "$msamples"
+            echo "$msamples" | tee -a ../output/logs/${app}_size_${size}.txt
             if [[ ! -z $msamples ]]; then
                 msamples_value=$(echo $msamples | awk '{print $2}')
                 total_msamples=$(echo "$total_msamples + $msamples_value" | bc)
@@ -65,7 +62,6 @@ for app in *.`hostname`.x; do
         done
 
         average_msamples=$(echo "scale=2; $total_msamples / $num_runs" | bc)
-
         variance=0
         for msamples_value in "${msamples_values[@]}"; do
             diff=$(echo "$msamples_value - $average_msamples" | bc)
@@ -85,9 +81,6 @@ for app in *.`hostname`.x; do
         echo "$app,$size,$average_msamples,$stddev,$lower_bound,$upper_bound" >> "../$output_file"
 
     done
-
-    # Restaure a saída padrão e os erros padrão para o terminal após a conclusão de todos os tamanhos
-    exec > /dev/tty 2>&1
 
 done
 
