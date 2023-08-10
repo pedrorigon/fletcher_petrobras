@@ -266,23 +266,23 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz) {
     const int size_med = ind(0, 0, (sz / 4));
 
     // Check and enable peer access if not already enabled
-    if (!g_peer_access_enabled) {
-        for (int i = 0; i < GPU_NUMBER; i++) {
-            CUDA_CALL(cudaSetDevice(i));
-            CUDA_CALL(cudaStreamCreate(&swap_stream[i]));
-
-            for (int j = 0; j < GPU_NUMBER; j++) {
-                if (i != j) {
-                    int can_access;
-                    CUDA_CALL(cudaDeviceCanAccessPeer(&can_access, i, j));
-                    if (can_access) {
-                        CUDA_CALL(cudaDeviceEnablePeerAccess(j, 0));
-                    }
-                }
-            }
-        }
-        g_peer_access_enabled = 1;
-    }
+    //if (!g_peer_access_enabled) {
+     //   for (int i = 0; i < GPU_NUMBER; i++) {
+     ///       CUDA_CALL(cudaSetDevice(i));
+     //       CUDA_CALL(cudaStreamCreate(&swap_stream[i]));
+//
+     //       for (int j = 0; j < GPU_NUMBER; j++) {
+      //          if (i != j) {
+      //              int can_access;
+      //              CUDA_CALL(cudaDeviceCanAccessPeer(&can_access, i, j));
+      //              if (can_access) {
+      //                  CUDA_CALL(cudaDeviceEnablePeerAccess(j, 0));
+       //             }
+       //         }
+      //      }
+      //  }
+     //   g_peer_access_enabled = 1;
+   // }
 
     // GPU 0 <-> GPU 1
     CUDA_CALL(cudaSetDevice(0));
