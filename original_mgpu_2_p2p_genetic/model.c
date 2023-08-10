@@ -3,7 +3,7 @@
 #include "driver.h"
 #include "fletcher.h"
 #include "walltime.h"
-#include "model.h"
+#include "model.h
 #include "CUDA/cuda_stuff.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
 #define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.1
+#define MUTATION_X_PROBABILITY 0.1 
 
 typedef struct
 {
@@ -142,7 +142,7 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     // Garantir que o novo valor de thread_y é válido para mutação
     while (new_thread_y * filhos[0].thread_x >= MAX_MULTIPLICATION)
     {
-        new_thread_y = gerarNovoValorAleatorioY();
+        new_thread_y = gerarNovoValorAleatorio();
     }
 
     filhos[0].thread_y = new_thread_y;
@@ -154,7 +154,7 @@ if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
    
     while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
     {
-        new_thread_x = gerarNovoValorAleatorioX();
+        new_thread_x = gerarNovoValorAleatorio();
     }
 
     filhos[0].thread_x = new_thread_x;
