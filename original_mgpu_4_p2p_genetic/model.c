@@ -5,6 +5,7 @@
 #include "walltime.h"
 #include "model.h"
 #include "CUDA/cuda_stuff.h"
+#include "CUDA/cuda_propagate.h"
 //#define MODEL_GLOBALVARS
 //ARTHUR: Transformar em variável local.
 
@@ -84,6 +85,8 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   // CUDA_Initialize initialize target, allocate data etc
 DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
               v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
+
+InitializeStreams();
 
 double walltime=0.0;
 for (int it=1; it<=st; it++) {
