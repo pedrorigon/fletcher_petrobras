@@ -34,7 +34,7 @@ for app in *.`hostname`.x; do
         echo "Size: $size" | tee -a ../output/logs/${app}_size_${size}.txt
 
         total_msamples=0
-        num_runs=10
+        num_runs=5
         msamples_values=()
 
         for run in $(seq 1 $num_runs); do
@@ -43,7 +43,7 @@ for app in *.`hostname`.x; do
                 echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
                 unset -v ACC_NUM_CORES
                 export ACC_DEVICE_TYPE=nvidia
-                ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | tee -a ../output/logs/${app}_size_${size}.txt | grep "MSamples/s"
+                ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 2 | tee -a ../output/logs/${app}_size_${size}.txt | grep "MSamples/s"
                 export ACC_DEVICE_TYPE=host
                 export ACC_NUM_CORES=$(lscpu | grep "^CPU(s):" | awk {'print $2'})
                 echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
@@ -51,7 +51,7 @@ for app in *.`hostname`.x; do
                 echo "---------------------------------------------------" | tee -a ../output/logs/${app}_size_${size}.txt
             fi
 
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | tee -a ../output/logs/${app}_size_${size}.txt; } 2>&1 )
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 2 | tee -a ../output/logs/${app}_size_${size}.txt; } 2>&1 )
             msamples=$(echo "$result" | grep "MSamples/s" || true)
             echo "$msamples" | tee -a ../output/logs/${app}_size_${size}.txt
             if [[ ! -z $msamples ]]; then
