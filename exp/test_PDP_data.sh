@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 # Função para calcular o valor crítico de t a partir do nível de confiança e do tamanho da amostra
+# Cuidar a dependência do módulo scipy que deve estar instalado
+# Caso não estiver instalado --> "sudo apt-get install python3-scipy"
+# Precisa de sudo -- verificar se PCAD tem --> SCIPY
 function get_t_critical() {
     confidence_level=$1
     sample_size=$2
@@ -9,9 +12,8 @@ function get_t_critical() {
     echo $t_critical
 }
 
-# Cria as pastas output e logs, se não existirem
+# Cria a pasta output, se não existir
 mkdir -p output
-mkdir -p logs
 
 # Verifica se já existe um arquivo com o mesmo nome e renomeia, se necessário
 output_file="resultados.csv"
@@ -31,16 +33,27 @@ for app in *.`hostname`.x; do
     echo "---------------------------------------------------"
     echo $app
     echo "---------------------------------------------------"
-
-    # Executar nvidia-smi e salvar output
-    smi_output=$(nvidia-smi -lms 100)
-    echo "$smi_output" > "../logs/$app.txt"
     
     for size in $(seq 88 32 408); do
         echo "Size: $size"
 
+        # Cria o diretório de logs se não existir
+        mkdir -p logs
+
+        # Cria um arquivo de log para o aplicativo atual com base no tamanho
+        log_file="logs/${app}_${size}.csv"
+
+        # Executa o script while para coletar dados da GPU e salvar em arquivos CSV separados com base no tamanho
+        (while true; do
+            nvidia-smi --query-gpu=index,name,power.draw,utilization.gpu --format=csv,noheader,nounits >> "$log_file"
+            sleep 0.01  # Espera 10 ms
+        done) &
+
+        # Obtém o PID do processo em segundo plano
+        pid=$!
+
         total_msamples=0
-        num_runs=10
+        num_runs=1
         msamples_values=()
 
         for run in $(seq 1 $num_runs); do
@@ -58,7 +71,7 @@ for app in *.`hostname`.x; do
             fi
 
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32; } 2>&1 )
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02; } 2>&1 )
             msamples=$(echo "$result" | grep "MSamples/s" || true)
             echo "$msamples"
             if [[ ! -z $msamples ]]; then
@@ -66,8 +79,14 @@ for app in *.`hostname`.x; do
                 total_msamples=$(echo "$total_msamples + $msamples_value" | bc)
                 msamples_values+=($msamples_value)
             fi
+
+            # Encerra o processo do script while para coletar dados da GPU
+           # kill $pid
+           # wait $pid 2>/dev/null
         done
 
+        kill $pid
+        wait $pid 2>/dev/null
         # Calcula a média dos resultados
         average_msamples=$(echo "scale=2; $total_msamples / $num_runs" | bc)
 
@@ -97,3 +116,4 @@ for app in *.`hostname`.x; do
 done
 
 cd ../
+
