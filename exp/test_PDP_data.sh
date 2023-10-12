@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-# Função para obter o número total de GPUs no sistema
-function get_total_gpus() {
-    nvidia-smi --query-gpu=name --format=csv,noheader,nounits | wc -l
-}
-
-# Função para calcular o valor crítico de t
+# Função para calcular o valor crítico de t a partir do nível de confiança e do tamanho da amostra
 function get_t_critical() {
     confidence_level=$1
     sample_size=$2
@@ -14,10 +9,11 @@ function get_t_critical() {
     echo $t_critical
 }
 
-# Cria a pasta output e logs, se não existirem
-mkdir -p output logs
+# Cria as pastas output e logs, se não existirem
+mkdir -p output
+mkdir -p logs
 
-# Setup inicial para nomear o arquivo de saída 
+# Verifica se já existe um arquivo com o mesmo nome e renomeia, se necessário
 output_file="resultados.csv"
 counter=1
 while [ -e "output/$output_file" ]; do
@@ -25,6 +21,8 @@ while [ -e "output/$output_file" ]; do
     ((counter++))
 done
 output_file="output/$output_file"
+
+# Cria o arquivo CSV e adiciona o cabeçalho
 echo "Aplicativo,Tamanho,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior" > $output_file
 
 cd bin/
@@ -33,43 +31,14 @@ for app in *.`hostname`.x; do
     echo "---------------------------------------------------"
     echo $app
     echo "---------------------------------------------------"
-    
-    # Criação de logs para o nvidia-smi para cada aplicativo
-    mkdir -p ../logs/$app
-    log_interval=10
-    total_gpus=$(get_total_gpus)
-    for gpu in $(seq 0 $(($total_gpus - 1))); do
-        nvidia-smi -i $gpu -lms $log_interval > ../logs/$app/gpu$gpu.txt &
-    done
-    sleep $log_interval
-    pkill -f "nvidia-smi -i"
-    
-    # Processamento dos logs para calcular médias de potência e consumo de energia
-    declare -A avg_power
-    declare -A total_energy
-    for gpu in $(seq 0 $(($total_gpus - 1))); do
-        log_file="../logs/$app/gpu$gpu.txt"
-        total_power=0
-        count=0
-        while IFS= read -r line; do
-            power=$(echo $line | awk -F ' ' '{print $13}' | tr -d 'W')
-            total_power=$(echo "$total_power + $power" | bc)
-            ((count++))
-        done < "$log_file"
-        avg_power[$gpu]=$(echo "scale=2; $total_power / $count" | bc)
-        total_energy[$gpu]=$(echo "scale=2; $avg_power[$gpu] * $log_interval" | bc)
-    done
-    
-    # Gera um arquivo .csv com a média da potência e a energia consumida
-    csv_file="../logs/$app/power_energy_summary.csv"
-    echo "GPU, Average Power (W), Total Energy (Joule)" > $csv_file
-    for gpu in $(seq 0 $(($total_gpus - 1))); do
-        echo "$gpu, ${avg_power[$gpu]}, ${total_energy[$gpu]}" >> $csv_file
-    done
 
-    # Continuação do seu loop original...
+    # Executar nvidia-smi e salvar output
+    smi_output=$(nvidia-smi -lms 100)
+    echo "$smi_output" > "../logs/$app.txt"
+    
     for size in $(seq 88 32 408); do
         echo "Size: $size"
+
         total_msamples=0
         num_runs=10
         msamples_values=()
@@ -128,4 +97,3 @@ for app in *.`hostname`.x; do
 done
 
 cd ../
-
