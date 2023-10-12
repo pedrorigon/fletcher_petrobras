@@ -2,6 +2,7 @@
 #include "cuda_stuff.h"
 #include "../driver.h"
 #include "../map.h"
+#include <nvml.h>
 
 void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
                      float dx, float dy, float dz, float dt,
@@ -366,4 +367,69 @@ void CUDA_Allocate_main(float **restrict vpz, float **restrict vsv, float **rest
    memset(*pc, 0, msize_vol);
    memset(*qp, 0, msize_vol);
    memset(*qc, 0, msize_vol);
+}
+
+void initNVML() {
+    nvmlReturn_t result = nvmlInit();
+    if (NVML_SUCCESS != result) { 
+        printf("Falha na inicialização do NVML: %s\n", nvmlErrorString(result));
+        exit(1);
+    }
+}
+
+// Obter a potência da GPU em watts
+double getGpuPower(int gpuIndex) {
+    nvmlDevice_t device;
+    unsigned int power;
+    nvmlReturn_t result;
+
+    result = nvmlDeviceGetHandleByIndex(gpuIndex, &device);
+    if (NVML_SUCCESS != result) {
+        printf("Falha ao obter o identificador do dispositivo %d: %s\n", gpuIndex, nvmlErrorString(result));
+        return -1;
+    }
+
+    result = nvmlDeviceGetPowerUsage(device, &power);
+    if (NVML_SUCCESS != result) {
+        printf("Falha ao obter o uso de energia do dispositivo %d: %s\n", gpuIndex, nvmlErrorString(result));
+        return -1;
+    }
+
+    return power / 1000.0; // Convertendo miliwatts para watts
+}
+
+double* startPowerCollection() {
+    unsigned int deviceCount;
+    nvmlReturn_t result = nvmlDeviceGetCount(&deviceCount);
+    if (NVML_SUCCESS != result) {
+        printf("Falha ao obter o número de dispositivos: %s\n", nvmlErrorString(result));
+        exit(1);
+    }
+
+    double* initialPowers = (double*) malloc(deviceCount * sizeof(double));
+
+    for (int i = 0; i < deviceCount; i++) {
+        initialPowers[i] = getGpuPower(i);
+    }
+
+    return initialPowers;
+}
+
+double* endPowerCollection(double* initialPowers) {
+    unsigned int deviceCount;
+    nvmlReturn_t result = nvmlDeviceGetCount(&deviceCount);
+    if (NVML_SUCCESS != result) {
+        printf("Falha ao obter o número de dispositivos: %s\n", nvmlErrorString(result));
+        exit(1);
+    }
+
+    double* finalPowers = (double*) malloc(deviceCount * sizeof(double));
+
+    for (int i = 0; i < deviceCount; i++) {
+        finalPowers[i] = getGpuPower(i) - initialPowers[i];
+    }
+
+    free(initialPowers);
+
+    return finalPowers;
 }

@@ -85,18 +85,29 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
               v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
 
+initNVML();
 double walltime=0.0;
+double energyt=0.0;
 for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
-
+    double* initialPowers = startPowerCollection();
     const double t0=wtime();
     
+    
     DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc); //ajustar parametros
+    double* powerDifferences = endPowerCollection(initialPowers);
+    walltime+=wtime()-t0;
     SwapArrays(&pp, &pc, &qp, &qc);
 
-    walltime+=wtime()-t0;
+    for (unsigned int i = 0; i < 4; i++) {
+        printf("Variação de Potência da GPU %d: %f Watts\n", i, powerDifferences[i]);
+        energyt = powerDifferences[i] * walltime;
+        printf("Energia consumida pela GPU %d: %f Joules\n", i, energyt);
+    }
+
+    free(powerDifferences);
 
     tSim=it*dt;
     if (tSim >= tOut) {
@@ -111,8 +122,6 @@ for (int it=1; it<=st; it++) {
 #endif
     }
   }
-
-
 
 
   const char StringHWM[6]="VmHWM";
