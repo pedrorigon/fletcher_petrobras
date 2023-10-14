@@ -457,7 +457,28 @@ for (int it=1; it<=st; it++) {
   printf ("Genetic time PORCENTAGEM %lf\n", genetic_time*100/walltime);
   printf ("MSamples/s %.0lf\n", MSamples);
   printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
+  
+  // Criar uma string formatada para o nome do arquivo
+  char filename[5]; // Ajuste o tamanho conforme necessário
+  sprintf(filename, "output%d.txt", sx-40); // "output%d.txt" é o formato do nome do arquivo
 
+  // Abrir o arquivo com o nome formatado
+  FILE *outputFile = fopen(filename, "w");
+
+  if (outputFile == NULL) {
+	printf("Erro ao abrir o arquivo de saída.\n");
+        return 1;
+  }
+
+  // Escrever os valores no arquivo
+  fprintf(outputFile, "walltime: %lf\n", walltime);
+  fprintf(outputFile, "genetic_time: %lf\n", genetic_time);
+  fprintf(outputFile, "Genetic time PORCENTAGEM %lf\n", genetic_time*100/walltime); 
+  fprintf(outputFile, "MSamples: %.0lf\n", MSamples);
+
+  // Fechar o arquivo
+  fclose(outputFile);
+  
   // Dump Execution Metrics in CSV
   
   FILE *fr=NULL;
