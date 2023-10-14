@@ -10,12 +10,12 @@
 #include <time.h>
 #include <limits.h>
 
-#define POPULATION_SIZE 20
+#define POPULATION_SIZE 30
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
 #define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.1 
+#define MUTATION_X_PROBABILITY 0.0 
 
 typedef struct
 {
@@ -33,7 +33,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{32, 4}, {64, 8}, {32, 16}, {64, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -49,13 +49,24 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
             populacao_atual++;
         }
     }
+	
+    int vetor_x[] = {16, 32, 64};
+    int vetor_y[] = {2, 4, 8, 16, 32, 64};
+    int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
+    int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
 
     while (populacao_atual < tamanho_populacao)
     {
-        int x = rand() % (MAX_NUM_THREADS - 1) + 2;
-        int y = rand() % (MAX_NUM_THREADS - 1) + 2;
-        if (x * y < MAX_MULTIPLICATION &&
-            isPowerOfTwo(x) && isPowerOfTwo(y))
+        srand(time(NULL));
+
+    	// Gera um número aleatório entre 0 e 5
+    	int indice_aleatorio_x = rand() % tamanho_vetor_x;
+	int indice_aleatorio_y = rand() % tamanho_vetor_y;
+	    
+	int x = vetor_x[indice_aleatorio_x];
+        int y = vetor_y[indice_aleatorio_y];
+	    
+        if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
@@ -118,10 +129,10 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
     {
         // Realizar crossover trocando os valores entre os pais
-        filhos[0].thread_x = pais[1].thread_y;
-        filhos[0].thread_y = pais[0].thread_x;
+        filhos[0].thread_x = pais[1].thread_x;
+        filhos[0].thread_y = pais[1].thread_y;
 
-        filhos[1].thread_x = pais[1].thread_x;
+        filhos[1].thread_x = pais[0].thread_x;
         filhos[1].thread_y = pais[0].thread_y;
     }
     else
@@ -279,6 +290,7 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 
 double walltime=0.0;
 double kernel_time=0.0;
+double genetic_time=0.0;
 double res=0.0;
 //int bsize_x=32, bsize_y=16;
 
@@ -306,6 +318,7 @@ for (int it=1; it<=st; it++) {
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
             kernel_time=wtime()-t0;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             populacao[it - 1].fitness = 1 / kernel_time;
             printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1].thread_x, populacao[it - 1].thread_y, kernel_time, res);
@@ -334,6 +347,7 @@ for (int it=1; it<=st; it++) {
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
             kernel_time=wtime()-t1;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             populacao[it - POPULATION_SIZE - 1].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
 
@@ -362,6 +376,7 @@ for (int it=1; it<=st; it++) {
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
             kernel_time=wtime()-t2;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
@@ -438,8 +453,31 @@ for (int it=1; it<=st; it++) {
   // Dump Execution Metrics
   
   printf ("Execution time (s) is %lf\n", walltime);
+  printf ("Genetic time (s) is %lf\n", genetic_time);
+  printf ("Genetic time PORCENTAGEM %lf\n", genetic_time*100/walltime);
   printf ("MSamples/s %.0lf\n", MSamples);
   printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
+
+  // Criar uma string formatada para o nome do arquivo
+  char filename[5]; // Ajuste o tamanho conforme necessário
+  sprintf(filename, "output%d.txt", sx-40); // "output%d.txt" é o formato do nome do arquivo
+
+  // Abrir o arquivo com o nome formatado
+  FILE *outputFile = fopen(filename, "w");
+
+  if (outputFile == NULL) {
+	printf("Erro ao abrir o arquivo de saída.\n");
+        return 1;
+  }
+
+  // Escrever os valores no arquivo
+  fprintf(outputFile, "walltime: %lf\n", walltime);
+  fprintf(outputFile, "genetic_time: %lf\n", genetic_time);
+  fprintf(outputFile, "Genetic time PORCENTAGEM %lf\n", genetic_time*100/walltime); 
+  fprintf(outputFile, "MSamples: %.0lf\n", MSamples);
+
+  // Fechar o arquivo
+  fclose(outputFile);
 
   // Dump Execution Metrics in CSV
   
