@@ -148,10 +148,10 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
     {
         // Realizar crossover trocando os valores entre os pais
-        filhos[0].thread_x = pais[1].thread_y;
-        filhos[0].thread_y = pais[0].thread_x;
+        filhos[0].thread_x = pais[1].thread_x;
+        filhos[0].thread_y = pais[1].thread_y;
 
-        filhos[1].thread_x = pais[1].thread_x;
+        filhos[1].thread_x = pais[0].thread_x;
         filhos[1].thread_y = pais[0].thread_y;
     }
     else
