@@ -5,18 +5,28 @@
 #include "walltime.h"
 #include "model.h"
 #include "CUDA/cuda_stuff.h"
-#include "CUDA/cuda_propagate.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
+#define MEGA 1.0e-6
+#define GIGA 1.0e-9
 
-#define POPULATION_SIZE 20
+#ifdef PAPI
+#include "ModPAPI.h"
+#endif
+
+#define MODEL_GLOBALVARS
+#include "precomp.h"
+#undef MODEL_GLOBALVARS
+
+
+#define POPULATION_SIZE 30
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
 #define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.1
+#define MUTATION_X_PROBABILITY 0.0 
 
 typedef struct
 {
@@ -34,7 +44,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{32, 4}, {64, 8}, {32, 16}, {64, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -42,7 +52,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
     {
         int x = indices_fixos[populacao_atual][0];
         int y = indices_fixos[populacao_atual][1];
-        if (x * y < MAX_MULTIPLICATION)
+        if (x>=16 && x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
@@ -51,12 +61,31 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
         }
     }
 
+    int vetor_x[] = {16, 32, 64};
+    int vetor_y[] = {2, 4, 8, 16, 32, 64};
+    int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
+    int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
+
+
     while (populacao_atual < tamanho_populacao)
     {
-        int x = rand() % (MAX_NUM_THREADS - 1) + 2;
-        int y = rand() % (MAX_NUM_THREADS - 1) + 2;
-        if (x * y < MAX_MULTIPLICATION &&
-            isPowerOfTwo(x) && isPowerOfTwo(y))
+	//int vetor_x[] = {16, 32, 64};
+	//int vetor_y[] = {2, 4, 8, 16, 32, 64};
+        //int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
+	//int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
+
+    	// Inicializa a semente para geração de números aleatórios
+    	srand(time(NULL));
+
+    	// Gera um número aleatório entre 0 e 5
+    	int indice_aleatorio_x = rand() % tamanho_vetor_x;
+	int indice_aleatorio_y = rand() % tamanho_vetor_y;
+
+
+        //int x = rand() % (MAX_NUM_THREADS - 1) + 2;
+	int x = vetor_x[indice_aleatorio_x];
+        int y = vetor_y[indice_aleatorio_y];
+        if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
@@ -113,6 +142,7 @@ int gerarNovoValorAleatorio()
     return random_value;
 }
 
+
 void crossoverEMutacao(Individuo *pais, Individuo *filhos)
 { // Verificar se a multiplicação dos valores de thread_x * thread_y é inferior a 1024
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
@@ -136,7 +166,7 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     // for (int i = 0; i < 2; i++)
     //{
     if ((double)rand() / RAND_MAX < MUTATION_Y_PROBABILITY)
-    {
+{
     int new_thread_y = gerarNovoValorAleatorio();
 
     // Garantir que o novo valor de thread_y é válido para mutação
@@ -146,19 +176,20 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     }
 
     filhos[0].thread_y = new_thread_y;
-    }
+}
 
-    if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+{
+    int new_thread_x = gerarNovoValorAleatorio();
+   
+    while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
     {
-        int new_thread_x = gerarNovoValorAleatorio();
-    
-        while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
-        {
-            new_thread_x = gerarNovoValorAleatorio();
-        }
-
-        filhos[0].thread_x = new_thread_x;
+        new_thread_x = gerarNovoValorAleatorio();
     }
+
+    filhos[0].thread_x = new_thread_x;
+}
+    //}
 }
 
 Individuo *gerarNovaSubpopulacao(Individuo *populacao)
@@ -201,112 +232,86 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 // a aptidão de cada indivíduo será 1/tempo de exec
 
 
-void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
-  fprintf(f,"sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",sx, sy, sz, bord, st);
+void ReportProblemSizeCSV(const int sx, const int sy, const int sz,
+			  const int bord, const int st, 
+			  FILE *f){
+  fprintf(f,
+	  "sx; %d; sy; %d; sz; %d; bord; %d;  st; %d; \n",
+	  sx, sy, sz, bord, st);
 }
 
-void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, FILE *f){
-  fprintf(f,"walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",walltime, MSamples, HWM, HWMUnit);
+void ReportMetricsCSV(double walltime, double MSamples,
+		      long HWM, char *HWMUnit, FILE *f){
+  fprintf(f,
+	  "walltime; %lf; MSamples; %lf; HWM;  %ld; HWMUnit;  %s;\n",
+	  walltime, MSamples, HWM, HWMUnit);
 }
 
 
-void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
-           const float dx, const float dy, const float dz, const float dt, const int it, float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
-	         float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta, float * restrict phi, float * restrict theta)
+void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, 
+           const int sx, const int sy, const int sz, const int bord,
+           const float dx, const float dy, const float dz, const float dt, const int it, 
+	   float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
+	   float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta,
+	   float * restrict phi, float * restrict theta)
 {
 
+  float tSim=0.0;
   int nOut=1;
-  int size = sx*sy*sz;
-  float tSim=0.0, tOut=nOut*dtOutput;
+  float tOut=nOut*dtOutput;
 
-  const long samplesPropagate=(long)(sx-2*(bord))*(long)(sy-2*(bord))*(long)(sz-2*(bord));
+  const long samplesPropagate=(long)(sx-2*bord)*(long)(sy-2*bord)*(long)(sz-2*bord);
   const long totalSamples=samplesPropagate*(long)st;
 
-  float *ch1dxx=NULL;  // isotropy simetry deep angle
-  float *ch1dyy=NULL;  // isotropy simetry deep angle
-  float *ch1dzz=NULL;  // isotropy simetry deep angle
-  float *ch1dxy=NULL;  // isotropy simetry deep angle
-  float *ch1dyz=NULL;  // isotropy simetry deep angle
-  float *ch1dxz=NULL;  // isotropy simetry deep angle
-  float *v2px=NULL;  // coeficient of H2(p)
-  float *v2pz=NULL;  // coeficient of H1(q)
-  float *v2sz=NULL;  // coeficient of H1(p-q) and H2(p-q)
-  float *v2pn=NULL;  // coeficient of H2(p)
-  
-  DRIVER_Allocate_Model_Variables(&ch1dxx, &ch1dyy, &ch1dzz, &ch1dxy, &ch1dyz, &ch1dxz, &v2px, &v2pz, &v2sz, &v2pn, sx, sy, sz);
+#ifdef PAPI
+  long long values[NCOUNTERS];
+  long long ThisValues[NCOUNTERS];
+  for (int i=0; i<NCOUNTERS; i++) {
+    values[i]=0LL;
+    ThisValues[i]=0LL;
+  }
 
-  for (int i=0; i<size; i++) {
-    float sinTheta=sin(theta[i]);
-    float cosTheta=cos(theta[i]);
-    float sin2Theta=sin(2.0*theta[i]);
-    float sinPhi=sin(phi[i]);
-    float cosPhi=cos(phi[i]);
-    float sin2Phi=sin(2.0*phi[i]);
-    ch1dxx[i]=sinTheta*sinTheta * cosPhi*cosPhi;
-    ch1dyy[i]=sinTheta*sinTheta * sinPhi*sinPhi;
-    ch1dzz[i]=cosTheta*cosTheta;
-    ch1dxy[i]=sinTheta*sinTheta * sin2Phi;
-    ch1dyz[i]=sin2Theta         * sinPhi;
-    ch1dxz[i]=sin2Theta         * cosPhi;
-  }
-  #ifdef _DUMP
-  {
-    const int iPrint=ind(bord+1,bord+1,bord+1);
-    printf("ch1dxx=%f; ch1dyy=%f; ch1dzz=%f; ch1dxy=%f; ch1dxz=%f; ch1dyz=%f\n",ch1dxx[iPrint], ch1dyy[iPrint], ch1dzz[iPrint], ch1dxy[iPrint], ch1dxz[iPrint], ch1dyz[iPrint]);
-  }
-  #endif
-
-  // coeficients of H1 and H2 at PDEs
-  for (int i=0; i<size; i++){
-    v2sz[i]=vsv[i]*vsv[i];
-    v2pz[i]=vpz[i]*vpz[i];
-    v2px[i]=v2pz[i]*(1.0+2.0*epsilon[i]);
-    v2pn[i]=v2pz[i]*(1.0+2.0*delta[i]);
-  }
-  
-#ifdef _DUMP
-{
-  const int iPrint=ind(bord+1,bord+1,bord+1);
-  printf("vsv=%e; vpz=%e, v2pz=%e\n", vsv[iPrint], vpz[iPrint], v2pz[iPrint]);
-  printf("v2sz=%e; v2pz=%e, v2px=%e, v2pn=%e\n", v2sz[iPrint], v2pz[iPrint], v2px[iPrint], v2pn[iPrint]);
-}
+  const int eventset=InitPAPI_CreateCounters();
 #endif
 
-  // CUDA_Initialize initialize target, allocate data etc
-DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
-              v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
+#define MODEL_INITIALIZE
+#include "precomp.h"
+#undef MODEL_INITIALIZE
 
-double walltime=0.0;
-double kernel_time=0.0;
-double res=0.0;
-//int bsize_x=32, bsize_y=16;
+  // DRIVER_Initialize initialize target, allocate data etc
+  DRIVER_Initialize(sx,   sy,   sz,   bord,
+		      dx,  dy,  dz,  dt,
+		      vpz,    vsv,    epsilon,    delta,
+		      phi,    theta,
+		      pp,    pc,    qp,    qc);
 
-InitializeStreams();
+  
+  double walltime=0.0;
+  double genetic_time=0.0;
+  double kernel_time=0.0;
+  double res=0.0;
+  Individuo populacao[POPULATION_SIZE];
+  inicializarPopulacao(populacao, POPULATION_SIZE);
 
-Individuo populacao[POPULATION_SIZE];
+  for (int it=1; it<=st; it++) {
 
-// Inicializar população
-inicializarPopulacao(populacao, POPULATION_SIZE);
-
-// Loop para executar o kernel com cada configuração e coletar os tempos de execução
-
-for (int it=1; it<=st; it++) {
     // Calculate / obtain source value on i timestep
     float src = Source(dt, it-1);
-    DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+    DRIVER_InsertSource(dt,it-1,iSource,pc,qc,src);
 
-   // printf("\nBsize_x: %d \n", bsize_x);
-  //  printf("Bsize_y: %d \n", bsize_y);
-    //update_bsize_values(&bsize_x, &bsize_y, timeIt);
+#ifdef PAPI
+    StartCounters(eventset);
+#endif
 
     if (it <= POPULATION_SIZE)
-    {
+        {
             printf("\nBsize_x: %d \n", populacao[it - 1].thread_x);
             printf("Bsize_y: %d \n", populacao[it - 1].thread_y);
             const double t0=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
             kernel_time=wtime()-t0;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             populacao[it - 1].fitness = 1 / kernel_time;
             printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1].thread_x, populacao[it - 1].thread_y, kernel_time, res);
@@ -326,15 +331,16 @@ for (int it=1; it<=st; it++) {
                 }
                 //free(novaSubpopulacao);
             }
-    }
+        }
     else if (it <= POPULATION_SIZE * 2)
-    {
+        {
             printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
             printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
             const double t1=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
             kernel_time=wtime()-t1;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             populacao[it - POPULATION_SIZE - 1].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
 
@@ -354,15 +360,16 @@ for (int it=1; it<=st; it++) {
                 }
                 //free(novaSubpopulacao);
             }
-    }
+        }
     else if (it <= POPULATION_SIZE * 3)
-    {
+        {
             printf("\nBsize_x: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_x);
             printf("Bsize_y: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_y);
             const double t2=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
             kernel_time=wtime()-t2;
             walltime+=kernel_time;
+	    genetic_time+=kernel_time;
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
@@ -381,45 +388,49 @@ for (int it=1; it<=st; it++) {
                 }
                 //free(novaSubpopulacao);
             }
-    }
+        }
     else
-    {
+        {
             int melhorConfig = encontrarMelhorIndice(populacao);
             printf("\nBsize_x: %d \n", populacao[melhorConfig].thread_x);
             printf("Bsize_y: %d \n", populacao[melhorConfig].thread_y);
             const double t3=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
             kernel_time=wtime()-t3;
             walltime+=kernel_time;
             printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
-    }
-
+        }
     //const double t0=wtime();
-    
-    //DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
+    //DRIVER_Propagate(  sx,   sy,   sz,   bord,
+		//       dx,   dy,   dz,   dt,   it,
+		//       pp,    pc,    qp,    qc);
+
     //SwapArrays(&pp, &pc, &qp, &qc);
+    //walltime+=wtime()-t0;
 
-    //timeIt=wtime()-t0;
-    //walltime+=timeIt;
-
-    //printf("tempo deu: %lf\n", timeIt);
+#ifdef PAPI
+    StopReadCounters(eventset, ThisValues);
+    for (int i=0; i<NCOUNTERS; i++) {
+      values[i]+=ThisValues[i];
+    }
+#endif
 
     tSim=it*dt;
     if (tSim >= tOut) {
+
       //DRIVER_Update_pointers(sx,sy,sz,pc);
       //DumpSliceFile(sx,sy,sz,pc,sPtr);
-    //  CUDA_prefetch_pc(sx,sy,sz,pc);
-
       tOut=(++nOut)*dtOutput;
 #ifdef _DUMP
       //DRIVER_Update_pointers(sx,sy,sz,pc);
-      //DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
+      //      DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,src);
 #endif
     }
   }
 
+  // get HWM data
 
   const char StringHWM[6]="VmHWM";
   char line[256], title[12],HWMUnit[8];
@@ -434,11 +445,12 @@ for (int it=1; it<=st; it++) {
     }
   }
   fclose(fp);
-    //nao vamos salvar em disco
 
   // Dump Execution Metrics
   
   printf ("Execution time (s) is %lf\n", walltime);
+  printf ("Genetic time (s) is %lf\n", genetic_time);
+  printf ("Genetic time PORCENTAGEM %lf\n", genetic_time*100/walltime);
   printf ("MSamples/s %.0lf\n", MSamples);
   printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
 
@@ -450,19 +462,26 @@ for (int it=1; it<=st; it++) {
 
   // report problem size
 
-  ReportProblemSizeCSV(sx, sy, sz, bord, st, fr);
+  ReportProblemSizeCSV(sx, sy, sz,
+		       bord, st, 
+		       fr);
 
   // report collected metrics
 
-  ReportMetricsCSV(walltime, MSamples, HWM, HWMUnit, fr);
+  ReportMetricsCSV(walltime, MSamples,
+		   HWM, HWMUnit, fr);
+  
+  // report PAPI metrics
+
+#ifdef PAPI
+  ReportRawCountersCSV (values, fr);
+#endif
   
   fclose(fr);
 
   fflush(stdout);
 
   // DRIVER_Finalize deallocate data, clean-up things etc 
-  DRIVER_Finalize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
-              v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc);
+  DRIVER_Finalize();
 
 }
-
