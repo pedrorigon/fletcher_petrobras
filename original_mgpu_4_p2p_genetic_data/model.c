@@ -66,7 +66,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 	int x = vetor_x[indice_aleatorio_x];
         int y = vetor_y[indice_aleatorio_y];
 	    
-        if (x * y < MAX_MULTIPLICATION &&)
+        if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
