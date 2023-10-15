@@ -191,12 +191,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaStreamSynchronize(stream[0]));
     CUDA_CALL(cudaStreamSynchronize(stream[1]));
 
-    cudaEvent_t start, stop;
-    CUDA_CALL(cudaEventCreate(&start));
-    CUDA_CALL(cudaEventCreate(&stop));
-
-    CUDA_CALL(cudaEventRecord(start));
-
     for (int gpu = 0; gpu < 2; gpu++)
     {
         CUDA_SwapArrays(&dev_pp[gpu], &dev_pc[gpu], &dev_qp[gpu], &dev_qc[gpu]);
@@ -208,15 +202,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
     CUDA_CALL(cudaStreamDestroy(swap_stream[0]));
     CUDA_CALL(cudaStreamDestroy(swap_stream[1]));
-
-    CUDA_CALL(cudaEventRecord(stop));
-    CUDA_CALL(cudaEventSynchronize(stop));
-
-    float milliseconds = 0.0f;
-    CUDA_CALL(cudaEventElapsedTime(&milliseconds, start, stop));
-
-    printf("Tempo de execução: %f ms\n", milliseconds);
-
 }
 
 // swap array pointers on time forward array propagation
