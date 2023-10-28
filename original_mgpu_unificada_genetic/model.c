@@ -273,7 +273,8 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   printf("v2sz=%e; v2pz=%e, v2px=%e, v2pn=%e\n", v2sz[iPrint], v2pz[iPrint], v2px[iPrint], v2pn[iPrint]);
 }
 #endif
-int gpu_qtd = 4;
+
+int gpu_qtd = mgpu_number_input;
 initialize_mgpu(gpu_qtd);
   // CUDA_Initialize initialize target, allocate data etc
 DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
@@ -399,7 +400,8 @@ for (int it=1; it<=st; it++) {
             printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
     }
 
-    //const double t0=wtime();
+    //const double t0=wtime();	         float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta, float * restrict phi, float * restrict theta, int mgpu_number_input)
+
     
     //DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
     //SwapArrays(&pp, &pc, &qp, &qc);
