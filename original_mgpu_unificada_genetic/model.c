@@ -275,6 +275,9 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 #endif
 
 int gpu_qtd = mgpu_number_input;
+number_gpu = mgpu_number_input;
+printf("numero de GPUS %d\n", gpu_qtd);
+printf("numero de GPUS %d\n", number_gpu);
 initialize_mgpu(gpu_qtd);
   // CUDA_Initialize initialize target, allocate data etc
 DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
