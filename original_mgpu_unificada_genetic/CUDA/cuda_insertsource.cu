@@ -2,6 +2,8 @@
 #include "../driver.h"
 #include "cuda_insertsource.h"
 
+extern int number_gpu;
+
 __global__ void kernel_InsertSource(const float val, const int iSource,
 	                            float * restrict qp, float * restrict qc, int fix_position, int offset)
 {
@@ -16,25 +18,24 @@ __global__ void kernel_InsertSource(const float val, const int iSource,
 
 void CUDA_InsertSource(const float val, const int iSource, float * restrict pc, float * restrict qc,  float * restrict pp, float * restrict qp)
 {
-  extern Gpu gpu_map[GPU_NUMBER];
-  extern float* dev_pp[GPU_NUMBER];
-  extern float* dev_pc[GPU_NUMBER];
-  extern float* dev_qp[GPU_NUMBER];
-  extern float* dev_qc[GPU_NUMBER];
+  extern Gpu* gpu_map;
+  extern float** dev_pp;
+  extern float** dev_pc;
+  extern float** dev_qp;
+  extern float** dev_qc;
 
-  int num_gpus = 4;
   int gpu_mid;
   int teste;
   int offset = 0;
   int fix_position = 0;
   //CUDA_CALL(cudaGetDeviceCount(&num_gpus));
-  for (int gpu = 0; gpu < 4; gpu++)
+  for (int gpu = 0; gpu < number_gpu; gpu++)
     {
         cudaDeviceProp prop;
         cudaSetDevice(gpu);
         if ((dev_pp[gpu]) && (dev_qp[gpu]))
         {
-          gpu_mid = num_gpus / 2;
+          gpu_mid = number_gpu / 2;
           if (gpu == gpu_mid){
             offset = gpu_map[2].center_position;
           } else if (gpu == (gpu_mid - 1)){

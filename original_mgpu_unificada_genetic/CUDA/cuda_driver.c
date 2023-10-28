@@ -6,26 +6,26 @@
 #include"cuda_stuff.h"
 #include"cuda_propagate.h"
 #include"cuda_insertsource.h"
-#define GPU_NUMBER 4
+//#define GPU_NUMBER 4
 
-
-Gpu gpu_map[GPU_NUMBER];
-float* dev_ch1dxx[GPU_NUMBER];
-float* dev_ch1dyy[GPU_NUMBER];
-float* dev_ch1dzz[GPU_NUMBER];
-float* dev_ch1dxy[GPU_NUMBER];
-float* dev_ch1dyz[GPU_NUMBER];
-float* dev_ch1dxz[GPU_NUMBER];
-float* dev_v2px[GPU_NUMBER];
-float* dev_v2pz[GPU_NUMBER];
-float* dev_v2sz[GPU_NUMBER];
-float* dev_v2pn[GPU_NUMBER];
-float* dev_pp[GPU_NUMBER];
-float* dev_pc[GPU_NUMBER];
-float* dev_qp[GPU_NUMBER];
-float* dev_qc[GPU_NUMBER];
-float* bordSwap_pp[GPU_NUMBER];
-float* bordSwap_qp[GPU_NUMBER];
+int number_gpu=4;
+Gpu* gpu_map;
+float* dev_ch1dxx;
+float* dev_ch1dyy;
+float* dev_ch1dzz;
+float* dev_ch1dxy;
+float* dev_ch1dyz;
+float* dev_ch1dxz;
+float* dev_v2px;
+float* dev_v2pz;
+float* dev_v2sz;
+float* dev_v2pn;
+float* dev_pp;
+float* dev_pc;
+float* dev_qp;
+float* dev_qc;
+float* bordSwap_pp;
+float* bordSwap_qp;
 
 
 void DRIVER_Initialize(const int sx, const int sy, const int sz, const int bord,

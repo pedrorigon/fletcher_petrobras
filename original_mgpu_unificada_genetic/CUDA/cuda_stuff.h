@@ -33,6 +33,9 @@ void CUDA_Allocate_main(float ** restrict vpz, float ** restrict vsv, float ** r
     float ** restrict phi, float ** restrict theta, float ** restrict pp, float ** restrict pc, float ** restrict qp, 
     float ** restrict qc, int sx, int sy, int sz);
 
+void allocate_pointer_array(float ***array, const char *name);
+
+void initialize_mgpu(int gpu_number);
 
 #ifdef __cplusplus
 }

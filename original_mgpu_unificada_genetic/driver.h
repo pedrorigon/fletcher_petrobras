@@ -1,34 +1,17 @@
 #ifndef __driver_h__
 #define __driver_h__
-#define GPU_NUMBER 4
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
-      size_t gpu_upper_x;
-      size_t gpu_upper_y;
-      size_t gpu_upper_z;
-      size_t gpu_lower_x;
-      size_t gpu_lower_y;
-      size_t gpu_lower_z;
       size_t gpu_size_bord;
-      size_t gpu_payload;
       size_t gpu_start_pointer;
       size_t gpu_end_pointer;
-      size_t cpu_lower;
-      size_t cpu_upper;
-      size_t cpu_start_pointer;
-      size_t cpu_end_pointer;
       size_t gpu_size_gpu;
       size_t cpu_offset;
-      size_t cpu_z_start_compute;
-      size_t cpu_z_end_compute;
-      size_t cpu_z_start_read;
-      size_t cpu_z_end_read;
       size_t center_position;
-
 
    } Gpu;
 

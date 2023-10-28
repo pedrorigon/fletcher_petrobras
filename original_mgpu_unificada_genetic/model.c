@@ -271,7 +271,8 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   printf("v2sz=%e; v2pz=%e, v2px=%e, v2pn=%e\n", v2sz[iPrint], v2pz[iPrint], v2px[iPrint], v2pn[iPrint]);
 }
 #endif
-
+int gpu_qtd = 4;
+initialize_mgpu(gpu_qtd);
   // CUDA_Initialize initialize target, allocate data etc
 DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
               v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
