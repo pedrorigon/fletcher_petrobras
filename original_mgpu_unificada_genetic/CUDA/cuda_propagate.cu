@@ -189,11 +189,13 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
                                                                          dev_ch1dzz[gpu], dev_ch1dxy[gpu], dev_ch1dyz[gpu], dev_ch1dxz[gpu], dev_v2px[gpu], dev_v2pz[gpu], dev_v2sz[gpu],
                                                                          dev_v2pn[gpu], dev_pp[gpu], dev_pc[gpu], dev_qp[gpu], dev_qc[gpu], lower, upper);
     }
-
-    CUDA_CALL(cudaStreamSynchronize(stream[0]));
-    CUDA_CALL(cudaStreamSynchronize(stream[1]));
-    CUDA_CALL(cudaStreamSynchronize(stream[2]));
-    CUDA_CALL(cudaStreamSynchronize(stream[3]));
+    for (int gpu = 0; gpu < number_gpu; gpu++){
+        CUDA_CALL(cudaStreamSynchronize(stream[gpu]));
+    }
+   // CUDA_CALL(cudaStreamSynchronize(stream[0]));
+   // CUDA_CALL(cudaStreamSynchronize(stream[1]));
+   // CUDA_CALL(cudaStreamSynchronize(stream[2]));
+   // CUDA_CALL(cudaStreamSynchronize(stream[3]));
 
     for (int gpu = 0; gpu < number_gpu; gpu++)
     {
@@ -201,10 +203,14 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     }
     CUDA_CALL(cudaDeviceSynchronize());
 
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[2]));
-    CUDA_CALL(cudaStreamSynchronize(swap_stream[3]));
+    for (int gpu = 0; gpu < number_gpu; gpu++){
+        CUDA_CALL(cudaStreamSynchronize(swap_stream[gpu]));
+    }
+
+   // CUDA_CALL(cudaStreamSynchronize(swap_stream[0]));
+   // CUDA_CALL(cudaStreamSynchronize(swap_stream[1]));
+   // CUDA_CALL(cudaStreamSynchronize(swap_stream[2]));
+    //CUDA_CALL(cudaStreamSynchronize(swap_stream[3]));
 }
 
 // swap array pointers on time forward array propagation
@@ -229,8 +235,8 @@ void CUDA_SwapBord(const int sx, const int sy, const int sz)
     extern Gpu *gpu_map;
 
     // Define sizes
-    const int size_gpu0 = ind(0, 0, (sz / 4 - 5));
-    const int size_med = ind(0, 0, (sz / 4));
+    const int size_gpu0= ind(0, 0, (sz / number_gpu - 5));
+    const int size_med = ind(0, 0, (sz / number_gpu));
 
     if (number_gpu == 8)
     {
