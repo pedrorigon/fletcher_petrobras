@@ -80,6 +80,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[1].gpu_end_pointer = ind(0, 0, (sz / 2 + 5));
       gpu_map[1].gpu_size_gpu = (sx * sy * (sz / 2 + 5)) * sizeof(float);
       gpu_map[1].cpu_offset = ind(0, 0, (sz / 2 - 5));
+      gpu_map[1].center_position = ind(sx / 2, sy / 2, (sz / 2 + 5));
    }
    else if (number_gpu == 8)
    {
