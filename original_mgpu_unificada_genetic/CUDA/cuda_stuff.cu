@@ -253,7 +253,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
          CUDA_CALL(cudaMalloc(&dev_v2sz[0], msize_vol));
          CUDA_CALL(cudaMalloc(&dev_v2pn[0], msize_vol));
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dxx[0], ch1dxx, msize_vol, cudaMemcpyHostToDevice));
-         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[0], ch1dyy, msize_vol cudaMemcpyHostToDevice));
+         CUDA_CALL(cudaMemcpyAsync(dev_ch1dyy[0], ch1dyy, msize_vol, cudaMemcpyHostToDevice));
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dzz[0], ch1dzz, msize_vol, cudaMemcpyHostToDevice));
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dxy[0], ch1dxy, msize_vol, cudaMemcpyHostToDevice));
          CUDA_CALL(cudaMemcpyAsync(dev_ch1dyz[0], ch1dyz, msize_vol, cudaMemcpyHostToDevice));
