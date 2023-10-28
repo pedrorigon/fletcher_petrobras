@@ -37,6 +37,7 @@ int main(int argc, char** argv) {
   int i, it;             // for indices
 //PPL  char fNameAbs[128];    // prefix of absortion file
   char fNameSec[128];    // prefix of sections files
+  int mgpu_number_input=1;
 
   const float dtOutput=0.01;
 
@@ -58,6 +59,8 @@ int main(int argc, char** argv) {
   dz=atof(argv[8]);
   dt=atof(argv[9]);
   tmax=atof(argv[10]);
+  mgpu_number_input=atof(argv[11]);
+
 
   // verify problem formulation
 
@@ -244,7 +247,7 @@ int main(int argc, char** argv) {
   // - calls InsertSource
   // - do AbsorbingBoundary and DumpSliceFile, if needed
   // - Finalize
-  Model(st, iSource, dtOutput, sPtr, sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, vpz, vsv, epsilon, delta, phi, theta);
+  Model(st, iSource, dtOutput, sPtr, sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, vpz, vsv, epsilon, delta, phi, theta, mgpu_number_input);
 
  // CloseSliceFile(sPtr);
 }

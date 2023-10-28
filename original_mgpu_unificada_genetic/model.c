@@ -18,6 +18,8 @@
 #define MUTATION_Y_PROBABILITY 0.1
 #define MUTATION_X_PROBABILITY 0.1
 
+extern int number_gpu;
+
 typedef struct
 {
     int thread_x;
@@ -212,7 +214,7 @@ void ReportMetricsCSV(double walltime, double MSamples,long HWM, char *HWMUnit, 
 
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, const int sx, const int sy, const int sz, const int bord,
            const float dx, const float dy, const float dz, const float dt, const int it, float * restrict pp, float * restrict pc, float * restrict qp, float * restrict qc,
-	         float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta, float * restrict phi, float * restrict theta)
+	         float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta, float * restrict phi, float * restrict theta, int mgpu_number_input)
 {
 
   int nOut=1;
