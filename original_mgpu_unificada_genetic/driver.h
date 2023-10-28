@@ -12,6 +12,10 @@ typedef struct {
       size_t gpu_size_gpu;
       size_t cpu_offset;
       size_t center_position;
+      size_t lower_kernel1;
+      size_t upper_kernel1;
+      size_t lower_kernel2;
+      size_t upper_kernel2;
 
    } Gpu;
 

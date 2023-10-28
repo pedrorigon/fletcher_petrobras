@@ -129,16 +129,16 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
         if (gpu == 0)
         {
-            lower = sz / 4 - 5;
-            upper = sz / 4;
+            lower = gpu_map[0].lower_kernel1;
+            upper = gpu_map[0].upper_kernel1;
         }
         else if(gpu == (number_gpu - 1))
         {
-          lower = bord + 1;
-          upper = bord + 1 + 5;
+          lower = gpu_map[gpu].lower_kernel1;
+          upper = gpu_map[gpu].lower_kernel1;
         } else{
-          lower = sz/4;
-          upper = sz/4 + 5;
+          lower = gpu_map[gpu].lower_kernel1;
+          upper = gpu_map[gpu].lower_kernel1;
           
           // Executar o kernel no dispositivo da iteração
           kernel_Propagate<<<numBlocks, threadsPerBlock, 0, compute_stream[gpu]>>>(sx, sy, sz, bord, dx, dy, dz, dt, it, dev_ch1dxx[gpu], dev_ch1dyy[gpu],
@@ -164,16 +164,16 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
 
         if (gpu == 0)
         {
-            lower = bord + 1;
-            upper = sz / 4 - 5;
+            lower = gpu_map[0].lower_kernel2;
+            upper = gpu_map[0].upper_kernel2;
         }
         else if(gpu == (number_gpu - 1))
         {
-          lower = bord + 1 + 5;
-          upper = sz/4 - 1;
+          lower = gpu_map[gpu].lower_kernel2;
+          upper = gpu_map[gpu].upper_kernel2;;
         } else{
-          lower = bord + 1 + 5;
-          upper = sz/4;
+          lower = gpu_map[gpu].lower_kernel2;
+          upper = gpu_map[gpu].upper_kernel2;
         }
 
         const int width = upper - lower;
@@ -192,7 +192,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     CUDA_CALL(cudaStreamSynchronize(stream[1]));
     CUDA_CALL(cudaStreamSynchronize(stream[2]));
     CUDA_CALL(cudaStreamSynchronize(stream[3]));
-
 
     for (int gpu = 0; gpu < number_gpu; gpu++)
     {
