@@ -82,7 +82,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
    const size_t msize_vol_extra = msize_vol + 2 * sxsy * sizeof(float); // 2 extra plans for wave fields
 
    // Cópia dos dados para cada GPU
-   for (int device = 0; device < 4; device++)
+   for (int device = 0; device < number_gpu; device++)
    {
       cudaDeviceProp deviceProp;
       CUDA_CALL(cudaGetDeviceProperties(&deviceProp, device));
