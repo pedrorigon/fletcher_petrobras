@@ -48,6 +48,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[1].gpu_end_pointer = ind(0, 0, (sz / 4 + 5));
       gpu_map[1].gpu_size_gpu = (sx * sy * (sz / 4 + 10)) * sizeof(float);
       gpu_map[1].cpu_offset = ind(0, 0, (sz / 4 - 5));
+      gpu_map[1].center_position = ind(sx / 2, sy / 2, (sz / 4 + 5));
 
       // GPU 2 - Important Variables
       gpu_map[2].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -72,6 +73,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[0].gpu_end_pointer = ind(0, 0, (sz / 2));
       gpu_map[0].gpu_size_gpu = (sx * sy * (sz / 2 + 5)) * sizeof(float);
       gpu_map[0].cpu_offset = 0;
+      gpu_map[1].center_position = ind(sx / 2, sy / 2, (sz / 2 + 5));
 
       // GPU 1 - Important Variables
       gpu_map[1].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -96,6 +98,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[1].gpu_end_pointer = ind(0, 0, (sz / 8 + 5));
       gpu_map[1].gpu_size_gpu = (sx * sy * (sz / 8 + 10)) * sizeof(float);
       gpu_map[1].cpu_offset = ind(0, 0, (sz / 8 - 5));
+      gpu_map[1].center_position = ind(sx / 2, sy / 2, (sz / 4 + 5));
 
       // GPU 2 - Important Variables
       gpu_map[2].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -103,6 +106,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[2].gpu_end_pointer = ind(0, 0, (sz / 8 + 5));
       gpu_map[2].gpu_size_gpu = (sx * sy * (sz / 8 + 10)) * sizeof(float);
       gpu_map[2].cpu_offset = ind(0, 0, (sz / 4 - 5));
+      gpu_map[2].center_position = ind(sx / 2, sy / 2, 5);
 
       // GPU 3 - Important Variables
       gpu_map[3].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -110,6 +114,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[3].gpu_end_pointer = ind(0, 0, (sz / 8 + 5));
       gpu_map[3].gpu_size_gpu = (sx * sy * (sz / 8 + 10)) * sizeof(float);
       gpu_map[3].cpu_offset = ind(0, 0, ((3 * (sz / 8)) - 5));
+      gpu_map[3].center_position = ind(sx / 2, sy / 2, (sz / 8 + 5));
 
       // GPU 4 - Important Variables
       gpu_map[4].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -125,6 +130,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[5].gpu_end_pointer = ind(0, 0, (sz / 8 + 5));
       gpu_map[5].gpu_size_gpu = (sx * sy * (sz / 8 + 10)) * sizeof(float);
       gpu_map[5].cpu_offset = ind(0, 0, ((5 * (sz / 8)) - 5));
+      gpu_map[5].center_position = ind(sx / 2, sy / 2, 5);
 
       // GPU 6 - Important Variables
       gpu_map[6].gpu_size_bord = sx * sy * (5) * sizeof(float);
@@ -132,6 +138,7 @@ void CUDA_Initialize(const int sx, const int sy, const int sz, const int bord,
       gpu_map[6].gpu_end_pointer = ind(0, 0, (sz / 8 + 5));
       gpu_map[6].gpu_size_gpu = (sx * sy * (sz / 8 + 10)) * sizeof(float);
       gpu_map[6].cpu_offset = ind(0, 0, ((6 * (sz / 8)) - 5));
+      gpu_map[6].center_position = ind(sx / 2, sy / 2, 5);
 
       // GPU 7 - Important Variables
       gpu_map[7].gpu_size_bord = sx * sy * (5) * sizeof(float);

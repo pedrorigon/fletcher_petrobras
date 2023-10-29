@@ -169,7 +169,7 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
     else
     {
         CUDA_SwapBord(sx, sy, sz);
-        
+
         for (int gpu = 0; gpu < number_gpu; gpu++)
         {
             // cudaDeviceProp prop;
@@ -184,7 +184,6 @@ void CUDA_Propagate(const int sx, const int sy, const int sz, const int bord,
             {
                 lower = gpu_map[gpu].lower_kernel2;
                 upper = gpu_map[gpu].upper_kernel2;
-                ;
             }
             else
             {
