@@ -11,13 +11,12 @@
 #include <time.h>
 #include <limits.h>
 
-#define NUM_GENERATIONS 3 
-#define POPULATION_SIZE 30
+#define POPULATION_SIZE 20
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
 #define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.0 
+#define MUTATION_X_PROBABILITY 0.1
 
 extern int number_gpu;
 
@@ -28,11 +27,6 @@ typedef struct
     double fitness;
 } Individuo;
 
-typedef struct {
-    int bsize_x;
-    int bsize_y;
-} BlockSizes;
-
 int isPowerOfTwo(int num)
 {
     return (num & (num - 1)) == 0;
@@ -42,7 +36,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {64, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -59,31 +53,18 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
         }
     }
 
-    int vetor_x[] = {16, 32, 64};
-    int vetor_y[] = {2, 4, 8, 16, 32, 64};
-    int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
-    int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
-
-
     while (populacao_atual < tamanho_populacao)
     {
-	
-    	// Inicializa a semente para geração de números aleatórios
-    	srand(time(NULL));
-
-    	// Gera um número aleatório entre para os indices
-    	int indice_aleatorio_x = rand() % tamanho_vetor_x;
-	    int indice_aleatorio_y = rand() % tamanho_vetor_y;
-       
-	    int x = vetor_x[indice_aleatorio_x];
-      int y = vetor_y[indice_aleatorio_y];
-      if (x * y < MAX_MULTIPLICATION)
-      {
-          populacao[populacao_atual].thread_x = x;
-          populacao[populacao_atual].thread_y = y;
-          populacao[populacao_atual].fitness = 0.0;
-          populacao_atual++;
-      }
+        int x = rand() % (MAX_NUM_THREADS - 1) + 2;
+        int y = rand() % (MAX_NUM_THREADS - 1) + 2;
+        if (x * y < MAX_MULTIPLICATION &&
+            isPowerOfTwo(x) && isPowerOfTwo(y))
+        {
+            populacao[populacao_atual].thread_x = x;
+            populacao[populacao_atual].thread_y = y;
+            populacao[populacao_atual].fitness = 0.0;
+            populacao_atual++;
+        }
     }
 }
 
@@ -139,10 +120,10 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
     {
         // Realizar crossover trocando os valores entre os pais
-        filhos[0].thread_x = pais[1].thread_x;
-        filhos[0].thread_y = pais[1].thread_y;
+        filhos[0].thread_x = pais[1].thread_y;
+        filhos[0].thread_y = pais[0].thread_x;
 
-        filhos[1].thread_x = pais[0].thread_x;
+        filhos[1].thread_x = pais[1].thread_x;
         filhos[1].thread_y = pais[0].thread_y;
     }
     else
@@ -157,7 +138,7 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     // for (int i = 0; i < 2; i++)
     //{
     if ((double)rand() / RAND_MAX < MUTATION_Y_PROBABILITY)
-{
+    {
     int new_thread_y = gerarNovoValorAleatorio();
 
     // Garantir que o novo valor de thread_y é válido para mutação
@@ -167,20 +148,19 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     }
 
     filhos[0].thread_y = new_thread_y;
-}
-
-if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
-{
-    int new_thread_x = gerarNovoValorAleatorio();
-   
-    while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
-    {
-        new_thread_x = gerarNovoValorAleatorio();
     }
 
-    filhos[0].thread_x = new_thread_x;
-}
-    //}
+    if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+    {
+        int new_thread_x = gerarNovoValorAleatorio();
+    
+        while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
+        {
+            new_thread_x = gerarNovoValorAleatorio();
+        }
+
+        filhos[0].thread_x = new_thread_x;
+    }
 }
 
 Individuo *gerarNovaSubpopulacao(Individuo *populacao)
@@ -221,57 +201,6 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 }
 // preciso rodar o kernel com todas as configurações da população inicial
 // a aptidão de cada indivíduo será 1/tempo de exec
-
-Individuo populacao[POPULATION_SIZE]; //global?
-
-BlockSizes initialize(int *geracao){
-  //Individuo populacao[POPULATION_SIZE];
-  inicializarPopulacao(populacao, POPULATION_SIZE);
-  BlockSizes blockSizes;
-  *geracao = 0;
-
-  blockSizes.bsize_x = populacao[1 - (*geracao)*POPULATION_SIZE - 1].thread_x;
-  blockSizes.bsize_y = populacao[1 - (*geracao)*POPULATION_SIZE - 1].thread_y;
-
-  return blockSizes;
-}
-
-BlockSizes genetic_exec(int it, double kernel_time, int *geracao){
-
-  BlockSizes blockSizes;
-
-  if(it % POPULATION_SIZE != 0 && it <= POPULATION_SIZE*NUM_GENERATIONS){
-      populacao[it - (*geracao) *POPULATION_SIZE - 1].fitness = 1 / kernel_time; //calcula o fitness da exec anterior
-      blockSizes.bsize_x = populacao[it - (*geracao)*POPULATION_SIZE - 1].thread_x;    //passa config p prox exec
-      blockSizes.bsize_y = populacao[it - (*geracao)*POPULATION_SIZE - 1].thread_y;
-      return blockSizes;
-  }
-  else if(it % POPULATION_SIZE == 0 && it <= POPULATION_SIZE*3){
-    //fazer selecao 
-    (*geracao) = (*geracao) + 1; //fazer ponteiro para pegar o valor atualizado 
-    Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-    // Substituir a população atual pela nova subpopulação
-    for (int j = 0; j < POPULATION_SIZE; j++){
-      populacao[j] = novaSubpopulacao[j];              
-    }
-    printf("chegou aqui");
-    blockSizes.bsize_x = populacao[0].thread_x;    //passa config p prox exec
-    blockSizes.bsize_y = populacao[0].thread_y;
-    printf("%d, %d", blockSizes.bsize_x, blockSizes.bsize_y);
-    return blockSizes;
-  }
-  else {
-    //já achou melhor, só segue executando 
-    int melhorConfig = encontrarMelhorIndice(populacao);
-    blockSizes.bsize_x = populacao[melhorConfig].thread_x;
-    blockSizes.bsize_y = populacao[melhorConfig].thread_y;
-    return blockSizes;
-  }
-}
-
-double random_time() {
-    return (double)rand() / RAND_MAX;
-}
 
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz, const int bord, const int st, FILE *f){
@@ -358,13 +287,14 @@ DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1d
 double walltime=0.0;
 double kernel_time=0.0;
 double res=0.0;
-double timeIt=0.0;
-int bsize_x=32, bsize_y=16;
+//int bsize_x=32, bsize_y=16;
 
 InitializeStreams();
-srand(time(NULL));
-int geracao;  
-BlockSizes bsizes = initialize(&geracao);
+
+Individuo populacao[POPULATION_SIZE];
+
+// Inicializar população
+inicializarPopulacao(populacao, POPULATION_SIZE);
 
 // Loop para executar o kernel com cada configuração e coletar os tempos de execução
 
@@ -373,17 +303,116 @@ for (int it=1; it<=st; it++) {
     float src = Source(dt, it-1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
 
-    printf("\nBsize_x: %d \n", bsizes.bsize_x);
-    printf("Bsize_y: %d \n", bsizes.bsize_y);
-    const double t0=wtime();
-    DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsizes.bsize_x, bsizes.bsize_y); //ajustar parametros
+   // printf("\nBsize_x: %d \n", bsize_x);
+  //  printf("Bsize_y: %d \n", bsize_y);
+    //update_bsize_values(&bsize_x, &bsize_y, timeIt);
+
+    if (it <= POPULATION_SIZE)
+    {
+            printf("\nBsize_x: %d \n", populacao[it - 1].thread_x);
+            printf("Bsize_y: %d \n", populacao[it - 1].thread_y);
+            const double t0=wtime();
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
+            kernel_time=wtime()-t0;
+            walltime+=kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+            populacao[it - 1].fitness = 1 / kernel_time;
+            printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1].thread_x, populacao[it - 1].thread_y, kernel_time, res);
+            // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[i - 1].thread_x, populacao[i - 1].thread_y, populacao[i - 1].fitness);
+            //  printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i, populacao[i - 1].thread_x, populacao[i - 1].thread_y, populacao[i - 1].fitness);
+            //    inicio primeira seleção genética
+            //     Gerar a nova subpopulação
+            if (it == POPULATION_SIZE)
+            {
+                printf("ta na hora da Seleçao\n");
+                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
+                // Substituir a população atual pela nova subpopulação
+                for (int j = 0; j < POPULATION_SIZE; j++)
+                {
+                    populacao[j] = novaSubpopulacao[j];
+                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
+                }
+                //free(novaSubpopulacao);
+            }
+    }
+    else if (it <= POPULATION_SIZE * 2)
+    {
+            printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
+            printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
+            const double t1=wtime();
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
+            kernel_time=wtime()-t1;
+            walltime+=kernel_time;
+            populacao[it - POPULATION_SIZE - 1].fitness = 1 / kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+
+            printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y, kernel_time, res);
+            // printf("SEGUNDA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i, i - POPULATION_SIZE - 1, populacao[i - POPULATION_SIZE - 1].thread_x, populacao[i - POPULATION_SIZE - 1].thread_y, populacao[i - POPULATION_SIZE - 1].fitness);
+            //  printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
+            //  Gerar a nova subpopulação
+            if (it == POPULATION_SIZE * 2)
+            {
+                printf("ta na hora da SEGUNDA Seleçao\n");
+                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
+                // Substituir a população atual pela nova subpopulação
+                for (int j = 0; j < POPULATION_SIZE; j++)
+                {
+                    populacao[j] = novaSubpopulacao[j];
+                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
+                }
+                //free(novaSubpopulacao);
+            }
+    }
+    else if (it <= POPULATION_SIZE * 3)
+    {
+            printf("\nBsize_x: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_x);
+            printf("Bsize_y: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_y);
+            const double t2=wtime();
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
+            kernel_time=wtime()-t2;
+            walltime+=kernel_time;
+            populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+            printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
+            printf("TERCEIRA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", it, it - 1 - 2 * POPULATION_SIZE, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, populacao[it - 1 - 2 * POPULATION_SIZE].fitness);
+            // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
+            // Gerar a nova subpopulação
+            if (it == POPULATION_SIZE * 3)
+            {
+                printf("ta na hora da TERCEIRA Seleçao\n");
+                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
+                // Substituir a população atual pela nova subpopulação
+                for (int j = 0; j < POPULATION_SIZE; j++)
+                {
+                    populacao[j] = novaSubpopulacao[j];
+                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
+                }
+                //free(novaSubpopulacao);
+            }
+    }
+    else
+    {
+            int melhorConfig = encontrarMelhorIndice(populacao);
+            printf("\nBsize_x: %d \n", populacao[melhorConfig].thread_x);
+            printf("Bsize_y: %d \n", populacao[melhorConfig].thread_y);
+            const double t3=wtime();
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
+            kernel_time=wtime()-t3;
+            walltime+=kernel_time;
+            printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
+            res = (MEGA*(double)samplesPropagate)/kernel_time;
+            printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
+    }
+
+    //const double t0=wtime();	         float * restrict vpz, float * restrict vsv, float * restrict epsilon, float * restrict delta, float * restrict phi, float * restrict theta, int mgpu_number_input)
+
+    
+    //DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); //ajustar parametros
     //SwapArrays(&pp, &pc, &qp, &qc);
 
-    timeIt=wtime()-t0;
-    walltime+=timeIt;
-    res = (MEGA*(double)samplesPropagate)/timeIt;
-    printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsizes.bsize_x, bsizes.bsize_y, timeIt, res);
-    bsizes = genetic_exec(it, timeIt, &geracao);
+    //timeIt=wtime()-t0;
+    //walltime+=timeIt;
+
     //printf("tempo deu: %lf\n", timeIt);
 
     tSim=it*dt;
