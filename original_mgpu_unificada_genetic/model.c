@@ -383,7 +383,7 @@ for (int it=1; it<=st; it++) {
     walltime+=timeIt;
     res = 1 / timeIt;
     printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsizes.bsize_x, bsizes.bsize_y, timeIt, res);
-    bsizes = genetic_exec(it, kernel_time, &geracao);
+    bsizes = genetic_exec(it, timeIt, &geracao);
     //printf("tempo deu: %lf\n", timeIt);
 
     tSim=it*dt;
