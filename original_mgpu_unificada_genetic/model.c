@@ -381,7 +381,7 @@ for (int it=1; it<=st; it++) {
 
     timeIt=wtime()-t0;
     walltime+=timeIt;
-    res = 1 / timeIt;
+    res = (MEGA*(double)samplesPropagate)/timeIt;
     printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsizes.bsize_x, bsizes.bsize_y, timeIt, res);
     bsizes = genetic_exec(it, timeIt, &geracao);
     //printf("tempo deu: %lf\n", timeIt);
