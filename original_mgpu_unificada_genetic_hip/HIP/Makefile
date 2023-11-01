@@ -2,7 +2,7 @@ include ../config.mk
 include flags.mk
 
 all:
-	$(CC) $(CFLAGS) $(COMMON_FLAGS) -c hip_driver.hip
+	$(CC) $(CFLAGS) $(COMMON_FLAGS) -c hip_driver.c
 	$(HIPCC) $(HIPCFLAGS) $(COMMON_FLAGS) -c hip_stuff.hip
 	$(HIPCC) $(HIPCFLAGS) $(COMMON_FLAGS) -c hip_propagate.hip
 	$(HIPCC) $(HIPCFLAGS) $(COMMON_FLAGS) -c hip_insertsource.hip

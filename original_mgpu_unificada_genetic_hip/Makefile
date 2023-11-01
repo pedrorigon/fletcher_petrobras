@@ -2,7 +2,7 @@
 #   module load gompi
 
 # Default
-arch=CUDA
+arch=HIP
 
 include config.mk
 include $(arch)/flags.mk

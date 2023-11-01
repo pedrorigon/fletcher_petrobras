@@ -379,16 +379,16 @@ void HIP_Allocate_Model_Variables(float **restrict ch1dxx, float **restrict ch1d
 {
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
-    HIP_CALL(hipMallocHost(ch1dxx, msize_vol));
-    HIP_CALL(hipMallocHost(ch1dyy, msize_vol));
-    HIP_CALL(hipMallocHost(ch1dzz, msize_vol));
-    HIP_CALL(hipMallocHost(ch1dxy, msize_vol));
-    HIP_CALL(hipMallocHost(ch1dyz, msize_vol));
-    HIP_CALL(hipMallocHost(ch1dxz, msize_vol));
-    HIP_CALL(hipMallocHost(v2px, msize_vol));
-    HIP_CALL(hipMallocHost(v2pz, msize_vol));
-    HIP_CALL(hipMallocHost(v2sz, msize_vol));
-    HIP_CALL(hipMallocHost(v2pn, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dxx, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dyy, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dzz, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dxy, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dyz, msize_vol));
+    HIP_CALL(hipHostMalloc(ch1dxz, msize_vol));
+    HIP_CALL(hipHostMalloc(v2px, msize_vol));
+    HIP_CALL(hipHostMalloc(v2pz, msize_vol));
+    HIP_CALL(hipHostMalloc(v2sz, msize_vol));
+    HIP_CALL(hipHostMalloc(v2pn, msize_vol));
 }
 
 
@@ -400,17 +400,17 @@ void HIP_Allocate_main(float **restrict vpz, float **restrict vsv, float **restr
     const size_t sxsysz = ((size_t)sx * sy) * sz;
     const size_t msize_vol = sxsysz * sizeof(float);
     const size_t msize_vol_extra = msize_vol + 2 * sx * sy * sizeof(float); // 2 extra plans for wave fields
-    HIP_CALL(hipMallocHost(vpz, msize_vol));
-    HIP_CALL(hipMallocHost(vsv, msize_vol));
-    HIP_CALL(hipMallocHost(epsilon, msize_vol));
-    HIP_CALL(hipMallocHost(delta, msize_vol));
-    HIP_CALL(hipMallocHost(phi, msize_vol));
-    HIP_CALL(hipMallocHost(theta, msize_vol));
+    HIP_CALL(hipHostMalloc(vpz, msize_vol));
+    HIP_CALL(hipHostMalloc(vsv, msize_vol));
+    HIP_CALL(hipHostMalloc(epsilon, msize_vol));
+    HIP_CALL(hipHostMalloc(delta, msize_vol));
+    HIP_CALL(hipHostMalloc(phi, msize_vol));
+    HIP_CALL(hipHostMalloc(theta, msize_vol));
 
-    HIP_CALL(hipMallocHost(pp, msize_vol_extra)); // Allocate extra space for wave fields
-    HIP_CALL(hipMallocHost(pc, msize_vol_extra)); // Allocate extra space for wave fields
-    HIP_CALL(hipMallocHost(qp, msize_vol_extra)); // Allocate extra space for wave fields
-    HIP_CALL(hipMallocHost(qc, msize_vol_extra)); // Allocate extra space for wave fields
+    HIP_CALL(hipHostMalloc(pp, msize_vol_extra)); // Allocate extra space for wave fields
+    HIP_CALL(hipHostMalloc(pc, msize_vol_extra)); // Allocate extra space for wave fields
+    HIP_CALL(hipHostMalloc(qp, msize_vol_extra)); // Allocate extra space for wave fields
+    HIP_CALL(hipHostMalloc(qc, msize_vol_extra)); // Allocate extra space for wave fields
     // ARTHUR - Ver se esta operação fica na CPU ou mover para a GPU.
     memset(*pp, 0, msize_vol_extra);
     memset(*pc, 0, msize_vol_extra);
