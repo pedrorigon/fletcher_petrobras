@@ -3,7 +3,7 @@
 #include "../derivatives.h"
 #include "../driver.h"
 #include "../map.h"
-#include
+
 
 hipStream_t stream[8];
 hipStream_t swap_stream[8];
@@ -37,7 +37,6 @@ __global__ void kernel_Propagate(const int sx, const int sy, const int sz, const
 
 // solve both equations in all internal grid points,
 // including absortion zone
-#pragma unroll
     for (int iz = lower; iz < upper; iz++)
     {
         const int i = ind(ix, iy, iz);
