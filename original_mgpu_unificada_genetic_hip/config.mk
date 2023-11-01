@@ -15,3 +15,6 @@ PGCC_LIBS=-lm
 
 # PAPI flags
 PAPI_LIBS=-lpapi
+
+AMD_GPU_TARGET=gfx906
+
