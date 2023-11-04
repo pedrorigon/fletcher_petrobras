@@ -280,6 +280,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 
   double walltime = 0.0;
   double timeIt = 0.0;
+  double res = 0.0;
   int bsize_x = 32, bsize_y = 16;
 
   int optBsize = find_optimal_config_for_gpu(sx, &bsize_x, &bsize_y);
@@ -303,8 +304,11 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
       timeIt = wtime() - t0;
       walltime += timeIt;
 
+      res = (MEGA*(double)samplesPropagate)/timeIt;
+      printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsize_x, bsize_y, timeIt, res);
+
       // find_optimal_block_size(sx, timeIt, &bsize_x, &bsize_y);
-      printf("tempo deu: %lf\n", timeIt);
+      //printf("tempo deu: %lf\n", timeIt);
 
       tSim = it * dt;
       if (tSim >= tOut)
@@ -340,8 +344,10 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
       timeIt = wtime() - t0;
       walltime += timeIt;
 
+      res = (MEGA*(double)samplesPropagate)/timeIt;
+      printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsize_x, bsize_y, timeIt, res);
+
       find_optimal_block_size(sx, timeIt, &bsize_x, &bsize_y);
-      printf("tempo deu: %lf\n", timeIt);
 
       tSim = it * dt;
       if (tSim >= tOut)
