@@ -21,12 +21,12 @@
 #undef MODEL_GLOBALVARS
 
 
-#define POPULATION_SIZE 20
+#define POPULATION_SIZE 30
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
-#define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.1 
+#define MUTATION_Y_PROBABILITY 0.2
+#define MUTATION_X_PROBABILITY 0.2 
 
 typedef struct
 {
@@ -44,7 +44,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{32, 4}, {64, 8}, {32, 16}, {64, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -61,12 +61,21 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
         }
     }
 
+    int vetor_x[] = {8, 16, 32, 64};
+    int vetor_y[] = {2, 4, 8, 16, 32, 64};
+    int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
+    int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
+
+
     while (populacao_atual < tamanho_populacao)
     {
-        int x = rand() % (MAX_NUM_THREADS - 1) + 2;
-        int y = rand() % (MAX_NUM_THREADS - 1) + 2;
-        if (x * y < MAX_MULTIPLICATION &&
-            isPowerOfTwo(x) && isPowerOfTwo(y))
+        int indice_aleatorio_x = rand() % tamanho_vetor_x;
+	int indice_aleatorio_y = rand() % tamanho_vetor_y;
+       
+	int x = vetor_x[indice_aleatorio_x];
+        int y = vetor_y[indice_aleatorio_y];
+  
+        if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
@@ -129,8 +138,8 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
     {
         // Realizar crossover trocando os valores entre os pais
-        filhos[0].thread_x = pais[1].thread_y;
-        filhos[0].thread_y = pais[0].thread_x;
+        filhos[0].thread_x = pais[0].thread_x;
+        filhos[0].thread_y = pais[1].thread_y;
 
         filhos[1].thread_x = pais[1].thread_x;
         filhos[1].thread_y = pais[0].thread_y;
@@ -177,7 +186,12 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 {
     Individuo *novaSubpopulacao = (Individuo *)malloc(POPULATION_SIZE * sizeof(Individuo));
 
-    for (int i = 0; i < POPULATION_SIZE; i++)
+    // Copiar o melhor indivíduo inalterado para a nova subpopulação
+    int indiceMelhor = encontrarMelhorIndice(populacao);
+    //printf("melhor indice repassado é %d", indiceMelhor);
+    novaSubpopulacao[0] = populacao[indiceMelhor];
+
+    for (int i = 1; i < POPULATION_SIZE; i=i+2)
     {
         // Seleção de pais por torneio
         Individuo pais[2];
@@ -186,17 +200,9 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
         // Crossover e mutação para gerar filhos
         Individuo filhos[2];
         crossoverEMutacao(pais, filhos);
-
-        if (i == 0)
-        {
-            // Copiar o melhor indivíduo inalterado para a nova subpopulação
-            int indiceMelhor = encontrarMelhorIndice(populacao);
-            novaSubpopulacao[i] = populacao[indiceMelhor];
-        }
-        else
-        {
-            novaSubpopulacao[i] = filhos[0]; // Por exemplo, você pode escolher o primeiro filho
-        }
+        
+        novaSubpopulacao[i] = filhos[0];
+        novaSubpopulacao[i+1] = filhos[1];
     }
 
     // Substituir os indivíduos antigos na população atual pelos novos
@@ -211,7 +217,6 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 }
 // preciso rodar o kernel com todas as configurações da população inicial
 // a aptidão de cada indivíduo será 1/tempo de exec
-
 
 void ReportProblemSizeCSV(const int sx, const int sy, const int sz,
 			  const int bord, const int st, 
@@ -300,7 +305,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             //     Gerar a nova subpopulação
             if (it == POPULATION_SIZE)
             {
-                printf("ta na hora da Seleçao\n");
+                //printf("ta na hora da Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -311,7 +316,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
                 //free(novaSubpopulacao);
             }
         }
-    else if (it <= POPULATION_SIZE * 2)
+    else if (it <= POPULATION_SIZE*2)
         {
             printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
             printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
@@ -328,7 +333,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             //  Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 2)
             {
-                printf("ta na hora da SEGUNDA Seleçao\n");
+              //  printf("ta na hora da SEGUNDA Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -350,12 +355,12 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
-            printf("TERCEIRA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", it, it - 1 - 2 * POPULATION_SIZE, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, populacao[it - 1 - 2 * POPULATION_SIZE].fitness);
+            //printf("TERCEIRA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", it, it - 1 - 2 * POPULATION_SIZE, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, populacao[it - 1 - 2 * POPULATION_SIZE].fitness);
             // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
             // Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 3)
             {
-                printf("ta na hora da TERCEIRA Seleçao\n");
+                //printf("ta na hora da TERCEIRA Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -460,4 +465,3 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   DRIVER_Finalize();
 
 }
-
