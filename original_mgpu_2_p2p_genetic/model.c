@@ -9,13 +9,24 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
+#define MEGA 1.0e-6
+#define GIGA 1.0e-9
 
-#define POPULATION_SIZE 20
+#ifdef PAPI
+#include "ModPAPI.h"
+#endif
+
+#define MODEL_GLOBALVARS
+#include "precomp.h"
+#undef MODEL_GLOBALVARS
+
+
+#define POPULATION_SIZE 30
 #define MAX_NUM_THREADS 64
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
-#define MUTATION_Y_PROBABILITY 0.1
-#define MUTATION_X_PROBABILITY 0.1 
+#define MUTATION_Y_PROBABILITY 0.2
+#define MUTATION_X_PROBABILITY 0.2 
 
 typedef struct
 {
@@ -33,7 +44,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {32, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{64, 4}, {64, 8}, {32, 16}, {128, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -50,12 +61,21 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
         }
     }
 
+    int vetor_x[] = {8, 16, 32, 64, 128};
+    int vetor_y[] = {2, 4, 8, 16, 32, 64, 128};
+    int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
+    int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
+
+
     while (populacao_atual < tamanho_populacao)
     {
-        int x = rand() % (MAX_NUM_THREADS - 1) + 2;
-        int y = rand() % (MAX_NUM_THREADS - 1) + 2;
-        if (x * y < MAX_MULTIPLICATION &&
-            isPowerOfTwo(x) && isPowerOfTwo(y))
+        int indice_aleatorio_x = rand() % tamanho_vetor_x;
+	int indice_aleatorio_y = rand() % tamanho_vetor_y;
+       
+	int x = vetor_x[indice_aleatorio_x];
+        int y = vetor_y[indice_aleatorio_y];
+  
+        if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
             populacao[populacao_atual].thread_y = y;
@@ -99,7 +119,7 @@ void selecaoPorTorneio(Individuo *populacao, Individuo *pais)
 
 int gerarNovoValorAleatorio()
 {
-    int vetor[] = {2, 4, 8, 16, 32, 64};
+    int vetor[] = {2, 4, 8, 16, 32, 64, 128};
     int tamanho_vetor = sizeof(vetor) / sizeof(vetor[0]);
 
     // Inicializa a semente para geração de números aleatórios
@@ -118,8 +138,8 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
     {
         // Realizar crossover trocando os valores entre os pais
-        filhos[0].thread_x = pais[1].thread_y;
-        filhos[0].thread_y = pais[0].thread_x;
+        filhos[0].thread_x = pais[0].thread_x;
+        filhos[0].thread_y = pais[1].thread_y;
 
         filhos[1].thread_x = pais[1].thread_x;
         filhos[1].thread_y = pais[0].thread_y;
@@ -166,7 +186,12 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 {
     Individuo *novaSubpopulacao = (Individuo *)malloc(POPULATION_SIZE * sizeof(Individuo));
 
-    for (int i = 0; i < POPULATION_SIZE; i++)
+    // Copiar o melhor indivíduo inalterado para a nova subpopulação
+    int indiceMelhor = encontrarMelhorIndice(populacao);
+    //printf("melhor indice repassado é %d", indiceMelhor);
+    novaSubpopulacao[0] = populacao[indiceMelhor];
+
+    for (int i = 1; i < POPULATION_SIZE; i=i+2)
     {
         // Seleção de pais por torneio
         Individuo pais[2];
@@ -175,17 +200,9 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
         // Crossover e mutação para gerar filhos
         Individuo filhos[2];
         crossoverEMutacao(pais, filhos);
-
-        if (i == 0)
-        {
-            // Copiar o melhor indivíduo inalterado para a nova subpopulação
-            int indiceMelhor = encontrarMelhorIndice(populacao);
-            novaSubpopulacao[i] = populacao[indiceMelhor];
-        }
-        else
-        {
-            novaSubpopulacao[i] = filhos[0]; // Por exemplo, você pode escolher o primeiro filho
-        }
+        
+        novaSubpopulacao[i] = filhos[0];
+        novaSubpopulacao[i+1] = filhos[1];
     }
 
     // Substituir os indivíduos antigos na população atual pelos novos
