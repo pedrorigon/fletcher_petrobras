@@ -38,7 +38,7 @@ for app in *.`hostname`.x; do
     echo $app
     echo "---------------------------------------------------"
     
-    for size in $(seq 88 32 408); do
+    for size in $(seq 88 32 504); do
         echo "Size: $size"
 
         # Cria o diretório de logs se não existir
@@ -76,7 +76,7 @@ for app in *.`hostname`.x; do
             fi
             txt_file="exec/${app}_${size}.txt"
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02; } 2>&1 | tee "$txt_file")
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 2; } 2>&1 | tee "$txt_file")
             msamples=$(echo "$result" | grep "MSamples/s" || true)
             echo "$msamples"
             if [[ ! -z $msamples ]]; then

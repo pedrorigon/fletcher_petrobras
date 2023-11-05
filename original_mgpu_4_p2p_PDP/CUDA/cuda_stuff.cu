@@ -367,3 +367,11 @@ void CUDA_Allocate_main(float **restrict vpz, float **restrict vsv, float **rest
    memset(*qp, 0, msize_vol);
    memset(*qc, 0, msize_vol);
 }
+
+const char* get_default_device_name() {
+    static char device_name[256];
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
+    strncpy(device_name, deviceProp.name, sizeof(device_name));
+    return device_name;
+}

@@ -18,6 +18,8 @@ void CUDA_Finalize();
 
 void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc);
 
+const char* get_default_device_name();
+
 #ifdef __cplusplus
 }
 #endif

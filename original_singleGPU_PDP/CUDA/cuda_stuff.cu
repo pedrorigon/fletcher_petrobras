@@ -199,3 +199,12 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
    const size_t msize_vol=sxsysz*sizeof(float);
    if (pc) CUDA_CALL(cudaMemcpy(pc, dev_pc, msize_vol, cudaMemcpyDeviceToHost));
 }
+
+
+const char* get_default_device_name() {
+    static char device_name[256];
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
+    strncpy(device_name, deviceProp.name, sizeof(device_name));
+    return device_name;
+}
