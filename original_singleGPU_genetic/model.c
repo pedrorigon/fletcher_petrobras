@@ -44,7 +44,7 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
 {
     srand(time(NULL));
 
-    int indices_fixos[][2] = {{32, 4}, {64, 8}, {32, 16}, {64, 4}};
+    int indices_fixos[][2] = {{64, 4}, {64, 8}, {32, 16}, {128, 4}};
     int num_indices_fixos = sizeof(indices_fixos) / sizeof(indices_fixos[0]);
 
     int populacao_atual = 0;
@@ -61,8 +61,8 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
         }
     }
 
-    int vetor_x[] = {8, 16, 32, 64};
-    int vetor_y[] = {2, 4, 8, 16, 32, 64};
+    int vetor_x[] = {8, 16, 32, 64, 128};
+    int vetor_y[] = {2, 4, 8, 16, 32, 64, 128};
     int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
     int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
 
@@ -119,7 +119,7 @@ void selecaoPorTorneio(Individuo *populacao, Individuo *pais)
 
 int gerarNovoValorAleatorio()
 {
-    int vetor[] = {2, 4, 8, 16, 32, 64};
+    int vetor[] = {2, 4, 8, 16, 32, 64, 128};
     int tamanho_vetor = sizeof(vetor) / sizeof(vetor[0]);
 
     // Inicializa a semente para geração de números aleatórios
