@@ -30,7 +30,7 @@ static optimal_block opt_block = {.bsize_x = 0, .bsize_y = 0, .min_time = DBL_MA
 static int already_optimized = 0;
 static int saved = 0;
 static int block_index = 0;
-static block_size sizes[] = {{2, 2}, {2, 4}, {2, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2} ,{2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16} ,{32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2} ,{2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16}, {8, 32}, {8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8},  {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16}, {8, 32}, {8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2}, {8, 16}, {8, 32}, {128, 4} ,{8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2}};
+static block_size sizes[] = {{2, 2}, {2, 4}, {2, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2} ,{2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16}, {128, 4} ,{32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2} ,{2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16}, {8, 32}, {8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8},  {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128}, {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128}, {8, 2}, {8, 4}, {8, 8}, {8, 16}, {8, 32}, {8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2}, {8, 16}, {8, 32}, {8, 64}, {16, 2}, {16, 4}, {16, 8}, {16, 16}, {16, 32}, {32, 2}, {32, 4}, {32, 8}, {32, 16}, {64, 2} ,{64, 4}, {64, 8}, {128, 2}};
 
 // Variável global para armazenar o tamanho de bloco ótimo encontrado
 static int optimal_bsize_x = 0;
@@ -275,8 +275,11 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 #endif
 
   // CUDA_Initialize initialize target, allocate data etc
-  DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz,
-                    v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); // ok Arthur
+  DRIVER_Initialize(sx,   sy,   sz,   bord,
+		      dx,  dy,  dz,  dt,
+		      vpz,    vsv,    epsilon,    delta,
+		      phi,    theta,
+		      pp,    pc,    qp,    qc);
 
   double walltime = 0.0;
   double timeIt = 0.0;
@@ -292,13 +295,13 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
     {
       // Calculate / obtain source value on i timestep
       float src = Source(dt, it - 1);
-      DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+      DRIVER_InsertSource(dt,it-1,iSource,pc,qc,src);
 
       printf("\nBsize_x: %d \n", bsize_x);
       printf("Bsize_y: %d \n", bsize_y);
       const double t0 = wtime();
 
-      DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); // ajustar parametros
+      DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, bsize_x, bsize_y); // ajustar parametros
       // SwapArrays(&pp, &pc, &qp, &qc);
 
       timeIt = wtime() - t0;
@@ -332,13 +335,13 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
     {
       // Calculate / obtain source value on i timestep
       float src = Source(dt, it - 1);
-      DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
+      DRIVER_InsertSource(dt,it-1,iSource,pc,qc,src);
 
       printf("\nBsize_x: %d \n", bsize_x);
       printf("Bsize_y: %d \n", bsize_y);
       const double t0 = wtime();
 
-      DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); // ajustar parametros
+      DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, bsize_x, bsize_y); // ajustar parametros
       // SwapArrays(&pp, &pc, &qp, &qc);
 
       timeIt = wtime() - t0;
