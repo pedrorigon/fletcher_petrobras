@@ -15,8 +15,17 @@ function get_t_critical() {
 # Cria a pasta output, se não existir
 mkdir -p output
 
-# Cria o diretório exec, se não existir
-mkdir -p output/exec
+# Verifica se já existe um arquivo com o mesmo nome e renomeia, se necessário
+output_file="resultados.csv"
+counter=1
+while [ -e "output/$output_file" ]; do
+    output_file="resultados($counter).csv"
+    ((counter++))
+done
+output_file="output/$output_file"
+
+# Cria o arquivo CSV e adiciona o cabeçalho
+echo "Aplicativo,Tamanho,Resultado Médio,Desvio Padrão,IC Inferior,IC Superior" > $output_file
 
 cd bin/
 
@@ -33,18 +42,13 @@ for app in *.`hostname`.x; do
 
         # Cria um arquivo de log para o aplicativo atual com base no tamanho
         log_file="logs/${app}_${size}.csv"
+        txt_file="output/exec/${app}_${size}.txt"
 
         # Executa o script while para coletar dados da GPU e salvar em arquivos CSV separados com base no tamanho
         (while true; do
             nvidia-smi --query-gpu=index,name,power.draw,utilization.gpu --format=csv,noheader,nounits >> "$log_file"
             sleep 0.01  # Espera 10 ms
         done) &
-
-        # Cria um arquivo TXT para salvar a saída do aplicativo
-        app_txt_file="output/exec/${app}.${size}.txt"
-
-        # Executa o aplicativo e salva a saída no arquivo TXT
-        (./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02 > "$app_txt_file" 2>&1) &
 
         # Obtém o PID do processo em segundo plano
         pid=$!
@@ -68,7 +72,7 @@ for app in *.`hostname`.x; do
             fi
 
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02; } 2>&1 )
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02; } 2>&1 | tee "$txt_file")
             msamples=$(echo "$result" | grep "MSamples/s" || true)
             echo "$msamples"
             if [[ ! -z $msamples ]]; then
@@ -113,3 +117,4 @@ for app in *.`hostname`.x; do
 done
 
 cd ../
+
