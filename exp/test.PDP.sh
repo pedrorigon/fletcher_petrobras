@@ -14,7 +14,10 @@ function get_t_critical() {
 
 # Cria a pasta output, se não existir
 mkdir -p output
-mkdir -p output/exec
+cd bin/
+mkdir -p exec
+cd ../
+
 
 # Verifica se já existe um arquivo com o mesmo nome e renomeia, se necessário
 output_file="resultados.csv"
@@ -43,7 +46,7 @@ for app in *.`hostname`.x; do
 
         # Cria um arquivo de log para o aplicativo atual com base no tamanho
         log_file="logs/${app}_${size}.csv"
-        txt_file="output/exec/${app}_${size}.txt"
+        #txt_file="output/exec/${app}_${size}.txt"
 
         # Executa o script while para coletar dados da GPU e salvar em arquivos CSV separados com base no tamanho
         (while true; do
@@ -71,7 +74,7 @@ for app in *.`hostname`.x; do
                 echo "CPU"
                 echo "---------------------------------------------------"
             fi
-
+            txt_file="exec/${app}_${size}.txt"
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
             result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.02; } 2>&1 | tee "$txt_file")
             msamples=$(echo "$result" | grep "MSamples/s" || true)
