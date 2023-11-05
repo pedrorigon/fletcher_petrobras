@@ -327,8 +327,8 @@ for (int it=1; it<=st; it++) {
 
     if (it <= POPULATION_SIZE)
     {
-            printf("\nBsize_x: %d \n", populacao[it - 1].thread_x);
-            printf("Bsize_y: %d \n", populacao[it - 1].thread_y);
+           // printf("\nBsize_x: %d \n", populacao[it - 1].thread_x);
+           // printf("Bsize_y: %d \n", populacao[it - 1].thread_y);
             const double t0=wtime();
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
             kernel_time=wtime()-t0;
@@ -342,7 +342,7 @@ for (int it=1; it<=st; it++) {
             //     Gerar a nova subpopulação
             if (it == POPULATION_SIZE)
             {
-                printf("ta na hora da Seleçao\n");
+               // printf("ta na hora da Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -355,8 +355,8 @@ for (int it=1; it<=st; it++) {
     }
     else if (it <= POPULATION_SIZE * 2)
     {
-            printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
-            printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
+            //printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
+            //printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
             const double t1=wtime();
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
             kernel_time=wtime()-t1;
@@ -370,7 +370,7 @@ for (int it=1; it<=st; it++) {
             //  Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 2)
             {
-                printf("ta na hora da SEGUNDA Seleçao\n");
+                //printf("ta na hora da SEGUNDA Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -383,21 +383,21 @@ for (int it=1; it<=st; it++) {
     }
     else if (it <= POPULATION_SIZE * 3)
     {
-            printf("\nBsize_x: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_x);
-            printf("Bsize_y: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_y);
+            //printf("\nBsize_x: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_x);
+            //printf("Bsize_y: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_y);
             const double t2=wtime();
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
             kernel_time=wtime()-t2;
             walltime+=kernel_time;
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
-            printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
+            //printf("\n Iteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, kernel_time, res);
             printf("TERCEIRA GERAÇÃO \n valor indice: %d Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", it, it - 1 - 2 * POPULATION_SIZE, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y, populacao[it - 1 - 2 * POPULATION_SIZE].fitness);
             // printf("Indivíduo %d: thread_x = %d, thread_y = %d, fitness = %f\n", i - 1, populacao[(i - 1) / 2].thread_x, populacao[(i - 1) / 2].thread_y, populacao[(i - 1) / 2].fitness);
             // Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 3)
             {
-                printf("ta na hora da TERCEIRA Seleçao\n");
+               // printf("ta na hora da TERCEIRA Seleçao\n");
                 Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
                 // Substituir a população atual pela nova subpopulação
                 for (int j = 0; j < POPULATION_SIZE; j++)
@@ -411,13 +411,13 @@ for (int it=1; it<=st; it++) {
     else
     {
             int melhorConfig = encontrarMelhorIndice(populacao);
-            printf("\nBsize_x: %d \n", populacao[melhorConfig].thread_x);
-            printf("Bsize_y: %d \n", populacao[melhorConfig].thread_y);
+            //printf("\nBsize_x: %d \n", populacao[melhorConfig].thread_x);
+            //printf("Bsize_y: %d \n", populacao[melhorConfig].thread_y);
             const double t3=wtime();
             DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
             kernel_time=wtime()-t3;
             walltime+=kernel_time;
-            printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
+            //printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
             res = (MEGA*(double)samplesPropagate)/kernel_time;
             printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
     }
