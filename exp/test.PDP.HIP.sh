@@ -50,8 +50,8 @@ for app in *.`hostname`.x; do
 
         # Executa o script while para coletar dados da GPU e salvar em arquivos CSV separados com base no tamanho
         (while true; do
-            nvidia-smi --query-gpu=index,name,power.draw,utilization.gpu --format=csv,noheader,nounits >> "$log_file"
-            sleep 0.01  # Espera 10 ms
+             rocm-smi --showid --showname --showpower --showuse >> "$log_file"
+             sleep 0.01  # Espera 10 ms
         done) &
 
         # Obtém o PID do processo em segundo plano
