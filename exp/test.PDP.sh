@@ -14,6 +14,7 @@ function get_t_critical() {
 
 # Cria a pasta output, se não existir
 mkdir -p output
+mkdir -p output/exec
 
 # Verifica se já existe um arquivo com o mesmo nome e renomeia, se necessário
 output_file="resultados.csv"
