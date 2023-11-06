@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
   sx=nx+2*bord+2*absorb;
   sy=ny+2*bord+2*absorb;
   sz=nz+2*bord+2*absorb;
-
+  int size = sx*sy*sz;
   // number of time iterations
 
   st=ceil(tmax/dt);
@@ -117,114 +117,82 @@ int main(int argc, char** argv) {
 	 nx+2*absorb, ny+2*absorb, nz+2*absorb);
   printf("Source at coordinates (%d,%d,%d)\n", ixSource,iySource,izSource);
   printf("Will run %d time steps of %f to reach time %f\n", st, dt, st*dt);
-
-#ifdef _OPENMP
-#include <omp.h>
-#pragma omp parallel
-  if (omp_get_thread_num() == 0) {
-    if (omp_get_num_threads()==1)
-      printf("Sequential execution with OpenMP directives enable\n");
-    else
-      printf("Execution with OpenMP directives on %d threads\n", omp_get_num_threads());
-  }
-#else
-  printf("OpenMP directives disabled\n");
-#endif
-
-#ifdef _OPENACC
-#include <openacc.h>
-  const acc_device_t devType=acc_get_device_type();
-  const int devNum=acc_get_device_num(devType);
-  const char* propName=acc_get_property_string(devNum, devType, acc_property_name);
-  printf("Execution with OpenACC directives on device %s\n",propName);
-#else
-  printf("OpenACC directives disabled\n");
-#endif
-
 #endif
 
   // allocate input anisotropy arrays
   
   float *vpz=NULL;      // p wave speed normal to the simetry plane
-  vpz = (float *) malloc(sx*sy*sz*sizeof(float));
-
   float *vsv=NULL;      // sv wave speed normal to the simetry plane
-  vsv = (float *) malloc(sx*sy*sz*sizeof(float));
-  
-  float *epsilon=NULL;  // Thomsen isotropic parameter
-  epsilon = (float *) malloc(sx*sy*sz*sizeof(float));
-  
+  float *epsilon=NULL;  // Thomsen isotropic parameter  
   float *delta=NULL;    // Thomsen isotropic parameter
-  delta = (float *) malloc(sx*sy*sz*sizeof(float));
-  
   float *phi=NULL;     // isotropy simetry azimuth angle
-  phi = (float *) malloc(sx*sy*sz*sizeof(float));
-  
   float *theta=NULL;  // isotropy simetry deep angle
-  theta = (float *) malloc(sx*sy*sz*sizeof(float));
+  float *pp=NULL;
+  float *pc=NULL;
+  float *qp=NULL;
+  float *qc=NULL;
+
+
+  DRIVER_Allocate_main(&vpz, &vsv, &epsilon, &delta, &phi, &theta, &pp, &pc, &qp, &qc, sx, sy, sz);
+  
 
   // input anisotropy arrays for selected problem formulation
-
   switch(prob) {
-
-  case ISO:
-
-    for (i=0; i<sx*sy*sz; i++) {
-      vpz[i]=3000.0;
-      epsilon[i]=0.0;
-      delta[i]=0.0;
-      phi[i]=0.0;
-      theta[i]=0.0;
-      vsv[i]=0.0;
-    }
-    break;
-
-  case VTI:
-
-    if (SIGMA > MAX_SIGMA) {
-      printf("Since sigma (%f) is greater that threshold (%f), sigma is considered infinity and vsv is set to zero\n", 
-		      SIGMA, MAX_SIGMA);
-    }
-    for (i=0; i<sx*sy*sz; i++) {
-      vpz[i]=3000.0;
-      epsilon[i]=0.24;
-      delta[i]=0.1;
-      phi[i]=0.0;
-      theta[i]=0.0;
-      if (SIGMA > MAX_SIGMA) {
-	vsv[i]=0.0;
-      } else {
-	vsv[i]=vpz[i]*sqrtf(fabsf(epsilon[i]-delta[i])/SIGMA);
+    case ISO:
+      for (i=0; i<size; i++) {
+        vpz[i]=3000.0;
+        epsilon[i]=0.0;
+        delta[i]=0.0;
+        phi[i]=0.0;
+        theta[i]=0.0;
+        vsv[i]=0.0;
       }
-    }
-    break;
+      break;
 
-  case TTI:
-
-    if (SIGMA > MAX_SIGMA) {
-      printf("Since sigma (%f) is greater that threshold (%f), sigma is considered infinity and vsv is set to zero\n", 
-		      SIGMA, MAX_SIGMA);
-    }
-    for (i=0; i<sx*sy*sz; i++) {
-      vpz[i]=3000.0;
-      epsilon[i]=0.24;
-      delta[i]=0.1;
-      //      phi[i]=0.0;
-      phi[i]=1.0; // evitando coeficientes nulos
-      theta[i]=atanf(1.0);
+    case VTI:
       if (SIGMA > MAX_SIGMA) {
-	vsv[i]=0.0;
-      } else {
-	vsv[i]=vpz[i]*sqrtf(fabsf(epsilon[i]-delta[i])/SIGMA);
+        printf("Since sigma (%f) is greater that threshold (%f), sigma is considered infinity and vsv is set to zero\n", 
+  		      SIGMA, MAX_SIGMA);
       }
-    }
+      for (i=0; i<size; i++) {
+        vpz[i]=3000.0;
+        epsilon[i]=0.24;
+        delta[i]=0.1;
+        phi[i]=0.0;
+        theta[i]=0.0;
+        if (SIGMA > MAX_SIGMA) {
+  	       vsv[i]=0.0;
+        } else {
+  	       vsv[i]=vpz[i]*sqrtf(fabsf(epsilon[i]-delta[i])/SIGMA);
+        }
+      }
+      break;
+
+    case TTI:
+      if (SIGMA > MAX_SIGMA) {
+        printf("Since sigma (%f) is greater that threshold (%f), sigma is considered infinity and vsv is set to zero\n", 
+  		      SIGMA, MAX_SIGMA);
+      }
+      for (i=0; i<size; i++) {
+        vpz[i]=3000.0;
+        epsilon[i]=0.24;
+        delta[i]=0.1;
+        //      phi[i]=0.0;
+        phi[i]=1.0; // evitando coeficientes nulos
+        theta[i]=atanf(1.0);
+        if (SIGMA > MAX_SIGMA) {
+        	vsv[i]=0.0;
+        } else {
+  	      vsv[i]=vpz[i]*sqrtf(fabsf(epsilon[i]-delta[i])/SIGMA);
+        }
+      }
   } // end switch
 
   // stability condition
   
   float maxvel;
   maxvel=vpz[0]*sqrt(1.0+2*epsilon[0]);
-  for (i=1; i<sx*sy*sz; i++) {
+  for (i=1; i<size; i++) {
     maxvel=fmaxf(maxvel,vpz[i]*sqrt(1.0+2*epsilon[i]));
   }
   float mindelta=dx;
@@ -240,21 +208,11 @@ int main(int argc, char** argv) {
 
   // random boundary speed
 
-  RandomVelocityBoundary(sx, sy, sz,
-			 nx, ny, nz,
-			 bord, absorb,
-			 vpz, vsv);
-  // pressure fields at previous, current and future time steps
+  RandomVelocityBoundary(sx, sy, sz, nx, ny, nz, bord, absorb, vpz, vsv);
   
-  float *pp=NULL;
-  pp = (float *) malloc(sx*sy*sz*sizeof(float)); 
-  float *pc=NULL;
-  pc = (float *) malloc(sx*sy*sz*sizeof(float)); 
-  float *qp=NULL;
-  qp = (float *) malloc(sx*sy*sz*sizeof(float)); 
-  float *qc=NULL;
-  qc = (float *) malloc(sx*sy*sz*sizeof(float)); 
-  for (i=0; i<sx*sy*sz; i++) {
+  // pressure fields at previous, current and future time steps
+
+  for (i=0; i<size; i++) {
     pp[i]=0.0f; pc[i]=0.0f; 
     qp[i]=0.0f; qc[i]=0.0f;
   }
@@ -269,16 +227,12 @@ int main(int argc, char** argv) {
   int izStart=0;
   int izEnd=sz-1;
 
-  SlicePtr sPtr;
-  //sPtr=OpenSliceFile(ixStart, ixEnd,
-		   //  iyStart, iyEnd,
-		   //  izStart, izEnd,
-		  //   dx, dy, dz, dt,
-		  //   fNameSec);
+  SlicePtr sPtr;  //nao vamos salvar em disco
+  //sPtr=OpenSliceFile(ixStart, ixEnd, iyStart, iyEnd, izStart, izEnd, dx, dy, dz, dt, fNameSec); //nao vamos salvar em disco
 
-  //DumpSliceFile(sx,sy,sz,pc,sPtr);
+  //DumpSliceFile(sx,sy,sz,pc,sPtr); //nao vamos salvar em disco
 #ifdef _DUMP
- // DumpSlicePtr(sPtr);
+  //DumpSlicePtr(sPtr); //nao vamos salvar em disco
   //  DumpSliceSummary(sx,sy,sz,sPtr,dt,it,pc,0);
 #endif
   
@@ -290,13 +244,7 @@ int main(int argc, char** argv) {
   // - calls InsertSource
   // - do AbsorbingBoundary and DumpSliceFile, if needed
   // - Finalize
-  Model(st,     iSource, dtOutput, sPtr,
-        sx,     sy,      sz,       bord,
-        dx,     dy,      dz,       dt,   it, 
-        pp,     pc,      qp,       qc,
-	vpz,    vsv,     epsilon,  delta,
-	phi,    theta);
+  Model(st, iSource, dtOutput, sPtr, sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, vpz, vsv, epsilon, delta, phi, theta);
 
-  //printf("teste\n");
-  //CloseSliceFile(sPtr);
+  //CloseSliceFile(sPtr); //nao vamos salvar em disco
 }

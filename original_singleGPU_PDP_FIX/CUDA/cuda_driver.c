@@ -83,7 +83,7 @@ void DRIVER_Propagate(const int sx, const int sy, const int sz, const int bord,
 	// CUDA_Propagate also does TimeForward
 	   CUDA_Propagate(  sx,   sy,   sz,   bord,
 	                    dx,   dy,   dz,   dt,   it,
-	                    pp,    pc,    qp,    qc, bsize_x, bsize_y);
+	                    pp,    pc,    qp,    qc, bsize_x,  bsize_y);
 
 }
 

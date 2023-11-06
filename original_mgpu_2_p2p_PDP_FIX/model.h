@@ -6,6 +6,9 @@
 #include <math.h>
 #include <string.h>
 
+#define MEGA 1.0e-6
+#define GIGA 1.0e-9
+
 void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr, 
            const int sx, const int sy, const int sz, const int bord,
            const float dx, const float dy, const float dz, const float dt, const int it, 

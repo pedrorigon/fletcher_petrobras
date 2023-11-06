@@ -182,10 +182,10 @@ void CUDA_Finalize()
    CUDA_CALL(cudaFree(dev_pc));
    CUDA_CALL(cudaFree(dev_qp));
    CUDA_CALL(cudaFree(dev_qc));
-   //CUDA_CALL(cudaFree(dev_pDx));
-   //CUDA_CALL(cudaFree(dev_qDx));
-   //CUDA_CALL(cudaFree(dev_pDy));
-   //CUDA_CALL(cudaFree(dev_qDy));
+   CUDA_CALL(cudaFree(dev_pDx));
+   CUDA_CALL(cudaFree(dev_qDx));
+   CUDA_CALL(cudaFree(dev_pDy));
+   CUDA_CALL(cudaFree(dev_qDy));
 
    printf("CUDA_Finalize: SUCCESS\n");
 }
@@ -198,4 +198,13 @@ void CUDA_Update_pointers(const int sx, const int sy, const int sz, float *pc)
    const size_t sxsysz=((size_t)sx*sy)*sz;
    const size_t msize_vol=sxsysz*sizeof(float);
    if (pc) CUDA_CALL(cudaMemcpy(pc, dev_pc, msize_vol, cudaMemcpyDeviceToHost));
+}
+
+
+const char* get_default_device_name() {
+    static char device_name[256];
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
+    strncpy(device_name, deviceProp.name, sizeof(device_name));
+    return device_name;
 }
