@@ -26,7 +26,7 @@
 #define MAX_MULTIPLICATION 1024
 #define TOURNAMENT_SIZE 2
 #define MUTATION_Y_PROBABILITY 0.2
-#define MUTATION_X_PROBABILITY 0.2 
+#define MUTATION_X_PROBABILITY 0.2
 
 extern int number_gpu;
 
@@ -67,16 +67,15 @@ void inicializarPopulacao(Individuo *populacao, int tamanho_populacao)
     int vetor_y[] = {2, 4, 8, 16, 32, 64, 128};
     int tamanho_vetor_x = sizeof(vetor_x) / sizeof(vetor_x[0]);
     int tamanho_vetor_y = sizeof(vetor_y) / sizeof(vetor_y[0]);
-
-
+    
     while (populacao_atual < tamanho_populacao)
     {
         int indice_aleatorio_x = rand() % tamanho_vetor_x;
 	int indice_aleatorio_y = rand() % tamanho_vetor_y;
        
 	int x = vetor_x[indice_aleatorio_x];
-        int y = vetor_y[indice_aleatorio_y];
-  
+        int y = vetor_y[indice_aleatorio_y];        
+
         if (x * y < MAX_MULTIPLICATION)
         {
             populacao[populacao_atual].thread_x = x;
@@ -134,7 +133,6 @@ int gerarNovoValorAleatorio()
     return random_value;
 }
 
-
 void crossoverEMutacao(Individuo *pais, Individuo *filhos)
 { // Verificar se a multiplicação dos valores de thread_x * thread_y é inferior a 1024
     if ((pais[1].thread_y * pais[0].thread_x < 1024) && (pais[1].thread_x * pais[0].thread_y < 1024))
@@ -158,7 +156,7 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     // for (int i = 0; i < 2; i++)
     //{
     if ((double)rand() / RAND_MAX < MUTATION_Y_PROBABILITY)
-{
+    {
     int new_thread_y = gerarNovoValorAleatorio();
 
     // Garantir que o novo valor de thread_y é válido para mutação
@@ -168,26 +166,24 @@ void crossoverEMutacao(Individuo *pais, Individuo *filhos)
     }
 
     filhos[0].thread_y = new_thread_y;
-}
-
-if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
-{
-    int new_thread_x = gerarNovoValorAleatorio();
-   
-    while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
-    {
-        new_thread_x = gerarNovoValorAleatorio();
     }
 
-    filhos[0].thread_x = new_thread_x;
-}
-    //}
+    if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
+    {
+        int new_thread_x = gerarNovoValorAleatorio();
+    
+        while (new_thread_x * filhos[0].thread_y >= MAX_MULTIPLICATION)
+        {
+            new_thread_x = gerarNovoValorAleatorio();
+        }
+
+        filhos[0].thread_x = new_thread_x;
+    }
 }
 
-Individuo *gerarNovaSubpopulacao(Individuo *populacao)
+void gerarNovaSubpopulacao(Individuo *populacao)
 {
     Individuo *novaSubpopulacao = (Individuo *)malloc(POPULATION_SIZE * sizeof(Individuo));
-
     // Copiar o melhor indivíduo inalterado para a nova subpopulação
     int indiceMelhor = encontrarMelhorIndice(populacao);
     //printf("melhor indice repassado é %d", indiceMelhor);
@@ -203,8 +199,14 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
         Individuo filhos[2];
         crossoverEMutacao(pais, filhos);
         
-        novaSubpopulacao[i] = filhos[0];
-        novaSubpopulacao[i+1] = filhos[1];
+        if(i==POPULATION_SIZE-1){
+            novaSubpopulacao[i] = filhos[0];
+        }
+        else 
+        {
+            novaSubpopulacao[i] = filhos[0];
+            novaSubpopulacao[i+1] = filhos[1];
+        }
     }
 
     // Substituir os indivíduos antigos na população atual pelos novos
@@ -214,8 +216,6 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
     }
 
     free(novaSubpopulacao); // Liberar memória da nova subpopulação
-
-    return populacao; // Retornar a população atualizada
 }
 // preciso rodar o kernel com todas as configurações da população inicial
 // a aptidão de cada indivíduo será 1/tempo de exec
@@ -341,16 +341,8 @@ for (int it=1; it<=st; it++) {
             //    inicio primeira seleção genética
             //     Gerar a nova subpopulação
             if (it == POPULATION_SIZE)
-            {
-               // printf("ta na hora da Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+	    {
+                gerarNovaSubpopulacao(populacao);
             }
     }
     else if (it <= POPULATION_SIZE * 2)
@@ -370,15 +362,7 @@ for (int it=1; it<=st; it++) {
             //  Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 2)
             {
-                //printf("ta na hora da SEGUNDA Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+                gerarNovaSubpopulacao(populacao);
             }
     }
     else if (it <= POPULATION_SIZE * 3)
@@ -397,15 +381,7 @@ for (int it=1; it<=st; it++) {
             // Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 3)
             {
-               // printf("ta na hora da TERCEIRA Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+                gerarNovaSubpopulacao(populacao);
             }
     }
     else
