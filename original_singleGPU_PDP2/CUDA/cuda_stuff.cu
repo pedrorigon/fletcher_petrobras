@@ -157,10 +157,10 @@ void CUDA_Finalize()
    extern float* dev_qDx;
    extern float* dev_qDy;
 
-   //dev_pp-=sxsy;
-   //dev_pc-=sxsy;
-   //dev_qp-=sxsy;
-   //dev_qc-=sxsy;
+   dev_pp-=sxsy;
+   dev_pc-=sxsy;
+   dev_qp-=sxsy;
+   dev_qc-=sxsy;
 
    CUDA_CALL(cudaFree(dev_vpz));
    CUDA_CALL(cudaFree(dev_vsv));
@@ -182,10 +182,10 @@ void CUDA_Finalize()
    CUDA_CALL(cudaFree(dev_pc));
    CUDA_CALL(cudaFree(dev_qp));
    CUDA_CALL(cudaFree(dev_qc));
-   CUDA_CALL(cudaFree(dev_pDx));
-   CUDA_CALL(cudaFree(dev_qDx));
-   CUDA_CALL(cudaFree(dev_pDy));
-   CUDA_CALL(cudaFree(dev_qDy));
+   //CUDA_CALL(cudaFree(dev_pDx));
+   //CUDA_CALL(cudaFree(dev_qDx));
+   //CUDA_CALL(cudaFree(dev_pDy));
+   //CUDA_CALL(cudaFree(dev_qDy));
 
    printf("CUDA_Finalize: SUCCESS\n");
 }
