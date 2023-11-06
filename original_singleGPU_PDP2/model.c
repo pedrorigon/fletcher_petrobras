@@ -4,6 +4,11 @@
 #include "fletcher.h"
 #include "walltime.h"
 #include "model.h"
+#include "CUDA/cuda_stuff.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <limits.h>
 #ifdef PAPI
 #include "ModPAPI.h"
 #endif
