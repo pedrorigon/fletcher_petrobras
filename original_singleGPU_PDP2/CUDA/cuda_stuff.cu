@@ -157,10 +157,10 @@ void CUDA_Finalize()
    extern float* dev_qDx;
    extern float* dev_qDy;
 
-   dev_pp-=sxsy;
-   dev_pc-=sxsy;
-   dev_qp-=sxsy;
-   dev_qc-=sxsy;
+   //dev_pp-=sxsy;
+   //dev_pc-=sxsy;
+   //dev_qp-=sxsy;
+   //dev_qc-=sxsy;
 
    CUDA_CALL(cudaFree(dev_vpz));
    CUDA_CALL(cudaFree(dev_vsv));
