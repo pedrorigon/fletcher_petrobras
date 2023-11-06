@@ -182,7 +182,7 @@ if ((double)rand() / RAND_MAX < MUTATION_X_PROBABILITY)
     //}
 }
 
-Individuo *gerarNovaSubpopulacao(Individuo *populacao)
+gerarNovaSubpopulacao(Individuo *populacao)
 {
     Individuo *novaSubpopulacao = (Individuo *)malloc(POPULATION_SIZE * sizeof(Individuo));
 
@@ -213,7 +213,7 @@ Individuo *gerarNovaSubpopulacao(Individuo *populacao)
 
     free(novaSubpopulacao); // Liberar memória da nova subpopulação
 
-    return populacao; // Retornar a população atualizada
+    //return populacao; // Retornar a população atualizada
 }
 // preciso rodar o kernel com todas as configurações da população inicial
 // a aptidão de cada indivíduo será 1/tempo de exec
@@ -305,17 +305,9 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             //     Gerar a nova subpopulação
             if (it == POPULATION_SIZE)
             {
-                //printf("ta na hora da Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+               gerarNovaSubpopulacao(populacao);
             }
-        }
+	}
     else if (it <= POPULATION_SIZE*2)
         {
             printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
@@ -333,15 +325,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             //  Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 2)
             {
-              //  printf("ta na hora da SEGUNDA Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+              gerarNovaSubpopulacao(populacao);
             }
         }
     else if (it <= POPULATION_SIZE * 3)
@@ -360,15 +344,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
             // Gerar a nova subpopulação
             if (it == POPULATION_SIZE * 3)
             {
-                //printf("ta na hora da TERCEIRA Seleçao\n");
-                Individuo *novaSubpopulacao = gerarNovaSubpopulacao(populacao);
-                // Substituir a população atual pela nova subpopulação
-                for (int j = 0; j < POPULATION_SIZE; j++)
-                {
-                    populacao[j] = novaSubpopulacao[j];
-                    // printf("nova pop: %d thread x: %d thread y: %d\n", j, populacao[j].thread_x, populacao[j].thread_y);
-                }
-                //free(novaSubpopulacao);
+                gerarNovaSubpopulacao(populacao);
             }
         }
     else
