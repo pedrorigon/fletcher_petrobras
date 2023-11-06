@@ -448,42 +448,42 @@ for (int it=1; it<=st; it++) {
   }
 
 
-  const char StringHWM[6]="VmHWM";
-  char line[256], title[12],HWMUnit[8];
-  const long HWM;
+ // const char StringHWM[6]="VmHWM";
+  //char line[256], title[12],HWMUnit[8];
+  //const long HWM;
   const double MSamples=(MEGA*(double)totalSamples)/walltime;
   
-  FILE *fp=fopen("/proc/self/status","r");
-  while (fgets(line, 256, fp) != NULL){
-    if (strncmp(line, StringHWM, 5) == 0) {
-      sscanf(line+6,"%ld %s", &HWM, HWMUnit);
-      break;
-    }
-  }
-  fclose(fp);
+  //FILE *fp=fopen("/proc/self/status","r");
+ // while (fgets(line, 256, fp) != NULL){
+  //  if (strncmp(line, StringHWM, 5) == 0) {
+   //   sscanf(line+6,"%ld %s", &HWM, HWMUnit);
+   //   break;
+   /// }
+//}
+ // fclose(fp);
     //nao vamos salvar em disco
 
   // Dump Execution Metrics
   
   printf ("Execution time (s) is %lf\n", walltime);
   printf ("MSamples/s %.0lf\n", MSamples);
-  printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
+ // printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
 
   // Dump Execution Metrics in CSV
   
-  FILE *fr=NULL;
-  const char fName[]="Report.csv";
-  fr=fopen(fName,"w");
+ // FILE *fr=NULL;
+ // const char fName[]="Report.csv";
+ // fr=fopen(fName,"w");
 
   // report problem size
 
-  ReportProblemSizeCSV(sx, sy, sz, bord, st, fr);
+ // ReportProblemSizeCSV(sx, sy, sz, bord, st, fr);
 
   // report collected metrics
 
-  ReportMetricsCSV(walltime, MSamples, HWM, HWMUnit, fr);
+ // ReportMetricsCSV(walltime, MSamples, HWM, HWMUnit, fr);
   
-  fclose(fr);
+ // fclose(fr);
 
   fflush(stdout);
 
