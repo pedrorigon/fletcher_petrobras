@@ -9,9 +9,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
-#ifdef PAPI
-#include "ModPAPI.h"
-#endif
 
 #define MODEL_GLOBALVARS
 #include "precomp.h"
@@ -212,7 +209,7 @@ gerarNovaSubpopulacao(Individuo *populacao)
 
     free(novaSubpopulacao); // Liberar memória da nova subpopulação
 
-    //return populacao; // Retornar a população atualizada
+    return populacao; // Retornar a população atualizada
 }
 
 
@@ -247,17 +244,6 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   const long samplesPropagate=(long)(sx-2*bord)*(long)(sy-2*bord)*(long)(sz-2*bord);
   const long totalSamples=samplesPropagate*(long)st;
 
-#ifdef PAPI
-  long long values[NCOUNTERS];
-  long long ThisValues[NCOUNTERS];
-  for (int i=0; i<NCOUNTERS; i++) {
-    values[i]=0LL;
-    ThisValues[i]=0LL;
-  }
-
-  const int eventset=InitPAPI_CreateCounters();
-#endif
-
 #define MODEL_INITIALIZE
 #include "precomp.h"
 #undef MODEL_INITIALIZE
@@ -282,10 +268,6 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
     float src = Source(dt, it-1);
     
     DRIVER_InsertSource(dt,it-1,iSource,pc,qc,src);
-
-#ifdef PAPI
-    StartCounters(eventset);
-#endif
 
     if (it <= POPULATION_SIZE)
     {
@@ -353,13 +335,6 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
         printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y, kernel_time, res);
     }
     
-    
-#ifdef PAPI
-    StopReadCounters(eventset, ThisValues);
-    for (int i=0; i<NCOUNTERS; i++) {
-      values[i]+=ThisValues[i];
-    }
-#endif
 
     tSim=it*dt;
     if (tSim >= tOut) {
@@ -378,52 +353,48 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
 
 #define MEGA 1.0e-6
 #define GIGA 1.0e-9
-  const char StringHWM[6]="VmHWM";
-  char line[256], title[12],HWMUnit[8];
-  const long HWM;
+ // const char StringHWM[6]="VmHWM";
+ // char line[256], title[12],HWMUnit[8];
+ // const long HWM;
   const double MSamples=(MEGA*(double)totalSamples)/walltime;
   
-  FILE *fp=fopen("/proc/self/status","r");
-  while (fgets(line, 256, fp) != NULL){
-    if (strncmp(line, StringHWM, 5) == 0) {
-      sscanf(line+6,"%ld %s", &HWM, HWMUnit);
-      break;
-    }
-  }
-  fclose(fp);
+ // FILE *fp=fopen("/proc/self/status","r");
+ // while (fgets(line, 256, fp) != NULL){
+ //   if (strncmp(line, StringHWM, 5) == 0) {
+ //     sscanf(line+6,"%ld %s", &HWM, HWMUnit);
+ //     break;
+ //   }
+ // }
+ // fclose(fp);
 
   // Dump Execution Metrics
   
   printf ("Execution time (s) is %lf\n", walltime);
   printf ("MSamples/s %.0lf\n", MSamples);
-  printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
+ // printf ("Memory High Water Mark is %ld %s\n",HWM, HWMUnit);
 
   // Dump Execution Metrics in CSV
   
-  FILE *fr=NULL;
-  const char fName[]="Report.csv";
-  fr=fopen(fName,"w");
+  //FILE *fr=NULL;
+  //const char fName[]="Report.csv";
+  //fr=fopen(fName,"w");
 
   // report problem size
 
-  ReportProblemSizeCSV(sx, sy, sz,
-		       bord, st, 
-		       fr);
+ // ReportProblemSizeCSV(sx, sy, sz,
+		    //   bord, st, 
+		   //    fr);
 
   // report collected metrics
 
-  ReportMetricsCSV(walltime, MSamples,
-		   HWM, HWMUnit, fr);
+  //ReportMetricsCSV(walltime, MSamples,
+		 //  HWM, HWMUnit, fr);
   
   // report PAPI metrics
 
-#ifdef PAPI
-  ReportRawCountersCSV (values, fr);
-#endif
-  
-  fclose(fr);
+  //fclose(fr);
 
-  fflush(stdout);
+  //fflush(stdout);
 
   // DRIVER_Finalize deallocate data, clean-up things etc 
   DRIVER_Finalize();
