@@ -297,5 +297,6 @@ int main(int argc, char** argv) {
 	vpz,    vsv,     epsilon,  delta,
 	phi,    theta);
 
+  printf("teste\n");
   CloseSliceFile(sPtr);
 }
