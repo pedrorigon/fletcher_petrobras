@@ -94,7 +94,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   double walltime = 0.0;
   double timeIt = 0.0;
   double res = 0.0;
-  int bsize_x = 128, bsize_y = 4;
+  int bsize_x = 16, bsize_y = 16;
 
   for (int it = 1; it <= st; it++)
   {
