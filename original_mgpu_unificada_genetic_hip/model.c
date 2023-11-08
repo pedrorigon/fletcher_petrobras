@@ -5,6 +5,7 @@
 #include "walltime.h"
 #include "model.h"
 #include "HIP/hip_stuff.h"
+#include "HIP/hip_propagate.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
