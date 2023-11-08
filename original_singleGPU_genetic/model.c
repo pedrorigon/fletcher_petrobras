@@ -242,8 +242,12 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   float *v2pz=NULL;  // coeficient of H1(q)
   float *v2sz=NULL;  // coeficient of H1(p-q) and H2(p-q)
   float *v2pn=NULL;  // coeficient of H2(p)
+
+  #define MODEL_INITIALIZE
+  #include "precomp.h"
+  #undef MODEL_INITIALIZE
   
-  DRIVER_Allocate_Model_Variables(&ch1dxx, &ch1dyy, &ch1dzz, &ch1dxy, &ch1dyz, &ch1dxz, &v2px, &v2pz, &v2sz, &v2pn, sx, sy, sz);
+  //DRIVER_Allocate_Model_Variables(&ch1dxx, &ch1dyy, &ch1dzz, &ch1dxy, &ch1dyz, &ch1dxz, &v2px, &v2pz, &v2sz, &v2pn, sx, sy, sz);
 
   for (int i=0; i<size; i++) {
     float sinTheta=sin(theta[i]);
@@ -266,38 +270,18 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
   }
   #endif
 
-  // coeficients of H1 and H2 at PDEs
-  for (int i=0; i<size; i++){
-    v2sz[i]=vsv[i]*vsv[i];
-    v2pz[i]=vpz[i]*vpz[i];
-    v2px[i]=v2pz[i]*(1.0+2.0*epsilon[i]);
-    v2pn[i]=v2pz[i]*(1.0+2.0*delta[i]);
-  }
-  
-#ifdef _DUMP
-{
-  const int iPrint=ind(bord+1,bord+1,bord+1);
-  printf("vsv=%e; vpz=%e, v2pz=%e\n", vsv[iPrint], vpz[iPrint], v2pz[iPrint]);
-  printf("v2sz=%e; v2pz=%e, v2px=%e, v2pn=%e\n", v2sz[iPrint], v2pz[iPrint], v2px[iPrint], v2pn[iPrint]);
-}
-#endif
-
-int gpu_qtd = mgpu_number_input;
-number_gpu = mgpu_number_input;
-printf("numero de GPUS %d\n", gpu_qtd);
-printf("numero de GPUS %d\n", number_gpu);
-initialize_mgpu(gpu_qtd, sz);
 
 // CUDA_Initialize initialize target, allocate data etc
-DRIVER_Initialize(sx, sy, sz, bord, dx, dy, dz, dt, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, 
-              v2px, v2pz, v2sz, v2pn, vpz, vsv, epsilon, delta, phi, theta, pp, pc, qp, qc); //ok Arthur
+DRIVER_Initialize(sx, sy, sz, bord,
+                    dx, dy, dz, dt,
+                    vpz, vsv, epsilon, delta,
+                    phi, theta,
+                    pp, pc, qp, qc);
 
 double walltime=0.0;
 double kernel_time=0.0;
 double res=0.0;
 //int bsize_x=32, bsize_y=16;
-
-InitializeStreams();
 
 Individuo populacao[POPULATION_SIZE];
 
@@ -320,7 +304,7 @@ for (int it=1; it<=st; it++) {
             printf("\nBsize_x: %d \n", populacao[it - 1].thread_x);
             printf("Bsize_y: %d \n", populacao[it - 1].thread_y);
             const double t0=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - 1].thread_x, populacao[it - 1].thread_y);
             kernel_time=wtime()-t0;
             walltime+=kernel_time;
             res = (MEGA*(double)samplesPropagate)/kernel_time;
@@ -340,7 +324,7 @@ for (int it=1; it<=st; it++) {
             printf("\nBsize_x: %d \n", populacao[it - POPULATION_SIZE - 1].thread_x);
             printf("Bsize_y: %d \n", populacao[it - POPULATION_SIZE - 1].thread_y);
             const double t1=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - POPULATION_SIZE - 1].thread_x, populacao[it - POPULATION_SIZE - 1].thread_y);
             kernel_time=wtime()-t1;
             walltime+=kernel_time;
             populacao[it - POPULATION_SIZE - 1].fitness = 1 / kernel_time;
@@ -360,7 +344,7 @@ for (int it=1; it<=st; it++) {
             printf("\nBsize_x: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_x);
             printf("Bsize_y: %d \n", populacao[it - 1 - 2 * POPULATION_SIZE].thread_y);
             const double t2=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[it - 1 - 2 * POPULATION_SIZE].thread_x, populacao[it - 1 - 2 * POPULATION_SIZE].thread_y); 
             kernel_time=wtime()-t2;
             walltime+=kernel_time;
             populacao[it - 1 - 2 * POPULATION_SIZE].fitness = 1 / kernel_time;
@@ -380,7 +364,7 @@ for (int it=1; it<=st; it++) {
             printf("\nBsize_x: %d \n", populacao[melhorConfig].thread_x);
             printf("Bsize_y: %d \n", populacao[melhorConfig].thread_y);
             const double t3=wtime();
-            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
+            DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, pp, pc, qp, qc, populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y); 
             kernel_time=wtime()-t3;
             walltime+=kernel_time;
             printf("MELHOR CONFIG: %d x %d", populacao[melhorConfig].thread_x, populacao[melhorConfig].thread_y);
