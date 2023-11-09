@@ -548,3 +548,11 @@ void initialize_mgpu(int gpu_number, int sz)
       gpu_map[7].upper_kernel2 = sz / 8 - 1;
    }
 }
+
+const char* get_default_device_name() {
+    static char device_name[256];
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
+    strncpy(device_name, deviceProp.name, sizeof(device_name));
+    return device_name;
+}

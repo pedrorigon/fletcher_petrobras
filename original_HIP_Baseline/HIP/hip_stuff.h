@@ -37,6 +37,8 @@ void allocate_pointer_array(float ***array, const char *name);
 
 void initialize_mgpu(int gpu_number, int sz);
 
+const char* get_default_device_name();
+
 #ifdef __cplusplus
 }
 #endif
