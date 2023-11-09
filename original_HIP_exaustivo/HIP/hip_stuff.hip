@@ -551,8 +551,8 @@ void initialize_mgpu(int gpu_number, int sz)
 
 const char* get_default_device_name() {
     static char device_name[256];
-    cudaDeviceProp deviceProp;
-    cudaGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
+    hipDeviceProp_t deviceProp;
+    hipGetDeviceProperties(&deviceProp, 0); // Pegando propriedades do device padrão
     strncpy(device_name, deviceProp.name, sizeof(device_name));
     return device_name;
 }
