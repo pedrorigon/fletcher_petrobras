@@ -8,6 +8,7 @@
 #include "HIP/hip_propagate.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <time.h>
 #include <limits.h>
 #define MEGA 1.0e-6
