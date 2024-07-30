@@ -6,27 +6,19 @@
 extern float *ch1dxx, *ch1dyy, *ch1dzz, *ch1dxy, *ch1dyz, *ch1dxz, *v2px, *v2pz, *v2sz, *v2pn;
 
 void DRIVER_Initialize(const int sx, const int sy, const int sz, const int bord,
-					   float dx, float dy, float dz, float dt,
-					   float *restrict vpz, float *restrict vsv, float *restrict epsilon, float *restrict delta,
-					   float *restrict phi, float *restrict theta,
-					   float *restrict pp, float *restrict pc, float *restrict qp, float *restrict qc)
+                       float dx, float dy, float dz, float dt,
+                       float *restrict vpz, float *restrict vsv, float *restrict epsilon, float *restrict delta,
+                       float *restrict phi, float *restrict theta,
+                       float *restrict pp, float *restrict pc, float *restrict qp, float *restrict qc)
 {
+  int num_gpus = get_num_gpus();
 
-#pragma acc enter data copyin(ch1dxx[0 : sx * sy * sz])
-#pragma acc enter data copyin(ch1dyy[0 : sx * sy * sz])
-#pragma acc enter data copyin(ch1dzz[0 : sx * sy * sz])
-#pragma acc enter data copyin(ch1dxy[0 : sx * sy * sz])
-#pragma acc enter data copyin(ch1dyz[0 : sx * sy * sz])
-#pragma acc enter data copyin(ch1dxz[0 : sx * sy * sz])
-#pragma acc enter data copyin(v2px[0 : sx * sy * sz])
-#pragma acc enter data copyin(v2pz[0 : sx * sy * sz])
-#pragma acc enter data copyin(v2sz[0 : sx * sy * sz])
-#pragma acc enter data copyin(v2pn[0 : sx * sy * sz])
-
-#pragma acc enter data copyin(pp[0 : sx * sy * sz])
-#pragma acc enter data copyin(pc[0 : sx * sy * sz])
-#pragma acc enter data copyin(qp[0 : sx * sy * sz])
-#pragma acc enter data copyin(qc[0 : sx * sy * sz])
+  for (int gpu = 0; gpu < num_gpus; gpu++)
+  {
+    #pragma acc set device_num(gpu)
+    #pragma acc enter data copyin(ch1dxx[0 : sx * sy * sz], ch1dyy[0 : sx * sy * sz], ch1dzz[0 : sx * sy * sz], ch1dxy[0 : sx * sy * sz], ch1dyz[0 : sx * sy * sz], ch1dxz[0 : sx * sy * sz], v2px[0 : sx * sy * sz], v2pz[0 : sx * sy * sz], v2sz[0 : sx * sy * sz], v2pn[0 : sx * sy * sz])
+    #pragma acc enter data copyin(pp[0 : sx * sy * sz], pc[0 : sx * sy * sz], qp[0 : sx * sy * sz], qc[0 : sx * sy * sz])
+  }
 }
 
 void DRIVER_Finalize()

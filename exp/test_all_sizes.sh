@@ -34,29 +34,29 @@ for app in *.`hostname`.x; do
     echo $app
     echo "---------------------------------------------------"
     
-    for size in $(seq 88 32 408); do
+    for size in $(seq 88 32 504); do
         echo "Size: $size"
 
         total_msamples=0
-        num_runs=10
+        num_runs=1
         msamples_values=()
 
         for run in $(seq 1 $num_runs); do
-            if [[ $app == *"OpenACC"* ]]; then
-                echo "GPU"
-                echo "---------------------------------------------------"
-                unset -v ACC_NUM_CORES
-                export ACC_DEVICE_TYPE=nvidia
-                ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | grep "MSamples/s"
-                export ACC_DEVICE_TYPE=host
-                export ACC_NUM_CORES=$(lscpu | grep "^CPU(s):" | awk {'print $2'})
-                echo "---------------------------------------------------"
-                echo "CPU"
-                echo "---------------------------------------------------"
-            fi
+            #if [[ $app == *"OpenACC"* ]]; then
+             #   echo "GPU"
+             #   echo "---------------------------------------------------"
+             #   unset -v ACC_NUM_CORES
+             #   export ACC_DEVICE_TYPE=nvidia
+             #   ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32 | grep "MSamples/s"
+             #   export ACC_DEVICE_TYPE=host
+             #   export ACC_NUM_CORES=$(lscpu | grep "^CPU(s):" | awk {'print $2'})
+             #   echo "---------------------------------------------------"
+             #   echo "CPU"
+             #   echo "---------------------------------------------------"
+           # fi
 
             # Executa o aplicativo e salva o resultado filtrado no arquivo CSV
-            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005 16 32; } 2>&1 )
+            result=$( { ./$app TTI $size $size $size 16 12.5 12.5 12.5 0.001 0.005; } 2>&1 )
             msamples=$(echo "$result" | grep "MSamples/s" || true)
             echo "$msamples"
             if [[ ! -z $msamples ]]; then

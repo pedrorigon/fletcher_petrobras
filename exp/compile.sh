@@ -1,9 +1,9 @@
 mkdir -p bin/
 cd ../
 
-for version in original_mgpu_4_p2p; do
+for version in original_openACC_mgpu original; do
 	cd $version
-	for backend in CUDA; do
+	for backend in OpenACC_mgpu OpenACC_baseline OpenACC; do
 		echo "-----------------------------------------------------"
 		echo "   $version - $backend"
 		echo "-----------------------------------------------------"
@@ -12,6 +12,7 @@ for version in original_mgpu_4_p2p; do
 	        if [[ $backend == *"OpenACC"* ]]; then
                         cp ModelagemFletcher.exe ../exp/bin/$version.$backend-CPU.`hostname`.x
                         mv ModelagemFletcher.exe ../exp/bin/$version.$backend-GPU.`hostname`.x
+			rm ../exp/bin/$version.$backend-CPU.`hostname`.x
 		else
                         mv ModelagemFletcher.exe ../exp/bin/$version.$backend.`hostname`.x
 		fi

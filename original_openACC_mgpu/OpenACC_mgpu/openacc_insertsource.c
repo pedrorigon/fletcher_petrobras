@@ -4,7 +4,7 @@
 // Helper function to get the number of GPUs
 int get_num_gpus()
 {
-  return acc_get_num_devices(acc_device_nvidia);
+  return 2;
 }
 
 // InsertSource: compute and insert source value at index iSource of arrays p and q
@@ -15,6 +15,7 @@ void OPENACC_InsertSource(float dt, int it, int iSource,
 {
   int num_gpus = get_num_gpus();
   int chunk_size = sz / num_gpus;
+  printf("Number of GPUs: %d\n", num_gpus);
 
   // Determine which GPU should handle the source insertion
   for (int gpu = 0; gpu < num_gpus; gpu++)
