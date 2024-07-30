@@ -102,8 +102,8 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
     float src = Source(dt, it - 1);
     DRIVER_InsertSource(src, iSource, pc, qc, pp, qp);
 
-    printf("\nBsize_x: %d \n", bsize_x);
-    printf("Bsize_y: %d \n", bsize_y);
+    //printf("\nBsize_x: %d \n", bsize_x);
+    //printf("Bsize_y: %d \n", bsize_y);
     const double t0 = wtime();
 
     DRIVER_Propagate(sx, sy, sz, bord, dx, dy, dz, dt, it, ch1dxx, ch1dyy, ch1dzz, ch1dxy, ch1dyz, ch1dxz, v2px, v2pz, v2sz, v2pn, pp, pc, qp, qc, bsize_x, bsize_y); // ajustar parametros
@@ -113,7 +113,7 @@ void Model(const int st, const int iSource, const float dtOutput, SlicePtr sPtr,
     walltime += timeIt;
 
     res = (MEGA * (double)samplesPropagate) / timeIt;
-    printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsize_x, bsize_y, timeIt, res);
+    //printf("\nIteracao: %d ; Bsize_x: %d ; Bsize_y: %d ; tempoExec: %lf ; MSamples: %lf \n", it, bsize_x, bsize_y, timeIt, res);
 
     // find_optimal_block_size(sx, timeIt, &bsize_x, &bsize_y);
     // printf("tempo deu: %lf\n", timeIt);

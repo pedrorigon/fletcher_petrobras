@@ -1,9 +1,9 @@
 mkdir -p bin/
 cd ../
 
-for version in original_openACC_mgpu original; do
+for version in original_openACC_mgpu original original_mgpu_2_p2p_PDP_FIX original_mgpu_4_p2p_PDP_FIX; do
 	cd $version
-	for backend in OpenACC_mgpu OpenACC_baseline OpenACC; do
+	for backend in CUDA; do
 		echo "-----------------------------------------------------"
 		echo "   $version - $backend"
 		echo "-----------------------------------------------------"
