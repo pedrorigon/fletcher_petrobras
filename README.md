@@ -1,6 +1,5 @@
 # Wave Propagation Simulation using C and CUDA/OpenMP/OpenACC
 
-## Project Overview
 This project implements a 3D wave propagation simulation using C and parallel computing techniques such as CUDA, OpenMP, or OpenACC. The simulation propagates waves through a cubic grid domain with 8th-order derivatives for high accuracy.
 
 ## Features
